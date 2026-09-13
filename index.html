@@ -731,50 +731,70 @@
             { id: 'j1cR-AW3Zf0', duration: 233, title: 'STONER' }
         ];
 
-        const STREAM_START_TIME = 1700000000; 
+        // Sabit canlı yayın başlangıç zaman damgası (Epoch Unix - Saniye cinsinden)
+        const STREAM_START_TIME = 1700000000;
 
-        // Diziyi tamamen rastgele karıştırmak için Fisher-Yates Karıştırma Algoritması
-        function shuffleArray(array) {
+        // Herkes için AYNISINI üreten pseudo-random (deterministik) karıştırma algoritması
+        function seededShuffle(array, seed) {
             let shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            let m = shuffled.length, t, i;
+
+            const pseudorandom = function() {
+                seed = (seed * 9301 + 49297) % 233280;
+                return seed / 233280;
+            };
+
+            while (m) {
+                i = Math.floor(pseudorandom() * m--);
+                t = shuffled[m];
+                shuffled[m] = shuffled[i];
+                shuffled[i] = t;
             }
             return shuffled;
         }
 
-        // İlk açılışta listenin rastgele sıralanması
-        let songList = shuffleArray(baseSongList);
-        let totalPlaylistDuration = songList.reduce((acc, song) => acc + song.duration, 0);
+        // Toplam çalma listesi süresi
+        const totalPlaylistDuration = baseSongList.reduce((acc, song) => acc + song.duration, 0);
 
+        // Zamana dayalı ortak canlı yayın durumunu hesaplayan fonksiyon
         function getCurrentStreamState() {
             const nowInSeconds = Math.floor(Date.now() / 1000);
-            const elapsedTime = (nowInSeconds - STREAM_START_TIME) % totalPlaylistDuration;
-            let accumulatedTime = 0;
+            const totalElapsed = Math.max(0, nowInSeconds - STREAM_START_TIME);
 
-            for (let i = 0; i < songList.length; i++) {
-                if (elapsedTime < accumulatedTime + songList[i].duration) {
+            // Mevcut döngü numarası (Seed olarak kullanılır)
+            const cycleIndex = Math.floor(totalElapsed / totalPlaylistDuration);
+            // Mevcut döngü içerisindeki geçen süre
+            const elapsedTime = totalElapsed % totalPlaylistDuration;
+
+            // Bu döngüye özel rastgele ama HER KULLANICIDA AYNISI OLAN şarkı listesi üret
+            const currentPlaylist = seededShuffle(baseSongList, cycleIndex + 42);
+
+            let accumulatedTime = 0;
+            for (let i = 0; i < currentPlaylist.length; i++) {
+                if (elapsedTime < accumulatedTime + currentPlaylist[i].duration) {
                     return {
+                        playlist: currentPlaylist,
                         songIndex: i,
                         seekTo: elapsedTime - accumulatedTime
                     };
                 }
-                accumulatedTime += songList[i].duration;
+                accumulatedTime += currentPlaylist[i].duration;
             }
-            return { songIndex: 0, seekTo: 0 };
+            return { playlist: currentPlaylist, songIndex: 0, seekTo: 0 };
         }
 
-        function updateTrackLabels(currentIndex) {
-            const currentSong = songList[currentIndex];
-            const nextIndex = (currentIndex + 1) % songList.length;
-            const nextSong = songList[nextIndex];
+        function updateTrackLabels(playlist, currentIndex) {
+            const currentSong = playlist[currentIndex];
+            const nextIndex = (currentIndex + 1) % playlist.length;
+            const nextSong = playlist[nextIndex];
 
             document.getElementById('current-track-name').innerText = currentSong.title;
             document.getElementById('next-track-name').innerText = nextSong.title;
         }
 
+        // İlk yükleme ekranındaki başlık ayarı
         const initialState = getCurrentStreamState();
-        updateTrackLabels(initialState.songIndex);
+        updateTrackLabels(initialState.playlist, initialState.songIndex);
 
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -782,7 +802,7 @@
 
         function onYouTubeIframeAPIReady() {
             const state = getCurrentStreamState();
-            const targetSong = songList[state.songIndex];
+            const targetSong = state.playlist[state.songIndex];
             currentLoadedVideoId = targetSong.id;
 
             player = new YT.Player('youtube-player', {
@@ -835,13 +855,6 @@
                 actualPlayerStatePlaying = true;
             } else if (event.data === YT.PlayerState.ENDED) {
                 actualPlayerStatePlaying = false;
-                // Şarkı bittiğinde sonraki şarkıya geç veya liste bittiyse yeniden rastgele oluştur
-                const currentState = getCurrentStreamState();
-                if (currentState.songIndex === 0) {
-                    // Tüm şarkılar bitti, listeyi yeniden rastgele karıştır
-                    songList = shuffleArray(baseSongList);
-                    totalPlaylistDuration = songList.reduce((acc, song) => acc + song.duration, 0);
-                }
                 syncToLiveStream();
             } else {
                 actualPlayerStatePlaying = false;
@@ -849,13 +862,14 @@
             updateAudioVisualState();
         }
 
+        // Kesintisiz senkronizasyonu sağlayan kontrol döngüsü
         function syncToLiveStream() {
             if (!isPlayerReady || !player || !userHasClicked) return;
 
             const state = getCurrentStreamState();
-            const targetSong = songList[state.songIndex];
+            const targetSong = state.playlist[state.songIndex];
 
-            updateTrackLabels(state.songIndex);
+            updateTrackLabels(state.playlist, state.songIndex);
 
             if (currentLoadedVideoId !== targetSong.id) {
                 currentLoadedVideoId = targetSong.id;
@@ -871,7 +885,8 @@
                 const currentTime = player.getCurrentTime();
                 const timeDiff = Math.abs(currentTime - state.seekTo);
                 
-                if (timeDiff > 1.5) {
+                // Şarkı 2 saniyeden fazla kaydıysa otomatik senkronize et
+                if (timeDiff > 2.0) {
                     player.seekTo(state.seekTo, true);
                     if (typeof player.getPlayerState === 'function' && player.getPlayerState() !== YT.PlayerState.PLAYING) {
                         player.playVideo();
@@ -897,9 +912,9 @@
 
             const startPlaying = () => {
                 const state = getCurrentStreamState();
-                const targetSong = songList[state.songIndex];
+                const targetSong = state.playlist[state.songIndex];
 
-                updateTrackLabels(state.songIndex);
+                updateTrackLabels(state.playlist, state.songIndex);
 
                 if (typeof player.unMute === 'function') player.unMute();
                 if (typeof player.setVolume === 'function') player.setVolume(Number(volumeRange.value));
