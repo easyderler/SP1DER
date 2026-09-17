@@ -1286,47 +1286,54 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Gerçek Zamanlı Presence)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
-            authDomain: "easyfm-42146.firebaseapp.com",
-            databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "easyfm-42146",
-            storageBucket: "easyfm-42146.firebasestorage.app",
-            messagingSenderId: "133593837997",
-            appId: "1:133593837997:web:71f8cf196177f284ac7124",
-            measurementId: "G-G0XGTS166Z"
-        };
+        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Gerçek Zamanlı Presence - DÜZELTİLDİ)
+const firebaseConfig = {
+    apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
+    authDomain: "easyfm-42146.firebaseapp.com",
+    databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "easyfm-42146",
+    storageBucket: "easyfm-42146.firebasestorage.app",
+    messagingSenderId: "133593837997",
+    appId: "1:133593837997:web:71f8cf196177f284ac7124",
+    measurementId: "G-G0XGTS166Z"
+};
+
+// 1. Firebase Uygulamasını Başlat
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+// 2. Avrupa (europe-west1) sunucusu için Database URL'i açıkça belirterek bağla
+const db = firebase.database(firebaseConfig.databaseURL);
+const listenersRef = db.ref('online_listeners');
+const listenerCountEl = document.getElementById('listener-count');
+
+// 3. Her bağlanan cihaz/sekme için benzersiz bir ID oluştur (push)
+const userRef = listenersRef.push();
+
+// 4. Bağlantı durumunu anlık takip et
+const connectedRef = db.ref('.info/connected');
+
+connectedRef.on('value', (snap) => {
+    if (snap.val() === true) {
+        // Cihaz koptuğunda veya tarayıcı kapandığında sunucuda veriyi sil
+        userRef.onDisconnect().remove();
         
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        // Cihaz aktifleştiğinde timestamp yaz (true yerine timestamp yazmak takibi kesinleştirir)
+        userRef.set(firebase.database.ServerValue.TIMESTAMP);
+    }
+});
 
-        const db = firebase.database();
-        const listenersRef = db.ref('online_listeners');
-        const listenerCountEl = document.getElementById('listener-count');
+// 5. Sekme/Sayfa kapatılırken anında varlığı düşür
+window.addEventListener('beforeunload', () => {
+    userRef.remove();
+});
 
-        // Oturum için benzersiz node
-        const userRef = listenersRef.push();
-
-        // Bağlantı durumunu dinle ve varlık (presence) kaydını güncelle
-        db.ref('.info/connected').on('value', (snap) => {
-            if (snap.val() === true) {
-                userRef.onDisconnect().remove();
-                userRef.set(true);
-            }
-        });
-
-        // Sekme kapatılırken kaydı anında kaldır
-        window.addEventListener('beforeunload', () => {
-            userRef.remove();
-        });
-
-        // Aktif dinleyici sayısını anlık olarak dinle
-        listenersRef.on('value', (snap) => {
-            const count = snap.numChildren();
-            listenerCountEl.innerText = count > 0 ? count : 1;
-        });
+// 6. Online dinleyici sayısını gerçek zamanlı olarak güncelle
+listenersRef.on('value', (snap) => {
+    const count = snap.exists() ? snap.numChildren() : 0;
+    listenerCountEl.innerText = count;
+});
     </script>
 </body>
 </html>
