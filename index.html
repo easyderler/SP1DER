@@ -1285,6 +1285,50 @@
         handleResize();
         requestAnimationFrame(animateGlobe);
         animateParticles();
+
+        // --- FIREBASE CANLI DİNLEYİCİ SİSTEMİ ---
+const firebaseConfig = {
+  apiKey: "AIzaSyD5t7WQzIAO_j6sdRGxWcCtjmYdtPJR54Q",
+  authDomain: "easyfm-b1686.firebaseapp.com",
+  databaseURL: "https://easyfm-b1686-default-rtdb.firebaseio.com",
+  projectId: "easyfm-b1686",
+  storageBucket: "easyfm-b1686.firebasestorage.app",
+  messagingSenderId: "809597294628",
+  appId: "1:809597294628:web:7f943da1f3ce86bd1220b1",
+  measurementId: "G-5GECQ3QLBT"
+};
+
+// Firebase Başlatma
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
+
+const listenersRef = db.ref('online_listeners');
+const listenerCountEl = document.getElementById('listener-count');
+
+// Bağlantı durumunu takip et (.info/connected)
+db.ref('.info/connected').on('value', (snap) => {
+    if (snap.val() === true) {
+        // Kullanıcı bağlandığında benzersiz bir oturum kimliği (node) oluştur
+        const myPresenceRef = listenersRef.push();
+
+        // Kullanıcı sekmeyi veya siteyi kapattığında veritabanından otomatik sil
+        myPresenceRef.onDisconnect().remove();
+
+        // Bağlı olduğunu doğrula
+        myPresenceRef.set(true);
+    }
+});
+
+// Veritabanındaki anlık dinleyici sayısını oku ve HTML'e yaz
+listenersRef.on('value', (snap) => {
+    const count = snap.numChildren();
+    if (listenerCountEl) {
+        // Dinleyici sıfır görünmesin diye varsayılan olarak minimum 1 veya gerçek sayıyı basar
+        listenerCountEl.innerText = count > 0 ? count : 1;
+    }
+});
     </script>
 </body>
 </html>
