@@ -1286,60 +1286,69 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Bölgesel Sunucu Düzeltmesi)
-const firebaseConfig = {
-    apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
-    authDomain: "easyfm-42146.firebaseapp.com",
-    databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "easyfm-42146",
-    storageBucket: "easyfm-42146.firebasedatabase.app",
-    messagingSenderId: "133593837997",
-    appId: "1:133593837997:web:71f8cf196177f284ac7124",
-    measurementId: "G-G0XGTS166Z"
-};
+        // ==========================================
+        // FIREBASE KESİN DİNLENİCİ SAYACI (DÜZELTİLDİ)
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
+            authDomain: "easyfm-42146.firebaseapp.com",
+            databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "easyfm-42146",
+            storageBucket: "easyfm-42146.firebasestorage.app",
+            messagingSenderId: "133593837997",
+            appId: "1:133593837997:web:71f8cf196177f284ac7124",
+            measurementId: "G-G0XGTS166Z"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
 
-// 1. Firebase Uygulamasını Başlat
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+        // Avrupa DB Adresi ile Bağlan
+        const db = firebase.database("https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app");
+        const listenersRef = db.ref('online_listeners');
+        const listenerCountEl = document.getElementById('listener-count');
 
-// 2. Avrupa (europe-west1) Sunucusuna Doğrudan Bağlan
-const db = firebase.app().database("https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app");
-const listenersRef = db.ref('online_listeners');
-const listenerCountEl = document.getElementById('listener-count');
+        // Her tarayıcı/cihaz/oturum için %100 benzersiz Random Key üret
+        const uniqueClientId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+        const myUserRef = listenersRef.child(uniqueClientId);
 
-// 3. Oturum Başına Benzersiz Cihaz ID'si Oluştur
-let sessionId = sessionStorage.getItem('easyfm_session_id');
-if (!sessionId) {
-    sessionId = 'user_' + Math.random().toString(36).substr(2, 9);
-    sessionStorage.setItem('easyfm_session_id', sessionId);
-}
-const userRef = listenersRef.child(sessionId);
+        // Bağlantı Durumu Tespiti
+        const connectedRef = db.ref('.info/connected');
 
-// 4. Gerçek Zamanlı Bağlantı Takibi
-db.ref('.info/connected').on('value', (snap) => {
-    if (snap.val() === true) {
-        console.log("✅ Firebase RTDB Bağlantısı Başarılı!");
-        userRef.onDisconnect().remove();
-        userRef.set(true);
-    } else {
-        console.warn("⚠️ Firebase Bağlantısı Bekleniyor...");
-    }
-});
+        connectedRef.on('value', (snap) => {
+            if (snap.val() === true) {
+                // Kopma anında sil
+                myUserRef.onDisconnect().remove();
+                // Online olduğunu sunucu saatiyle yaz
+                myUserRef.set({
+                    online: true,
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    console.log("✅ Firebase presence eklendi: " + uniqueClientId);
+                }).catch((err) => {
+                    console.error("❌ Firebase Yazma Hatası (Rules veya DB kısıtı):", err);
+                });
+            }
+        });
 
-// 5. Sekme Kapatıldığında Kaydı Sil
-window.addEventListener('beforeunload', () => {
-    userRef.remove();
-});
+        // Sekme Kapatılırsa veya Sayfa Değişirse Anında Düşür
+        window.addEventListener('beforeunload', () => {
+            myUserRef.remove();
+        });
 
-// 6. Dinleyici Sayısını Güncelle
-listenersRef.on('value', (snap) => {
-    const count = snap.exists() ? snap.numChildren() : 0;
-    console.log("📊 Aktif Dinleyici Sayısı:", count);
-    listenerCountEl.innerText = count > 0 ? count : 1;
-}, (error) => {
-    console.error("❌ Firebase İzin Hatası:", error);
-});
+        // Canlı Dinleyici Sayısını Dinle
+        listenersRef.on('value', (snap) => {
+            if (snap.exists()) {
+                const totalOnline = snap.numChildren();
+                console.log("🔥 Güncel Dinleyici Sayısı:", totalOnline);
+                listenerCountEl.innerText = totalOnline;
+            } else {
+                listenerCountEl.innerText = "1";
+            }
+        }, (error) => {
+            console.error("❌ Firebase Okuma Hatası:", error);
+        });
     </script>
 </body>
 </html>
