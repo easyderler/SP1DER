@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EA$Y FM | 7/24 YÜZDE YÜZ MÜZİK</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=Montserrat:wght@400;700;900&family=Permanent+Marker&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Permanent+Marker&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -19,6 +21,11 @@
             --glow-color: rgba(255, 255, 255, 0.55);
             --bg-glow: rgba(180, 220, 255, 0.1);
             --border-glow: rgba(255, 255, 255, 0.35);
+            --bass-scale: 1;
+            --bass-glow-scale: 1;
+            --bass-opacity: 0.55;
+            --glitch-x: 0px;
+            --glitch-y: 0px;
         }
 
         html, body {
@@ -79,9 +86,10 @@
 
         .trap-bg-text {
             position: fixed;
-            font-family: 'UnifrakturCook', cursive;
-            color: rgba(255, 255, 255, 0.04);
-            font-size: 22vw;
+            font-family: 'Syne', sans-serif;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.03);
+            font-size: 18vw;
             z-index: 1;
             pointer-events: none;
             text-transform: uppercase;
@@ -89,20 +97,20 @@
             letter-spacing: -3px;
             text-shadow: 0 0 35px var(--glow-color);
             filter: blur(1px);
-            transition: color 0.3s ease;
             will-change: transform;
+            transform-origin: center;
         }
 
         .trap-bg-text.top-left {
-            top: -6%;
-            left: -12%;
-            transform: rotate(-10deg);
+            top: -2%;
+            left: -10%;
+            transform: rotate(-10deg) scale(var(--bass-scale));
         }
 
         .trap-bg-text.bottom-right {
-            bottom: -10%;
-            right: -12%;
-            transform: rotate(8deg);
+            bottom: -5%;
+            right: -10%;
+            transform: rotate(8deg) scale(var(--bass-scale));
         }
 
         .spray-tag {
@@ -113,13 +121,13 @@
             font-size: 10vw;
             z-index: 1;
             pointer-events: none;
-            transition: color 0.4s ease, opacity 0.4s ease;
             text-shadow: 0 0 20px var(--glow-color);
-            will-change: transform;
+            will-change: transform, opacity;
+            transform-origin: center;
         }
 
-        .spray-tag.tag1 { top: 35%; left: 2%; transform: rotate(-25deg); }
-        .spray-tag.tag2 { top: 15%; right: 3%; transform: rotate(15deg); }
+        .spray-tag.tag1 { top: 35%; left: 2%; transform: rotate(-25deg) scale(var(--bass-scale)); }
+        .spray-tag.tag2 { top: 15%; right: 3%; transform: rotate(15deg) scale(var(--bass-scale)); }
 
         #bg-canvas {
             position: fixed;
@@ -131,44 +139,19 @@
             pointer-events: none;
         }
 
-        #lightning-flash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--accent-color);
-            z-index: 3;
-            pointer-events: none;
-            opacity: 0;
-            mix-blend-mode: overlay;
-            will-change: opacity;
-        }
-
         .ambient-glow {
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
             width: 95vw;
             height: 95vh;
             background: radial-gradient(circle, var(--glow-color) 0%, var(--bg-glow) 50%, rgba(0, 0, 0, 0) 80%);
             z-index: 4;
             pointer-events: none;
-            transition: transform 0.08s ease-out, opacity 0.08s ease-out, background 0.4s ease;
             will-change: transform, opacity;
             filter: blur(70px);
-        }
-
-        #mobile-glitch-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 40;
-            pointer-events: none;
-            opacity: 0;
-            mix-blend-mode: exclusion;
-            background: transparent;
-            will-change: opacity, transform;
+            transform: translate(-50%, -50%) scale(var(--bass-glow-scale));
+            opacity: var(--bass-opacity);
         }
 
         .main-wrapper {
@@ -186,7 +169,6 @@
             gap: 12px;
             margin: 0 auto;
             box-sizing: border-box;
-            transition: transform 0.05s ease, filter 0.05s ease;
             will-change: transform, filter;
         }
 
@@ -196,8 +178,7 @@
 
         .wrapper-glitch {
             filter: drop-shadow(-6px 0 0px rgba(255, 0, 50, 0.9)) drop-shadow(6px 0 0px rgba(0, 240, 255, 0.9)) !important;
-            -webkit-filter: drop-shadow(-6px 0 0px rgba(255, 0, 50, 0.9)) drop-shadow(6px 0 0px rgba(0, 240, 255, 0.9)) !important;
-            transform: translate(calc(var(--glitch-x, 0) * 1px), calc(var(--glitch-y, 0) * 1px)) scale(1.02) !important;
+            transform: translate(var(--glitch-x), var(--glitch-y)) scale(1.02) !important;
         }
 
         @keyframes trapBassShake {
@@ -300,13 +281,6 @@
 
         .theme-btn:active {
             transform: scale(0.6);
-            animation: themeExplosion 0.35s ease-out;
-        }
-
-        @keyframes themeExplosion {
-            0% { transform: scale(0.8); }
-            50% { transform: scale(1.8); filter: brightness(3); }
-            100% { transform: scale(1); }
         }
 
         .theme-ice { background: #ffffff; box-shadow: 0 0 14px #fff; }
@@ -409,9 +383,11 @@
             overflow: hidden;
             box-shadow: 0 16px 50px rgba(0, 0, 0, 0.95);
             border: 1px solid var(--border-glow);
-            transition: border-color 0.3s, box-shadow 0.3s, transform 0.08s ease;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            transform: scale(var(--bass-scale));
             background: #000;
             margin: 2px 0;
+            will-change: transform;
         }
 
         .video-container.playing-border {
@@ -550,6 +526,8 @@
             gap: 2px;
             height: 12px;
             margin-left: 4px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
         }
 
         .wave-bar {
@@ -578,17 +556,15 @@
 <body>
 
     <div class="scanline-overlay"></div>
-    <div id="mobile-glitch-overlay"></div>
 
-    <div class="trap-bg-text top-left" id="bg-text-1">EA$Y WORLDWIDE</div>
-    <div class="trap-bg-text bottom-right" id="bg-text-2">OPIUM 808</div>
+    <div class="trap-bg-text top-left">EA$Y WORLDWIDE</div>
+    <div class="trap-bg-text bottom-right">OPIUM 808</div>
 
-    <div class="spray-tag tag1" id="tag1">YSL</div>
-    <div class="spray-tag tag2" id="tag2">TRAPHOUSE</div>
+    <div class="spray-tag tag1">YSL</div>
+    <div class="spray-tag tag2">TRAPHOUSE</div>
 
     <canvas id="bg-canvas"></canvas>
-    <div id="lightning-flash"></div>
-    <div class="ambient-glow" id="ambient-glow"></div>
+    <div class="ambient-glow"></div>
 
     <div class="main-wrapper" id="main-wrapper">
         <div class="logo-container">
@@ -632,7 +608,7 @@
                 <span class="track-label">
                     <span style="display:inline-block; width:6px; height:6px; background:var(--accent-color); border-radius:50%; box-shadow:0 0 10px var(--accent-color);"></span>
                     YAYINDA
-                    <div class="wave-bars" id="wave-bars" style="opacity: 0;">
+                    <div class="wave-bars" id="wave-bars">
                         <div class="wave-bar"></div>
                         <div class="wave-bar"></div>
                         <div class="wave-bar"></div>
@@ -661,14 +637,11 @@
         function setRadioTheme(mode) {
             const t = THEMES[mode];
             currentAccentColor = t.accent;
-            document.documentElement.style.setProperty('--accent-color', t.accent);
-            document.documentElement.style.setProperty('--glow-color', t.glow);
-            document.documentElement.style.setProperty('--bg-glow', t.bgGlow);
-            document.documentElement.style.setProperty('--border-glow', t.borderGlow);
-
-            document.querySelectorAll('.spray-tag').forEach(el => {
-                el.style.color = t.accent;
-            });
+            const rootStyle = document.documentElement.style;
+            rootStyle.setProperty('--accent-color', t.accent);
+            rootStyle.setProperty('--glow-color', t.glow);
+            rootStyle.setProperty('--bg-glow', t.bgGlow);
+            rootStyle.setProperty('--border-glow', t.borderGlow);
 
             if (ringBarMeshes) {
                 const hexColor = parseInt(t.accent.replace('#', '0x'));
@@ -734,14 +707,10 @@
             { id: 'g9Zro7KQzgA', duration: 218, title: 'ME OR SUM' },
             { id: 'bd5l5NtzoWc', duration: 163, title: 'GËT BUSY' },
             { id: 'tSrCMEZvyWo', duration: 456, title: 'BVLGARI' }
-
-    
         ];
 
-        // Sabit canlı yayın başlangıç zaman damgası (Epoch Unix - Saniye cinsinden)
         const STREAM_START_TIME = 1700000000;
 
-        // Herkes için AYNISINI üreten pseudo-random (deterministik) karıştırma algoritması
         function seededShuffle(array, seed) {
             let shuffled = [...array];
             let m = shuffled.length, t, i;
@@ -760,20 +729,15 @@
             return shuffled;
         }
 
-        // Toplam çalma listesi süresi
         const totalPlaylistDuration = baseSongList.reduce((acc, song) => acc + song.duration, 0);
 
-        // Zamana dayalı ortak canlı yayın durumunu hesaplayan fonksiyon
         function getCurrentStreamState() {
             const nowInSeconds = Math.floor(Date.now() / 1000);
             const totalElapsed = Math.max(0, nowInSeconds - STREAM_START_TIME);
 
-            // Mevcut döngü numarası (Seed olarak kullanılır)
             const cycleIndex = Math.floor(totalElapsed / totalPlaylistDuration);
-            // Mevcut döngü içerisindeki geçen süre
             const elapsedTime = totalElapsed % totalPlaylistDuration;
 
-            // Bu döngüye özel rastgele ama HER KULLANICIDA AYNISI OLAN şarkı listesi üret
             const currentPlaylist = seededShuffle(baseSongList, cycleIndex + 42);
 
             let accumulatedTime = 0;
@@ -790,16 +754,18 @@
             return { playlist: currentPlaylist, songIndex: 0, seekTo: 0 };
         }
 
+        const currentTrackEl = document.getElementById('current-track-name');
+        const nextTrackEl = document.getElementById('next-track-name');
+
         function updateTrackLabels(playlist, currentIndex) {
             const currentSong = playlist[currentIndex];
             const nextIndex = (currentIndex + 1) % playlist.length;
             const nextSong = playlist[nextIndex];
 
-            document.getElementById('current-track-name').innerText = currentSong.title;
-            document.getElementById('next-track-name').innerText = nextSong.title;
+            if (currentTrackEl.innerText !== currentSong.title) currentTrackEl.innerText = currentSong.title;
+            if (nextTrackEl.innerText !== nextSong.title) nextTrackEl.innerText = nextSong.title;
         }
 
-        // İlk yükleme ekranındaki başlık ayarı
         const initialState = getCurrentStreamState();
         updateTrackLabels(initialState.playlist, initialState.songIndex);
 
@@ -838,10 +804,11 @@
         }
 
         const mainWrapper = document.getElementById('main-wrapper');
+        const vBox = document.getElementById('video-box');
+        const waveBars = document.getElementById('wave-bars');
+        const volumeRange = document.getElementById('volume-range');
 
         function updateAudioVisualState() {
-            const vBox = document.getElementById('video-box');
-            const waveBars = document.getElementById('wave-bars');
             const vol = Number(volumeRange.value);
 
             if (!userHasClicked || vol === 0 || isMuted || !actualPlayerStatePlaying) {
@@ -869,7 +836,6 @@
             updateAudioVisualState();
         }
 
-        // Kesintisiz senkronizasyonu sağlayan kontrol döngüsü
         function syncToLiveStream() {
             if (!isPlayerReady || !player || !userHasClicked) return;
 
@@ -892,7 +858,6 @@
                 const currentTime = player.getCurrentTime();
                 const timeDiff = Math.abs(currentTime - state.seekTo);
                 
-                // Şarkı 2 saniyeden fazla kaydıysa otomatik senkronize et
                 if (timeDiff > 2.0) {
                     player.seekTo(state.seekTo, true);
                     if (typeof player.getPlayerState === 'function' && player.getPlayerState() !== YT.PlayerState.PLAYING) {
@@ -910,7 +875,7 @@
             const volumeBox = document.getElementById('volume-box');
             volumeBox.classList.remove('disabled');
             document.getElementById('mute-btn').removeAttribute('disabled');
-            document.getElementById('volume-range').removeAttribute('disabled');
+            volumeRange.removeAttribute('disabled');
 
             const overlay = document.getElementById('start-overlay');
             overlay.style.opacity = '0';
@@ -940,7 +905,7 @@
                 updateAudioVisualState();
 
                 if (syncCheckInterval) clearInterval(syncCheckInterval);
-                syncCheckInterval = setInterval(syncToLiveStream, 1000);
+                syncCheckInterval = setInterval(syncToLiveStream, 2000);
             };
 
             if (isPlayerReady && player) {
@@ -959,11 +924,10 @@
         const startBtnEl = document.getElementById('start-btn-el');
 
         startOverlay.addEventListener('click', handleUserClick);
-        startOverlay.addEventListener('touchstart', handleUserClick);
+        startOverlay.addEventListener('touchstart', handleUserClick, {passive: false});
         startBtnEl.addEventListener('click', handleUserClick);
-        startBtnEl.addEventListener('touchstart', handleUserClick);
+        startBtnEl.addEventListener('touchstart', handleUserClick, {passive: false});
 
-        const volumeRange = document.getElementById('volume-range');
         const muteBtn = document.getElementById('mute-btn');
         let isMuted = false;
         let lastVolume = 100;
@@ -1013,13 +977,14 @@
             updateAudioVisualState();
         });
 
+        // 3D Three.JS Kurulumu
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
         
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         globeContainer.appendChild(renderer.domElement);
 
         function resizeThreeJS() {
@@ -1047,7 +1012,7 @@
         const earthTexture = textureLoader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
 
         const baseRadius = 1.35;
-        const segments = 64; 
+        const segments = 32; // Segment düşürüldü (Optimizasyon)
         const geometry = new THREE.SphereGeometry(baseRadius, segments, segments);
         const material = new THREE.MeshStandardMaterial({
             map: earthTexture,
@@ -1062,10 +1027,10 @@
         const ringBarMeshes = [];
 
         const barHeight = 0.45;
+        const barGeo = new THREE.BoxGeometry(0.035, barHeight, 0.035);
+        barGeo.translate(0, barHeight / 2, 0); 
+
         for (let i = 0; i < ringBarsCount; i++) {
-            const barGeo = new THREE.BoxGeometry(0.035, barHeight, 0.035);
-            barGeo.translate(0, barHeight / 2, 0); 
-            
             const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
             const bar = new THREE.Mesh(barGeo, barMat);
             
@@ -1111,7 +1076,7 @@
             ringTex.minFilter = THREE.LinearFilter;
             ringTex.magFilter = THREE.LinearFilter;
 
-            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.3, baseRadius + 0.3, 0.65, 64, 1, true);
+            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.3, baseRadius + 0.3, 0.65, 48, 1, true);
             const ringMat = new THREE.MeshBasicMaterial({
                 map: ringTex,
                 transparent: true,
@@ -1127,20 +1092,13 @@
         document.fonts.ready.then(() => { createOrbitRingText(); });
 
         let bassAngle = 0;
-        const ambientGlowEl = document.getElementById('ambient-glow');
-        const lightningEl = document.getElementById('lightning-flash');
-        const mobileGlitchEl = document.getElementById('mobile-glitch-overlay');
         const badgeLiveEl = document.getElementById('badge-live');
         const badgeListenerEl = document.getElementById('badge-listener');
         const themeSelectorEl = document.getElementById('theme-selector-box');
         const volumeBoxEl = document.getElementById('volume-box');
-        const videoBoxEl = document.getElementById('video-box');
-        const tag1El = document.getElementById('tag1');
-        const tag2El = document.getElementById('tag2');
-        const bgText1El = document.getElementById('bg-text-1');
-        const bgText2El = document.getElementById('bg-text-2');
 
         let lastTime = performance.now();
+        const rootStyle = document.documentElement.style;
 
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
@@ -1149,9 +1107,6 @@
             lastTime = currentTime;
 
             if (isNaN(deltaTime) || deltaTime > 0.1) return;
-
-            globeMesh.rotation.x = 0;
-            globeMesh.rotation.z = 0;
 
             const globeSpeed = isPlayingState ? 0.6 : 0.15;
             const ringSpeed = isPlayingState ? 0.75 : 0.22;
@@ -1169,23 +1124,9 @@
 
                 dirLight.intensity = 2.5 + bassPower * 3.0;
 
-                const glowScale = 1 + Math.sin(bassAngle) * 0.16;
-                ambientGlowEl.style.transform = `translate(-50%, -50%) scale(${glowScale})`;
-                ambientGlowEl.style.opacity = (0.55 + bassPower * 0.4).toString();
-
-                videoBoxEl.style.transform = `scale(${1 + bassPower * 0.012})`;
-
-                if (tag1El && tag2El) {
-                    tag1El.style.transform = `rotate(-25deg) scale(${1 + bassPower * 0.08})`;
-                    tag2El.style.transform = `rotate(15deg) scale(${1 + bassPower * 0.08})`;
-                    tag1El.style.opacity = (0.12 + bassPower * 0.2).toString();
-                    tag2El.style.opacity = (0.12 + bassPower * 0.2).toString();
-                }
-
-                if (bgText1El && bgText2El) {
-                    bgText1El.style.transform = `rotate(-10deg) scale(${1 + bassPower * 0.03})`;
-                    bgText2El.style.transform = `rotate(8deg) scale(${1 + bassPower * 0.03})`;
-                }
+                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.012).toFixed(3));
+                rootStyle.setProperty('--bass-glow-scale', (1 + Math.sin(bassAngle) * 0.16).toFixed(3));
+                rootStyle.setProperty('--bass-opacity', (0.55 + bassPower * 0.4).toFixed(2));
 
                 if (bassPower > 0.6) {
                     badgeLiveEl.classList.add('badge-bass-pulse');
@@ -1200,28 +1141,15 @@
                 }
 
                 if (bassPower > 0.65) {
-                    const shiftX = (Math.random() - 0.5) * 16;
-                    const shiftY = (Math.random() - 0.5) * 8;
-                    mainWrapper.style.setProperty('--glitch-x', shiftX);
-                    mainWrapper.style.setProperty('--glitch-y', shiftY);
+                    rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
+                    rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 8).toFixed(1) + 'px');
                     mainWrapper.classList.add('wrapper-glitch');
-
-                    mobileGlitchEl.style.opacity = (0.2 + (bassPower - 0.65) * 1.5).toString();
-                    mobileGlitchEl.style.background = Math.random() > 0.5 
-                        ? 'linear-gradient(90deg, rgba(255,0,80,0.3) 0%, transparent 50%, rgba(0,255,255,0.3) 100%)' 
-                        : 'linear-gradient(0deg, rgba(0,255,100,0.2) 0%, transparent 60%, rgba(255,0,0,0.3) 100%)';
                 } else {
                     mainWrapper.classList.remove('wrapper-glitch');
-                    mobileGlitchEl.style.opacity = '0';
                 }
 
-                if (bassPower > 0.85) {
-                    lightningEl.style.opacity = (Math.random() > 0.35 ? (0.3 + (bassPower - 0.85) * 1.2) : 0).toString();
-                } else {
-                    lightningEl.style.opacity = '0';
-                }
-
-                ringBarMeshes.forEach((bar, idx) => {
+                for (let idx = 0; idx < ringBarsCount; idx++) {
+                    const bar = ringBarMeshes[idx];
                     const rnd = Math.sin(bassAngle * 3 + idx) * 0.5 + 0.5;
                     const scaleY = 0.25 + rnd * 1.1 * (bassPower + 0.2);
                     
@@ -1231,50 +1159,37 @@
 
                     bar.scale.set(1, scaleY, 1);
                     bar.material.opacity = 0.6 + rnd * 0.4;
-                });
+                }
 
             } else {
                 globeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
                 dirLight.intensity = 2.2;
-                ambientGlowEl.style.transform = `translate(-50%, -50%) scale(1)`;
-                ambientGlowEl.style.opacity = '0.4';
-                lightningEl.style.opacity = '0';
-                mobileGlitchEl.style.opacity = '0';
-                videoBoxEl.style.transform = `scale(1)`;
+
+                rootStyle.setProperty('--bass-scale', '1');
+                rootStyle.setProperty('--bass-glow-scale', '1');
+                rootStyle.setProperty('--bass-opacity', '0.4');
+
                 mainWrapper.classList.remove('wrapper-glitch');
                 badgeLiveEl.classList.remove('badge-bass-pulse');
                 badgeListenerEl.classList.remove('badge-bass-pulse');
                 themeSelectorEl.classList.remove('badge-bass-pulse');
                 volumeBoxEl.classList.remove('badge-bass-pulse');
 
-                if (tag1El && tag2El) {
-                    tag1El.style.transform = `rotate(-25deg) scale(1)`;
-                    tag2El.style.transform = `rotate(15deg) scale(1)`;
-                    tag1El.style.opacity = '0.12';
-                    tag2El.style.opacity = '0.12';
-                }
-
-                if (bgText1El && bgText2El) {
-                    bgText1El.style.transform = `rotate(-10deg) scale(1)`;
-                    bgText2El.style.transform = `rotate(8deg) scale(1)`;
-                }
-
-                ringBarMeshes.forEach((bar, idx) => {
+                for (let idx = 0; idx < ringBarsCount; idx++) {
+                    const bar = ringBarMeshes[idx];
                     const currentRadius = baseRadius + 0.01;
                     const angle = (idx / ringBarsCount) * Math.PI * 2;
                     bar.position.set(Math.cos(angle) * currentRadius, Math.sin(angle) * currentRadius, 0);
 
                     bar.scale.set(1, 0.25, 1);
                     bar.material.opacity = 0.35;
-                });
+                }
             }
 
             renderer.render(scene, camera);
         }
-        
-        resizeThreeJS();
-        requestAnimationFrame(animateGlobe);
 
+        // Parçacık Tuvali (Particle Canvas)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particlesArray = [];
@@ -1285,7 +1200,6 @@
             resizeThreeJS();
         }
         window.addEventListener('resize', handleResize);
-        handleResize();
 
         class CyberParticle {
             constructor() { this.reset(); }
@@ -1313,20 +1227,28 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.globalAlpha = 1.0;
             }
         }
 
-        const particleCount = 65; 
+        const particleCount = 45; // Performans optimizasyonu için düşürüldü
         for (let i = 0; i < particleCount; i++) particlesArray.push(new CyberParticle());
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particlesArray.forEach(p => { p.update(); p.draw(); });
+            for (let i = 0; i < particleCount; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            ctx.globalAlpha = 1.0;
             requestAnimationFrame(animateParticles);
         }
+
+        // Başlat
+        handleResize();
+        requestAnimationFrame(animateGlobe);
         animateParticles();
 
+        // Firebase Entegrasyonu
         const firebaseConfig = {
             apiKey: "AIzaSyBaTlb6V6e4FMLTYNXAPBgdzsgiclL8Qw8",
             authDomain: "easyfm-37b9e.firebaseapp.com",
@@ -1339,6 +1261,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const myConnectionsRef = db.ref('online_listeners');
+        const listenerCountEl = document.getElementById('listener-count');
+
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
                 const con = myConnectionsRef.push();
@@ -1347,7 +1271,7 @@
             }
         });
         myConnectionsRef.on('value', (snap) => {
-            document.getElementById('listener-count').innerText = snap.numChildren();
+            listenerCountEl.innerText = snap.numChildren();
         });
     </script>
 </body>
