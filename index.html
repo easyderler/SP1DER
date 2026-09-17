@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[source: 1]<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Montserrat:wght@700;900&family=Permanent+Marker&family=Pirata+One&family=Rubik+Glitch&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -82,31 +82,6 @@
         @keyframes scanlineAnim {
             0% { transform: translateY(-100%); }
             100% { transform: translateY(100%); }
-        }
-
-        /* Trap / Hiphop Arkaplan Yazı Kapsayıcısı */
-        #gothic-bg-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .random-gothic-text {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.04);
-            pointer-events: none;
-            white-space: nowrap;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.06);
-            will-change: transform, opacity;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            user-select: none;
-            transition: opacity 0.8s ease-in-out;
         }
 
         #bg-canvas {
@@ -537,9 +512,6 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Trap / Hiphop Estetik Arkaplan Kapsayıcısı -->
-    <div id="gothic-bg-container"></div>
-
     <canvas id="bg-canvas"></canvas>
     <div class="ambient-glow"></div>
 
@@ -602,56 +574,6 @@
     </div>
 
     <script>
-        // --- TRAP & HIPHOP ESTETİK ARKA PLAN YAZILARI OLUŞTURUCU ---
-        const gothicWords = [
-            "EA$Y FM", "OPIUM 808", "TRAPHOUSE", "YSL", "WORLDWIDE", 
-            "CACTUS JACK", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST",
-            "999", "RAGE", "FE!N", "CARTI"
-        ];
-
-        function generateRandomGothicBg() {
-            const container = document.getElementById('gothic-bg-container');
-            container.innerHTML = '';
-            
-            const count = window.innerWidth < 600 ? 8 : 14;
-
-            for (let i = 0; i < count; i++) {
-                const el = document.createElement('div');
-                el.className = 'random-gothic-text';
-                
-                const word = gothicWords[Math.floor(Math.random() * gothicWords.length)];
-                el.innerText = word;
-
-                const top = Math.random() * 92; 
-                const left = Math.random() * 85 - 5; 
-                const fontSize = (Math.random() * 5 + 3.5).toFixed(1) + 'vw'; 
-                const rotation = Math.floor(Math.random() * 50 - 25); 
-                // Yumuşak, göze batmayan soluk opaklık (0.02 - 0.055)
-                const opacity = (Math.random() * 0.035 + 0.02).toFixed(3); 
-
-                // Trap / Hiphop Font Seçenekleri
-                const fontChoices = [
-                    "'Rubik Glitch', display",
-                    "'UnifrakturMaguntia', serif", 
-                    "'Pirata One', cursive",
-                    "'Permanent Marker', cursive",
-                    "'Dela Gothic One', sans-serif"
-                ];
-                const chosenFont = fontChoices[Math.floor(Math.random() * fontChoices.length)];
-
-                el.style.top = top + '%';
-                el.style.left = left + '%';
-                el.style.fontSize = fontSize;
-                el.style.fontFamily = chosenFont;
-                el.style.opacity = opacity;
-                el.style.transform = `rotate(${rotation}deg) scale(var(--bass-scale))`;
-
-                container.appendChild(el);
-            }
-        }
-
-        generateRandomGothicBg();
-
         let currentAccentColor = '#ffffff';
         const THEMES = {
             ICE: { accent: '#ffffff', glow: 'rgba(255, 255, 255, 0.55)', bgGlow: 'rgba(180, 220, 255, 0.1)', borderGlow: 'rgba(255, 255, 255, 0.35)' },
@@ -1228,7 +1150,6 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             resizeThreeJS();
-            generateRandomGothicBg();
             
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
@@ -1288,7 +1209,7 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Heartbeat & Tam Gerçek Zamanlı Düzeltme)
+        // FIREBASE GERÇEK ZAMANLI DİNLEYİCİ SAYACI
         const firebaseConfig = {
             apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
             authDomain: "easyfm-42146.firebaseapp.com",
@@ -1309,58 +1230,21 @@
         const listenerCountEl = document.getElementById('listener-count');
 
         // Benzersiz Oturum ID
-        const sessionId = 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        const sessionId = 'session_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
         const userRef = listenersRef.child(sessionId);
 
-        // Canlılık Sinyali Gönder (Heartbeat)
-        function sendHeartbeat() {
-            userRef.set({
-                lastSeen: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-
+        // Bağlantı durumunu izle ve kullanıcı ayrıldığında kaydı otomatik kaldır
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
                 userRef.onDisconnect().remove();
-                sendHeartbeat();
+                userRef.set(true);
             }
         });
 
-        // Her 10 saniyede bir canlılık sinyalini yenile
-        setInterval(sendHeartbeat, 10000);
-
-        // Sekme kapatılırken kaydı anında kaldır
-        window.addEventListener('beforeunload', () => {
-            userRef.remove();
-        });
-
-        // Aktif Dinleyici Sayısını Anlık Hesapla ve Eski Hayalet Oturumları Temizle
+        // Toplam aktif dinleyici sayısını anlık olarak güncelle
         listenersRef.on('value', (snap) => {
-            const data = snap.val();
-            if (!data) {
-                listenerCountEl.innerText = "1";
-                return;
-            }
-
-            const now = Date.now();
-            let activeCount = 0;
-
-            Object.keys(data).forEach((key) => {
-                const session = data[key];
-                const lastSeen = session ? session.lastSeen : 0;
-                
-                // Son 25 saniyede sinyal vermiş oturumları aktif say
-                if (lastSeen && (now - lastSeen < 25000)) {
-                    activeCount++;
-                } else {
-                    // 35 saniyeden eski hayalet kalıntıları sil
-                    if (lastSeen && (now - lastSeen > 35000)) {
-                        listenersRef.child(key).remove();
-                    }
-                }
-            });
-
-            listenerCountEl.innerText = activeCount > 0 ? activeCount : 1;
+            const count = snap.exists() ? snap.numChildren() : 0;
+            listenerCountEl.innerText = Math.max(1, count);
         });
     </script>
 </body>
