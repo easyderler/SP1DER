@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Permanent+Marker&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -84,50 +84,67 @@
             100% { transform: translateY(100%); }
         }
 
-        .trap-bg-text {
+        /* --- GTA San Andreas / Los Angeles Times Tarzı Arkaplan Tipografisi --- */
+        .bg-watermark-container {
             position: fixed;
-            font-family: 'UnifrakturMaguntia', serif;
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.04);
-            font-size: 16vw;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1;
             pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4vh 2vw;
+            overflow: hidden;
+        }
+
+        .trap-bg-text {
+            font-family: 'UnifrakturMaguntia', serif;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.05);
+            font-size: clamp(3rem, 11vw, 10rem);
             text-transform: uppercase;
             white-space: nowrap;
-            letter-spacing: 0px;
-            text-shadow: 0 0 35px var(--glow-color);
-            filter: blur(0.5px);
+            letter-spacing: 2px;
+            text-shadow: 0 0 25px var(--glow-color);
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.9));
             will-change: transform;
             transform-origin: center;
+            line-height: 0.9;
         }
 
-        .trap-bg-text.top-left {
-            top: -2%;
-            left: -10%;
-            transform: rotate(-8deg) scale(var(--bass-scale));
+        .trap-bg-text.top-title {
+            transform: translateY(-10%) scale(var(--bass-scale));
         }
 
-        .trap-bg-text.bottom-right {
-            bottom: -5%;
-            right: -10%;
-            transform: rotate(6deg) scale(var(--bass-scale));
+        .trap-bg-text.bottom-title {
+            transform: translateY(10%) scale(var(--bass-scale));
+        }
+
+        .spray-tag-container {
+            position: fixed;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 4vw;
+            transform: translateY(-50%);
+            z-index: 1;
+            pointer-events: none;
         }
 
         .spray-tag {
-            position: fixed;
             font-family: 'UnifrakturMaguntia', serif;
             color: var(--accent-color);
-            opacity: 0.15;
-            font-size: 11vw;
-            z-index: 1;
-            pointer-events: none;
+            opacity: 0.12;
+            font-size: clamp(2rem, 6vw, 5rem);
             text-shadow: 0 0 20px var(--glow-color);
             will-change: transform, opacity;
             transform-origin: center;
         }
 
-        .spray-tag.tag1 { top: 35%; left: 2%; transform: rotate(-20deg) scale(var(--bass-scale)); }
-        .spray-tag.tag2 { top: 15%; right: 3%; transform: rotate(12deg) scale(var(--bass-scale)); }
+        .spray-tag.tag1 { transform: rotate(-90deg) scale(var(--bass-scale)); }
+        .spray-tag.tag2 { transform: rotate(90deg) scale(var(--bass-scale)); }
 
         #bg-canvas {
             position: fixed;
@@ -557,11 +574,16 @@
 
     <div class="scanline-overlay"></div>
 
-    <div class="trap-bg-text top-left">EA$Y WORLDWIDE</div>
-    <div class="trap-bg-text bottom-right">OPIUM 808</div>
+    <!-- GTA San Andreas / Los Angeles Times Style Düzenli Tipografi -->
+    <div class="bg-watermark-container">
+        <div class="trap-bg-text top-title">Los Angeles Times</div>
+        <div class="trap-bg-text bottom-title">San Andreas FM</div>
+    </div>
 
-    <div class="spray-tag tag1">YSL</div>
-    <div class="spray-tag tag2">TRAPHOUSE</div>
+    <div class="spray-tag-container">
+        <div class="spray-tag tag1">YSL</div>
+        <div class="spray-tag tag2">TRAPHOUSE</div>
+    </div>
 
     <canvas id="bg-canvas"></canvas>
     <div class="ambient-glow"></div>
@@ -577,7 +599,7 @@
                 <span>CANLI</span>
             </div>
             <div class="badge" id="badge-listener">
-                <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">0</strong></span>
+                <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
             </div>
             <div class="theme-selector" id="theme-selector-box">
                 <div class="theme-btn theme-ice" onclick="setRadioTheme('ICE')" title="ICE White"></div>
@@ -1255,12 +1277,11 @@
             requestAnimationFrame(animateParticles);
         }
 
-        // Başlat
         handleResize();
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // Firebase Entegrasyonu (Düzeltildi)
+        // --- Firebase Anlık Dinleyici Takibi (Düzeltildi) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
             authDomain: "easyfm-42146.firebaseapp.com",
@@ -1276,23 +1297,29 @@
             firebase.initializeApp(firebaseConfig);
         }
 
-        const db = firebase.database();
+        const db = firebase.app().database("https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app");
         const listenersRef = db.ref('online_listeners');
         const listenerCountEl = document.getElementById('listener-count');
         const userRef = listenersRef.push();
 
-        // Bağlantı Durumu Takibi
+        // Otomatik varlık ekleme & kopma durumunu ayarlama
+        userRef.set({ online: true, ts: Date.now() });
+        userRef.onDisconnect().remove();
+
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
                 userRef.onDisconnect().remove();
-                userRef.set(true);
+                userRef.set({ online: true, ts: Date.now() });
             }
         });
 
-        // Sayacı Anlık Güncelle
+        // Anlık Dinleyici Sayısını Güncelleme
         listenersRef.on('value', (snap) => {
             const count = snap.numChildren();
-            listenerCountEl.innerText = count || 1;
+            listenerCountEl.innerText = count > 0 ? count : 1;
+        }, (err) => {
+            console.warn("Firebase listener fetch error:", err);
+            listenerCountEl.innerText = "1";
         });
     </script>
 </body>
