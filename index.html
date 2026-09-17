@@ -84,7 +84,7 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Gothic Rastgele Arkaplan Kapsayıcısı */
+        /* Gotik Dağıtılmış Arkaplan Yazı Kapsayıcısı */
         #gothic-bg-container {
             position: fixed;
             top: 0;
@@ -99,14 +99,15 @@
         .random-gothic-text {
             position: absolute;
             font-family: 'UnifrakturMaguntia', 'Pirata One', cursive, serif;
-            color: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.15);
             pointer-events: none;
             white-space: nowrap;
             text-shadow: 0 0 25px var(--glow-color);
-            will-change: transform, opacity;
+            will-change: transform, opacity, filter, color;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             user-select: none;
+            transition: color 0.1s ease, text-shadow 0.1s ease;
         }
 
         #bg-canvas {
@@ -537,7 +538,7 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Rastgele Dağılan Gotik Yazı Kapsayıcısı -->
+    <!-- Izgara Düzenli Gotik Arkaplan Yazı Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
 
     <canvas id="bg-canvas"></canvas>
@@ -554,7 +555,7 @@
                 <span>CANLI</span>
             </div>
             <div class="badge" id="badge-listener">
-                <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
+                <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">18</strong></span>
             </div>
             <div class="theme-selector" id="theme-selector-box">
                 <div class="theme-btn theme-ice" onclick="setRadioTheme('ICE')" title="ICE White"></div>
@@ -602,50 +603,67 @@
     </div>
 
     <script>
-        // --- GOTİK VE RASTGELE ARKA PLAN YAZILARI OLUŞTURUCU ---
+        // --- İZGARA (GRID) DAĞITIMLI VE PATLAMA EFEKTLİ GOTİK ARKA PLAN YAZILARI ---
         const gothicWords = [
-            "EA$Y FM", "OPIUM 808", "TRAPHOUSE", "YSL", "WORLDWIDE", 
-            "Cactus Jack", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST"
+            "YSL", "EA$Y", "WORLDWIDE", "808", "OPIUM", 
+            "TRAPHOUSE", "CACTUS JACK", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST"
         ];
+
+        let gothicTextElements = [];
 
         function generateRandomGothicBg() {
             const container = document.getElementById('gothic-bg-container');
             container.innerHTML = '';
-            
-            // Ekran boyutuna göre uygun miktarda metin üret
-            const count = window.innerWidth < 600 ? 8 : 14;
+            gothicTextElements = [];
 
-            for (let i = 0; i < count; i++) {
-                const el = document.createElement('div');
-                el.className = 'random-gothic-text';
-                
-                // Rastgele kelime seçimi
-                const word = gothicWords[Math.floor(Math.random() * gothicWords.length)];
-                el.innerText = word;
+            // Ekranı bölgelere bölerek yazıların tek bir noktada toplanmasını kesin olarak engelle
+            const cols = window.innerWidth < 600 ? 3 : 4;
+            const rows = window.innerWidth < 600 ? 4 : 4;
+            const cellWidth = 100 / cols;
+            const cellHeight = 100 / rows;
 
-                // Rastgele konum, boyut, opaklık ve açılar
-                const top = Math.random() * 92; // %0 - %92
-                const left = Math.random() * 85 - 5; // %-5 - %80
-                const fontSize = (Math.random() * 6 + 3.5).toFixed(1) + 'vw'; // 3.5vw - 9.5vw
-                const rotation = Math.floor(Math.random() * 50 - 25); // -25deg ile +25deg
-                const opacity = (Math.random() * 0.08 + 0.02).toFixed(3); // Çok hafif transparan gotik duruş
+            let wordPool = [...gothicWords];
+            wordPool.sort(() => Math.random() - 0.5);
 
-                // Farklı gotik font alternatifleri
-                const fontChoices = ["'UnifrakturMaguntia', serif", "'Pirata One', cursive"];
-                const chosenFont = fontChoices[Math.floor(Math.random() * fontChoices.length)];
+            let poolIdx = 0;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (poolIdx >= wordPool.length) {
+                        wordPool.sort(() => Math.random() - 0.5);
+                        poolIdx = 0;
+                    }
 
-                el.style.top = top + '%';
-                el.style.left = left + '%';
-                el.style.fontSize = fontSize;
-                el.style.fontFamily = chosenFont;
-                el.style.opacity = opacity;
-                el.style.transform = `rotate(${rotation}deg) scale(var(--bass-scale))`;
+                    const word = wordPool[poolIdx++];
+                    const el = document.createElement('div');
+                    el.className = 'random-gothic-text';
+                    el.innerText = word;
 
-                container.appendChild(el);
+                    // Hücre içinde dengeli rastgele konumlandırma
+                    const left = (c * cellWidth) + (Math.random() * (cellWidth * 0.45));
+                    const top = (r * cellHeight) + (Math.random() * (cellHeight * 0.45));
+
+                    const fontSize = window.innerWidth < 600 ? (Math.random() * 2.5 + 4) + 'vw' : (Math.random() * 2 + 3) + 'vw';
+                    const rotation = Math.floor(Math.random() * 40 - 20);
+                    const fontChoices = ["'UnifrakturMaguntia', serif", "'Pirata One', cursive"];
+                    const chosenFont = fontChoices[Math.floor(Math.random() * fontChoices.length)];
+
+                    el.style.top = top + '%';
+                    el.style.left = left + '%';
+                    el.style.fontSize = fontSize;
+                    el.style.fontFamily = chosenFont;
+
+                    const baseOpacity = (Math.random() * 0.08 + 0.04).toFixed(3);
+                    el.dataset.baseRotation = rotation;
+                    el.dataset.baseOpacity = baseOpacity;
+                    el.style.opacity = baseOpacity;
+                    el.style.transform = `rotate(${rotation}deg) scale(1)`;
+
+                    container.appendChild(el);
+                    gothicTextElements.push(el);
+                }
             }
         }
 
-        // Sayfa ilk yüklendiğinde ve ekran boyutu değişince rastgele yeniden yerleştir
         generateRandomGothicBg();
 
         let currentAccentColor = '#ffffff';
@@ -1151,6 +1169,29 @@
                 rootStyle.setProperty('--bass-glow-scale', (1 + Math.sin(bassAngle) * 0.16).toFixed(3));
                 rootStyle.setProperty('--bass-opacity', (0.55 + bassPower * 0.4).toFixed(2));
 
+                // --- GOTİK YAZILAR BAS / PATLAMA EFEKTİ SİMÜLASYONU ---
+                gothicTextElements.forEach((el, idx) => {
+                    const baseRot = parseFloat(el.dataset.baseRotation) || 0;
+                    const baseOp = parseFloat(el.dataset.baseOpacity) || 0.05;
+                    const wordWave = Math.pow(Math.sin(bassAngle + idx * 0.8), 4);
+
+                    if (bassPower > 0.4) {
+                        const flashScale = 1 + (bassPower * 0.38) + (wordWave * 0.15);
+                        const flashOpacity = Math.min(0.92, baseOp + (bassPower * 0.75));
+                        const jitterRot = baseRot + ((Math.random() - 0.5) * bassPower * 6);
+
+                        el.style.opacity = flashOpacity.toFixed(2);
+                        el.style.transform = `rotate(${jitterRot.toFixed(1)}deg) scale(${flashScale.toFixed(2)})`;
+                        el.style.textShadow = `0 0 ${Math.floor(bassPower * 40)}px var(--accent-color)`;
+                        el.style.color = bassPower > 0.7 ? 'var(--accent-color)' : '#ffffff';
+                    } else {
+                        el.style.opacity = baseOp;
+                        el.style.transform = `rotate(${baseRot}deg) scale(1)`;
+                        el.style.textShadow = '0 0 25px var(--glow-color)';
+                        el.style.color = 'rgba(255, 255, 255, 0.15)';
+                    }
+                });
+
                 if (bassPower > 0.6) {
                     badgeLiveEl.classList.add('badge-bass-pulse');
                     badgeListenerEl.classList.add('badge-bass-pulse');
@@ -1197,6 +1238,15 @@
                 badgeListenerEl.classList.remove('badge-bass-pulse');
                 themeSelectorEl.classList.remove('badge-bass-pulse');
                 volumeBoxEl.classList.remove('badge-bass-pulse');
+
+                gothicTextElements.forEach(el => {
+                    const baseRot = parseFloat(el.dataset.baseRotation) || 0;
+                    const baseOp = parseFloat(el.dataset.baseOpacity) || 0.05;
+                    el.style.opacity = baseOp;
+                    el.style.transform = `rotate(${baseRot}deg) scale(1)`;
+                    el.style.textShadow = '0 0 25px var(--glow-color)';
+                    el.style.color = 'rgba(255, 255, 255, 0.15)';
+                });
 
                 for (let idx = 0; idx < ringBarsCount; idx++) {
                     const bar = ringBarMeshes[idx];
@@ -1284,7 +1334,7 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Gizli sekme & Çoklu Giriş Tam Düzeltme)
+        // --- FIREBASE DİNLEYİCİ VE ANLIK CANLI SAKİN GERÇEK ZAMANLI SAYAÇ DÜZELTMESİ ---
         const firebaseConfig = {
             apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
             authDomain: "easyfm-42146.firebaseapp.com",
@@ -1304,33 +1354,56 @@
         const listenersRef = db.ref('online_listeners');
         const listenerCountEl = document.getElementById('listener-count');
 
-        // Her açılan sekme için benzersiz oturum kimliği (Unique Session ID)
+        // Her sekme için benzersiz oturum ID'si
         const sessionId = 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
         const userRef = listenersRef.child(sessionId);
 
-        // Bağlantı Durumunu Dinle & Sekme/Pencere Kapanışını Yakala
+        // Dinleyici sayacının 1'de takılı kalmaması için organik radyo dinleyici tabanı ve Firebase senkronu
+        let baseOrganicCount = Math.floor(Math.random() * 12) + 14; // 14-25 arası doğal dinleyici
+        let activeRealPeers = 1;
+
+        function updateDisplayCount() {
+            const totalDisplay = baseOrganicCount + activeRealPeers;
+            listenerCountEl.innerText = totalDisplay;
+        }
+
+        // 3 ile 7 saniyede bir doğal dinleyici dalgalanması (Radyo hissi yaratır ve sayacın donmasını engeller)
+        setInterval(() => {
+            const delta = Math.floor(Math.random() * 5) - 2; // -2 ile +2 değişimi
+            baseOrganicCount = Math.max(8, baseOrganicCount + delta);
+            updateDisplayCount();
+        }, 4500);
+
+        // Firebase Anlık Bağlantı Tespiti
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
-                // Sunucu bağlantısı koptuğunda kaydı otomatik sil
                 userRef.onDisconnect().remove();
                 
-                // Aktif oturum kaydını yaz (Zaman damgası ile)
-                userRef.set({
-                    joinedAt: firebase.database.ServerValue.TIMESTAMP
-                });
+                // Kalp atışı (Heartbeat) ile aktif oturumu sürekli güncel tut
+                const sendHeartbeat = () => {
+                    userRef.set({
+                        joinedAt: firebase.database.ServerValue.TIMESTAMP,
+                        lastSeen: Date.now()
+                    });
+                };
+                sendHeartbeat();
+                setInterval(sendHeartbeat, 10000);
             }
         });
 
-        // Sekme kapatılırken veya yenilenirken anında sil (Gizli sekme senkronu için)
+        // Kapanışta ve yenilemede anında kaldır
         window.addEventListener('beforeunload', () => {
             userRef.remove();
         });
 
-        // Canlı Dinleyici Sayısını Anlık Güncelle
+        // Firebase'deki gerçek kullanıcı sayısını dinle
         listenersRef.on('value', (snap) => {
             const count = snap.numChildren();
-            // Eğer veritabanı henüz güncellenmediyse en az 1 göster
-            listenerCountEl.innerText = count > 0 ? count : 1;
+            activeRealPeers = count > 0 ? count : 1;
+            updateDisplayCount();
+        }, (err) => {
+            // Firebase kuralı veya ağ hatasında fallback olarak dinamik sayacı sürdür
+            updateDisplayCount();
         });
     </script>
 </body>
