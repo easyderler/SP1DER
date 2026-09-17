@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Pirata+One&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -84,67 +84,30 @@
             100% { transform: translateY(100%); }
         }
 
-        /* --- GTA San Andreas / Los Angeles Times Tarzı Arkaplan Tipografisi --- */
-        .bg-watermark-container {
+        /* Gothic Rastgele Arkaplan Kapsayıcısı */
+        #gothic-bg-container {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 1;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 4vh 2vw;
             overflow: hidden;
         }
 
-        .trap-bg-text {
-            font-family: 'UnifrakturMaguntia', serif;
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.05);
-            font-size: clamp(3rem, 11vw, 10rem);
-            text-transform: uppercase;
-            white-space: nowrap;
-            letter-spacing: 2px;
-            text-shadow: 0 0 25px var(--glow-color);
-            filter: drop-shadow(0 0 10px rgba(0,0,0,0.9));
-            will-change: transform;
-            transform-origin: center;
-            line-height: 0.9;
-        }
-
-        .trap-bg-text.top-title {
-            transform: translateY(-10%) scale(var(--bass-scale));
-        }
-
-        .trap-bg-text.bottom-title {
-            transform: translateY(10%) scale(var(--bass-scale));
-        }
-
-        .spray-tag-container {
-            position: fixed;
-            top: 50%;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 4vw;
-            transform: translateY(-50%);
-            z-index: 1;
+        .random-gothic-text {
+            position: absolute;
+            font-family: 'UnifrakturMaguntia', 'Pirata One', cursive, serif;
+            color: rgba(255, 255, 255, 0.06);
             pointer-events: none;
-        }
-
-        .spray-tag {
-            font-family: 'UnifrakturMaguntia', serif;
-            color: var(--accent-color);
-            opacity: 0.12;
-            font-size: clamp(2rem, 6vw, 5rem);
-            text-shadow: 0 0 20px var(--glow-color);
+            white-space: nowrap;
+            text-shadow: 0 0 25px var(--glow-color);
             will-change: transform, opacity;
-            transform-origin: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            user-select: none;
         }
-
-        .spray-tag.tag1 { transform: rotate(-90deg) scale(var(--bass-scale)); }
-        .spray-tag.tag2 { transform: rotate(90deg) scale(var(--bass-scale)); }
 
         #bg-canvas {
             position: fixed;
@@ -574,16 +537,8 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- GTA San Andreas / Los Angeles Times Style Düzenli Tipografi -->
-    <div class="bg-watermark-container">
-        <div class="trap-bg-text top-title">Los Angeles Times</div>
-        <div class="trap-bg-text bottom-title">San Andreas FM</div>
-    </div>
-
-    <div class="spray-tag-container">
-        <div class="spray-tag tag1">YSL</div>
-        <div class="spray-tag tag2">TRAPHOUSE</div>
-    </div>
+    <!-- Rastgele Dağılan Gotik Yazı Kapsayıcısı -->
+    <div id="gothic-bg-container"></div>
 
     <canvas id="bg-canvas"></canvas>
     <div class="ambient-glow"></div>
@@ -647,6 +602,52 @@
     </div>
 
     <script>
+        // --- GOTİK VE RASTGELE ARKA PLAN YAZILARI OLUŞTURUCU ---
+        const gothicWords = [
+            "EA$Y FM", "OPIUM 808", "TRAPHOUSE", "YSL", "WORLDWIDE", 
+            "Cactus Jack", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST"
+        ];
+
+        function generateRandomGothicBg() {
+            const container = document.getElementById('gothic-bg-container');
+            container.innerHTML = '';
+            
+            // Ekran boyutuna göre uygun miktarda metin üret
+            const count = window.innerWidth < 600 ? 8 : 14;
+
+            for (let i = 0; i < count; i++) {
+                const el = document.createElement('div');
+                el.className = 'random-gothic-text';
+                
+                // Rastgele kelime seçimi
+                const word = gothicWords[Math.floor(Math.random() * gothicWords.length)];
+                el.innerText = word;
+
+                // Rastgele konum, boyut, opaklık ve açılar
+                const top = Math.random() * 92; // %0 - %92
+                const left = Math.random() * 85 - 5; // %-5 - %80
+                const fontSize = (Math.random() * 6 + 3.5).toFixed(1) + 'vw'; // 3.5vw - 9.5vw
+                const rotation = Math.floor(Math.random() * 50 - 25); // -25deg ile +25deg
+                const opacity = (Math.random() * 0.08 + 0.02).toFixed(3); // Çok hafif transparan gotik duruş
+
+                // Farklı gotik font alternatifleri
+                const fontChoices = ["'UnifrakturMaguntia', serif", "'Pirata One', cursive"];
+                const chosenFont = fontChoices[Math.floor(Math.random() * fontChoices.length)];
+
+                el.style.top = top + '%';
+                el.style.left = left + '%';
+                el.style.fontSize = fontSize;
+                el.style.fontFamily = chosenFont;
+                el.style.opacity = opacity;
+                el.style.transform = `rotate(${rotation}deg) scale(var(--bass-scale))`;
+
+                container.appendChild(el);
+            }
+        }
+
+        // Sayfa ilk yüklendiğinde ve ekran boyutu değişince rastgele yeniden yerleştir
+        generateRandomGothicBg();
+
         let currentAccentColor = '#ffffff';
         const THEMES = {
             ICE: { accent: '#ffffff', glow: 'rgba(255, 255, 255, 0.55)', bgGlow: 'rgba(180, 220, 255, 0.1)', borderGlow: 'rgba(255, 255, 255, 0.35)' },
@@ -1223,6 +1224,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             resizeThreeJS();
+            generateRandomGothicBg();
             
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
@@ -1277,11 +1279,12 @@
             requestAnimationFrame(animateParticles);
         }
 
+        // Başlat
         handleResize();
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // --- Firebase Anlık Dinleyici Takibi (Düzeltildi) ---
+        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Gizli sekme & Çoklu Giriş Tam Düzeltme)
         const firebaseConfig = {
             apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
             authDomain: "easyfm-42146.firebaseapp.com",
@@ -1297,29 +1300,37 @@
             firebase.initializeApp(firebaseConfig);
         }
 
-        const db = firebase.app().database("https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app");
+        const db = firebase.database();
         const listenersRef = db.ref('online_listeners');
         const listenerCountEl = document.getElementById('listener-count');
-        const userRef = listenersRef.push();
 
-        // Otomatik varlık ekleme & kopma durumunu ayarlama
-        userRef.set({ online: true, ts: Date.now() });
-        userRef.onDisconnect().remove();
+        // Her açılan sekme için benzersiz oturum kimliği (Unique Session ID)
+        const sessionId = 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        const userRef = listenersRef.child(sessionId);
 
+        // Bağlantı Durumunu Dinle & Sekme/Pencere Kapanışını Yakala
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
+                // Sunucu bağlantısı koptuğunda kaydı otomatik sil
                 userRef.onDisconnect().remove();
-                userRef.set({ online: true, ts: Date.now() });
+                
+                // Aktif oturum kaydını yaz (Zaman damgası ile)
+                userRef.set({
+                    joinedAt: firebase.database.ServerValue.TIMESTAMP
+                });
             }
         });
 
-        // Anlık Dinleyici Sayısını Güncelleme
+        // Sekme kapatılırken veya yenilenirken anında sil (Gizli sekme senkronu için)
+        window.addEventListener('beforeunload', () => {
+            userRef.remove();
+        });
+
+        // Canlı Dinleyici Sayısını Anlık Güncelle
         listenersRef.on('value', (snap) => {
             const count = snap.numChildren();
+            // Eğer veritabanı henüz güncellenmediyse en az 1 göster
             listenerCountEl.innerText = count > 0 ? count : 1;
-        }, (err) => {
-            console.warn("Firebase listener fetch error:", err);
-            listenerCountEl.innerText = "1";
         });
     </script>
 </body>
