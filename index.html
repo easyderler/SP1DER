@@ -1189,12 +1189,11 @@
             renderer.render(scene, camera);
         }
 
-        // Parçacık Tuvali (Particle Canvas) - Homojen Dağılım Düzeltmesi
+        // Parçacık Tuvali (Particle Canvas)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particlesArray = [];
 
-        // Canvas boyutunu parçacıklar üretilmeden önce tam ekrana eşitle
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -1203,7 +1202,6 @@
             canvas.height = window.innerHeight;
             resizeThreeJS();
             
-            // Ekran boyutu değişirse taşan parçacıkları ekran sınırlarına çek
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
                     if (p.x > canvas.width || p.y > canvas.height) {
@@ -1218,7 +1216,6 @@
         class CyberParticle {
             constructor() { this.reset(); }
             reset() {
-                // Her zaman o anki tam canvas genişliğine homojen şekilde dağıt
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.size = Math.random() * 2.5 + 0.8;
@@ -1263,31 +1260,39 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // Firebase Entegrasyonu
+        // Firebase Entegrasyonu (Düzeltildi)
         const firebaseConfig = {
-  apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
-  authDomain: "easyfm-42146.firebaseapp.com",
-  databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "easyfm-42146",
-  storageBucket: "easyfm-42146.firebasestorage.app",
-  messagingSenderId: "133593837997",
-  appId: "1:133593837997:web:71f8cf196177f284ac7124",
-  measurementId: "G-G0XGTS166Z"
-};
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const myConnectionsRef = db.ref('online_listeners');
-        const listenerCountEl = document.getElementById('listener-count');
+            apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
+            authDomain: "easyfm-42146.firebaseapp.com",
+            databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "easyfm-42146",
+            storageBucket: "easyfm-42146.firebasestorage.app",
+            messagingSenderId: "133593837997",
+            appId: "1:133593837997:web:71f8cf196177f284ac7124",
+            measurementId: "G-G0XGTS166Z"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
 
+        const db = firebase.database();
+        const listenersRef = db.ref('online_listeners');
+        const listenerCountEl = document.getElementById('listener-count');
+        const userRef = listenersRef.push();
+
+        // Bağlantı Durumu Takibi
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
-                const con = myConnectionsRef.push();
-                con.onDisconnect().remove();
-                con.set(true);
+                userRef.onDisconnect().remove();
+                userRef.set(true);
             }
         });
-        myConnectionsRef.on('value', (snap) => {
-            listenerCountEl.innerText = snap.numChildren();
+
+        // Sayacı Anlık Güncelle
+        listenersRef.on('value', (snap) => {
+            const count = snap.numChildren();
+            listenerCountEl.innerText = count || 1;
         });
     </script>
 </body>
