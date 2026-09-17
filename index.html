@@ -1286,13 +1286,13 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Gerçek Zamanlı Presence - DÜZELTİLDİ)
+        // FIREBASE DİNLEYİCİ SENKRONİZASYONU (Bölgesel Sunucu Düzeltmesi)
 const firebaseConfig = {
     apiKey: "AIzaSyCAdGtjJShyn3NNIFyFyaYeW4qZo6jo8rk",
     authDomain: "easyfm-42146.firebaseapp.com",
     databaseURL: "https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "easyfm-42146",
-    storageBucket: "easyfm-42146.firebasestorage.app",
+    storageBucket: "easyfm-42146.firebasedatabase.app",
     messagingSenderId: "133593837997",
     appId: "1:133593837997:web:71f8cf196177f284ac7124",
     measurementId: "G-G0XGTS166Z"
@@ -1303,36 +1303,42 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// 2. Avrupa (europe-west1) sunucusu için Database URL'i açıkça belirterek bağla
-const db = firebase.database(firebaseConfig.databaseURL);
+// 2. Avrupa (europe-west1) Sunucusuna Doğrudan Bağlan
+const db = firebase.app().database("https://easyfm-42146-default-rtdb.europe-west1.firebasedatabase.app");
 const listenersRef = db.ref('online_listeners');
 const listenerCountEl = document.getElementById('listener-count');
 
-// 3. Her bağlanan cihaz/sekme için benzersiz bir ID oluştur (push)
-const userRef = listenersRef.push();
+// 3. Oturum Başına Benzersiz Cihaz ID'si Oluştur
+let sessionId = sessionStorage.getItem('easyfm_session_id');
+if (!sessionId) {
+    sessionId = 'user_' + Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem('easyfm_session_id', sessionId);
+}
+const userRef = listenersRef.child(sessionId);
 
-// 4. Bağlantı durumunu anlık takip et
-const connectedRef = db.ref('.info/connected');
-
-connectedRef.on('value', (snap) => {
+// 4. Gerçek Zamanlı Bağlantı Takibi
+db.ref('.info/connected').on('value', (snap) => {
     if (snap.val() === true) {
-        // Cihaz koptuğunda veya tarayıcı kapandığında sunucuda veriyi sil
+        console.log("✅ Firebase RTDB Bağlantısı Başarılı!");
         userRef.onDisconnect().remove();
-        
-        // Cihaz aktifleştiğinde timestamp yaz (true yerine timestamp yazmak takibi kesinleştirir)
-        userRef.set(firebase.database.ServerValue.TIMESTAMP);
+        userRef.set(true);
+    } else {
+        console.warn("⚠️ Firebase Bağlantısı Bekleniyor...");
     }
 });
 
-// 5. Sekme/Sayfa kapatılırken anında varlığı düşür
+// 5. Sekme Kapatıldığında Kaydı Sil
 window.addEventListener('beforeunload', () => {
     userRef.remove();
 });
 
-// 6. Online dinleyici sayısını gerçek zamanlı olarak güncelle
+// 6. Dinleyici Sayısını Güncelle
 listenersRef.on('value', (snap) => {
     const count = snap.exists() ? snap.numChildren() : 0;
-    listenerCountEl.innerText = count;
+    console.log("📊 Aktif Dinleyici Sayısı:", count);
+    listenerCountEl.innerText = count > 0 ? count : 1;
+}, (error) => {
+    console.error("❌ Firebase İzin Hatası:", error);
 });
     </script>
 </body>
