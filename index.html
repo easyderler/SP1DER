@@ -1422,16 +1422,17 @@ function animateGlobe(currentTime) {
                 const follow = 1 - Math.exp(-bassEase * deltaTime);
                 smoothedBass += (rawBass - smoothedBass) * follow;
                 if (rawBass > 0.78 && bassKick < 0.32) bassKick = 1;
-                bassKick = Math.max(0, bassKick - deltaTime * 5.5);
-                const bassPower = Math.min(1, smoothedBass * 0.82 + bassKick * 0.28);
-const bassScale = 1 + bassPower * 0.028; 
+                bassKick = Math.max(0, bassKick - deltaTime * 7.2);
+                const bassPower = Math.min(1, smoothedBass * 0.72 + bassKick * 0.52);
+                // Daha sert kick: dünya vuruş anında belirgin biçimde nefes alır.
+                const bassScale = 1 + bassPower * 0.052 + bassKick * 0.018; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
-                dirLight.intensity = 0.88 + bassPower * 0.20;
+                dirLight.intensity = 0.88 + bassPower * 0.34 + bassKick * 0.12;
 
-                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.009).toFixed(3));
-                rootStyle.setProperty('--bass-glow-scale', (1 + bassPower * 0.12 + bassKick * 0.045).toFixed(3));
-                rootStyle.setProperty('--bass-opacity', (0.42 + bassPower * 0.24).toFixed(2));
+                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.017 + bassKick * 0.006).toFixed(3));
+                rootStyle.setProperty('--bass-glow-scale', (1 + bassPower * 0.22 + bassKick * 0.10).toFixed(3));
+                rootStyle.setProperty('--bass-opacity', (0.42 + bassPower * 0.34 + bassKick * 0.08).toFixed(2));
 
                 if (bassPower > 0.6) {
                     badgeLiveEl.classList.add('badge-bass-pulse');
@@ -1443,12 +1444,12 @@ const bassScale = 1 + bassPower * 0.028;
                     volumeBoxEl.classList.remove('badge-bass-pulse');
                 }
 
-                if (bassPower > 0.82 && bassKick > 0.18) {
+                if (bassPower > 0.76 && bassKick > 0.14) {
                     // Glitch konumu her frame değil, yaklaşık 12.5 kez/sn güncellenir.
                     if (currentTime - lastGlitchUpdate > 130) {
                         lastGlitchUpdate = currentTime;
-                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 7).toFixed(1) + 'px');
-                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 4).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 10).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 6).toFixed(1) + 'px');
                     }
                     mainWrapper.classList.add('wrapper-glitch');
                 } else {
@@ -1462,10 +1463,10 @@ const bassScale = 1 + bassPower * 0.028;
                     for (let idx = 0; idx < ringBarsCount; idx++) {
                         const bar = ringBarMeshes[idx];
                         const rnd = Math.sin(bassAngle * 2.7 + idx * 0.82) * 0.5 + 0.5;
-                        const scaleY = 0.30 + rnd * 0.86 * (bassPower + 0.24);
+                        const scaleY = 0.24 + rnd * 1.55 * (bassPower + 0.22) + bassKick * (0.32 + rnd * 0.48);
                         bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
                         bar.scale.y = scaleY;
-                        bar.material.opacity = 0.48 + rnd * 0.36 + bassPower * 0.08;
+                        bar.material.opacity = Math.min(1, 0.42 + rnd * 0.32 + bassPower * 0.22 + bassKick * 0.14);
                     }
                 }
 
@@ -1521,16 +1522,16 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
         requestAnimationFrame(animateGlobe);
 
         // FIREBASE CANLI DİNLEYİCİ SİSTEMİ
-        const firebaseConfig = {
-          apiKey: "AIzaSyBXFrrMQYuGJnbAZrYRxskJObfk-zUZt_c",
-          authDomain: "easyfm-749bd.firebaseapp.com",
-          databaseURL: "https://easyfm-749bd-default-rtdb.firebaseio.com",
-          projectId: "easyfm-749bd",
-          storageBucket: "easyfm-749bd.firebasestorage.app",
-          messagingSenderId: "43294673357",
-          appId: "1:43294673357:web:42dc0b2eefdb3a8a2bdc84",
-          measurementId: "G-V1JCFXPLCW"
-        };
+       const firebaseConfig = {
+  apiKey: "AIzaSyA4WSlpMCyEZPi-jFo-IpJQb55I_JG9iAc",
+  authDomain: "sp1der-e75ff.firebaseapp.com",
+  databaseURL: "https://sp1der-e75ff-default-rtdb.firebaseio.com",
+  projectId: "sp1der-e75ff",
+  storageBucket: "sp1der-e75ff.firebasestorage.app",
+  messagingSenderId: "1024402090973",
+  appId: "1:1024402090973:web:05e86d82e09cd6e1bce434",
+  measurementId: "G-R0W695S9N6"
+};
 
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
