@@ -1188,28 +1188,75 @@
 
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#ffffff';
+            // Neon / chrome 3D orbit typography: dark stroke separates the text
+            // from the bright globe, while layered cyan-white highlights keep it readable.
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.lineJoin = 'round';
 
-            ctx.font = '900 70px "Montserrat", sans-serif';
-            ctx.fillText("SP1DER", canvas.width / 2, 85);
+            const drawOrbitText = (text, y, font, lineWidth) => {
+                ctx.font = font;
 
-            ctx.font = '800 28px "Space Grotesk", sans-serif';
-            ctx.fillText("7/24 YÜZDE YÜZ MÜZİK", canvas.width / 2, 165);
+                // Deep 3D extrusion
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
+                ctx.lineWidth = lineWidth + 10;
+                for (let d = 10; d >= 2; d -= 2) {
+                    ctx.strokeText(text, canvas.width / 2 + d * 0.35, y + d * 0.55);
+                }
+
+                // Black separation outline
+                ctx.strokeStyle = '#03070a';
+                ctx.lineWidth = lineWidth + 5;
+                ctx.strokeText(text, canvas.width / 2, y);
+
+                // Electric outer rim
+                ctx.shadowColor = 'rgba(130, 225, 255, 0.95)';
+                ctx.shadowBlur = 24;
+                ctx.strokeStyle = 'rgba(170, 235, 255, 0.95)';
+                ctx.lineWidth = lineWidth;
+                ctx.strokeText(text, canvas.width / 2, y);
+
+                // Chrome face
+                const grad = ctx.createLinearGradient(0, y - 50, 0, y + 50);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.28, '#bfefff');
+                grad.addColorStop(0.52, '#516b78');
+                grad.addColorStop(0.7, '#eaffff');
+                grad.addColorStop(1, '#7bb8ce');
+                ctx.fillStyle = grad;
+                ctx.shadowColor = 'rgba(255,255,255,0.8)';
+                ctx.shadowBlur = 12;
+                ctx.fillText(text, canvas.width / 2, y);
+
+                // Razor highlight gives a metallic embossed edge
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(255,255,255,0.72)';
+                ctx.lineWidth = 1.5;
+                ctx.strokeText(text, canvas.width / 2, y - 1);
+            };
+
+            drawOrbitText('SP1DER', 82, '900 78px "Montserrat", sans-serif', 5);
+            drawOrbitText('7/24 YÜZDE YÜZ MÜZİK', 170, '900 30px "Space Grotesk", sans-serif', 3);
 
             const ringTex = new THREE.CanvasTexture(canvas);
             ringTex.minFilter = THREE.LinearFilter;
             ringTex.magFilter = THREE.LinearFilter;
+            ringTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
             const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.3, baseRadius + 0.3, 0.65, 48, 1, true);
             const ringMat = new THREE.MeshBasicMaterial({
                 map: ringTex,
                 transparent: true,
                 side: THREE.DoubleSide,
-                depthWrite: false
+                depthWrite: false,
+                depthTest: false,
+                opacity: 1
             });
 
             ringMesh = new THREE.Mesh(ringGeo, ringMat);
             ringMesh.rotation.z = 0.08;
+            ringMesh.renderOrder = 20;
             scene.add(ringMesh);
         }
 
