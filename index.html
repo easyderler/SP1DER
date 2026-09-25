@@ -1183,80 +1183,67 @@
             canvas.height = 256;
             const ctx = canvas.getContext('2d');
 
-            ctx.fillStyle = 'transparent';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            // Neon / chrome 3D orbit typography: dark stroke separates the text
-            // from the bright globe, while layered cyan-white highlights keep it readable.
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.lineJoin = 'round';
 
-            const drawOrbitText = (text, y, font, lineWidth) => {
+            // Site konseptine uygun: sade, karanlık, keskin ve okunaklı.
+            // Abartılı chrome/neon yerine hafif kabartma + siyah kontur kullanılır.
+            const drawOrbitText = (text, y, font, outline) => {
                 ctx.font = font;
 
-                // Deep 3D extrusion
+                // Çok hafif 3D/kabartma derinliği.
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
-                ctx.lineWidth = lineWidth + 10;
-                for (let d = 10; d >= 2; d -= 2) {
-                    ctx.strokeText(text, canvas.width / 2 + d * 0.35, y + d * 0.55);
-                }
+                ctx.fillStyle = 'rgba(0,0,0,0.92)';
+                ctx.fillText(text, canvas.width / 2 + 3, y + 4);
+                ctx.fillStyle = 'rgba(0,0,0,0.72)';
+                ctx.fillText(text, canvas.width / 2 + 1.5, y + 2);
 
-                // Black separation outline
-                ctx.strokeStyle = '#03070a';
-                ctx.lineWidth = lineWidth + 5;
+                // Dünya üzerindeki açık alanlarda yazının kaybolmasını engelleyen kontur.
+                ctx.strokeStyle = 'rgba(0,0,0,0.96)';
+                ctx.lineWidth = outline;
                 ctx.strokeText(text, canvas.width / 2, y);
 
-                // Electric outer rim
-                ctx.shadowColor = 'rgba(130, 225, 255, 0.95)';
-                ctx.shadowBlur = 24;
-                ctx.strokeStyle = 'rgba(170, 235, 255, 0.95)';
-                ctx.lineWidth = lineWidth;
-                ctx.strokeText(text, canvas.width / 2, y);
-
-                // Chrome face
-                const grad = ctx.createLinearGradient(0, y - 50, 0, y + 50);
-                grad.addColorStop(0, '#ffffff');
-                grad.addColorStop(0.28, '#bfefff');
-                grad.addColorStop(0.52, '#516b78');
-                grad.addColorStop(0.7, '#eaffff');
-                grad.addColorStop(1, '#7bb8ce');
-                ctx.fillStyle = grad;
-                ctx.shadowColor = 'rgba(255,255,255,0.8)';
-                ctx.shadowBlur = 12;
+                // Ana yüz: saf beyaz yerine hafif gri/metalik ton.
+                const face = ctx.createLinearGradient(0, y - 42, 0, y + 42);
+                face.addColorStop(0, '#ffffff');
+                face.addColorStop(0.42, '#d7d7d7');
+                face.addColorStop(0.58, '#9f9f9f');
+                face.addColorStop(1, '#f1f1f1');
+                ctx.fillStyle = face;
+                ctx.shadowColor = 'rgba(255,255,255,0.30)';
+                ctx.shadowBlur = 7;
                 ctx.fillText(text, canvas.width / 2, y);
 
-                // Razor highlight gives a metallic embossed edge
+                // İnce üst highlight; sadece derinlik hissi verir.
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = 'rgba(255,255,255,0.72)';
-                ctx.lineWidth = 1.5;
-                ctx.strokeText(text, canvas.width / 2, y - 1);
+                ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+                ctx.lineWidth = 1;
+                ctx.strokeText(text, canvas.width / 2, y - 0.8);
             };
 
-            drawOrbitText('SP1DER', 82, '900 78px "Montserrat", sans-serif', 5);
-            drawOrbitText('7/24 YÜZDE YÜZ MÜZİK', 170, '900 30px "Space Grotesk", sans-serif', 3);
+            drawOrbitText('SP1DER', 84, '900 76px "Montserrat", sans-serif', 8);
+            drawOrbitText('7/24 YÜZDE YÜZ MÜZİK', 169, '800 29px "Space Grotesk", sans-serif', 5);
 
             const ringTex = new THREE.CanvasTexture(canvas);
             ringTex.minFilter = THREE.LinearFilter;
             ringTex.magFilter = THREE.LinearFilter;
             ringTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
-            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.3, baseRadius + 0.3, 0.65, 48, 1, true);
+            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.30, baseRadius + 0.30, 0.65, 64, 1, true);
             const ringMat = new THREE.MeshBasicMaterial({
                 map: ringTex,
                 transparent: true,
                 side: THREE.DoubleSide,
                 depthWrite: false,
-                depthTest: false,
-                opacity: 1
+                depthTest: true,
+                opacity: 0.96
             });
 
             ringMesh = new THREE.Mesh(ringGeo, ringMat);
             ringMesh.rotation.z = 0.08;
-            ringMesh.renderOrder = 20;
+            // depthTest açık: halkanın arka yarısı dünyanın arkasında gerçek şekilde kaybolur.
             scene.add(ringMesh);
         }
 
