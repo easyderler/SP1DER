@@ -601,20 +601,21 @@
         // ================================================================
         // GERÇEK PNG ÖRÜMCEK AĞLARI — THREE.JS 3D
         // ================================================================
-        // Buradaki dosyalar PNG + alpha (şeffaf arka plan) olarak kullanılır.
-        // Böylece ekranda dikdörtgen fotoğraf değil, yalnızca ağın kendisi görünür.
-        // Ağlar CSS ile çizilmez; gerçek PNG texture -> Three.js WebGL plane.
+        // Ağlar internetten PNG olarak yüklenir. Local asset gerekmez.
+        // Fotoğraf PNG'lerinin kendi arka planı olsa bile aşağıdaki shader,
+        // parlak/ince ağ dokusunu alpha'ya çevirerek yalnızca ağın görünmesini
+        // sağlar. Böylece ekranda dikdörtgen fotoğraf görünmez.
 
         const photoWebsContainer = document.getElementById('photo-webs-container');
 
-        // Şeffaf arka planlı PNG ağ kaynakları.
-        // Kaynaklardan biri açılmazsa otomatik olarak sıradaki denenir.
-        // FreePNGimg sayfaları bu dosyaları PNG + alpha olarak tanımlıyor.
+        // Doğrudan internetten alınan GERÇEK ÖRÜMCEK AĞI fotoğrafları.
+        // Wikimedia Commons bu dosyaları image/png olarak servis ediyor.
+        // Special:Redirect/file adresi gerçek dosyaya yönlendirir; GitHub asset
+        // yüklemene gerek yoktur.
         const realWebImages = [
-            "https://freepngimg.com/save/31287-spider-web-transparent-image/1833x1242",
-            "https://freepngimg.com/save/33481-spider-web-file/2400x1639",
-            "https://www.transparentpng.com/thumb/spider/Dqt6Mh-aggressive-brown-spider-spider-web.png",
-            "https://www.pngkey.com/png/detail/206-2064450_spider-web-transparent-png-realistic-spider-web-drawing.png"
+            'https://commons.wikimedia.org/wiki/Special:Redirect/file/Dew_on_a_Spider_Web.png',
+            'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sunlit_spider_webs_across_wet_grassland_at_Tr%C3%A0m_Chim_National_Park%2C_Vietnam%2C_19_July_2026.png',
+            'https://commons.wikimedia.org/wiki/Special:Redirect/file/Autumn_Units_For_Spider.png'
         ];
 
         let lastWebTextureIndices = [];
@@ -626,9 +627,10 @@
         const webRenderer = new THREE.WebGLRenderer({
             alpha: true,
             antialias: true,
-            powerPreference: "high-performance"
+            powerPreference: 'high-performance',
+            premultipliedAlpha: true
         });
-        webRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        webRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
         webRenderer.setClearColor(0x000000, 0);
         photoWebsContainer.appendChild(webRenderer.domElement);
 
@@ -639,10 +641,8 @@
         webScene.add(webGroup);
 
         function resizeWebScene() {
-            const width = photoWebsContainer.clientWidth;
-            const height = photoWebsContainer.clientHeight;
-            if (!width || !height) return;
-
+            const width = photoWebsContainer.clientWidth || window.innerWidth;
+            const height = photoWebsContainer.clientHeight || window.innerHeight;
             webCamera.aspect = width / height;
             webCamera.updateProjectionMatrix();
             webRenderer.setSize(width, height, false);
@@ -650,13 +650,18 @@
 
         function loadWebTexture(url) {
             return new Promise((resolve, reject) => {
-                webTextureLoader.load(
+                const loader = new THREE.TextureLoader();
+                loader.setCrossOrigin('anonymous');
+                loader.load(
                     url,
                     texture => {
-                        if ('encoding' in texture && THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
+                        // three r128 kullanıldığı için sRGBEncoding tercih edilir.
+                        if (THREE.sRGBEncoding !== undefined) texture.encoding = THREE.sRGBEncoding;
                         texture.minFilter = THREE.LinearFilter;
                         texture.magFilter = THREE.LinearFilter;
-                        texture.generateMipmaps = true;
+                        texture.wrapS = THREE.ClampToEdgeWrapping;
+                        texture.wrapT = THREE.ClampToEdgeWrapping;
+                        texture.generateMipmaps = false;
                         resolve(texture);
                     },
                     undefined,
@@ -666,20 +671,18 @@
         }
 
         async function loadAnyWorkingWebTexture(preferredIndex) {
-            const candidates = [];
-            if (preferredIndex >= 0 && preferredIndex < realWebImages.length) {
-                candidates.push(preferredIndex);
-            }
+            const order = [];
+            if (preferredIndex >= 0 && preferredIndex < realWebImages.length) order.push(preferredIndex);
             for (let i = 0; i < realWebImages.length; i++) {
-                if (!candidates.includes(i)) candidates.push(i);
+                if (!order.includes(i)) order.push(i);
             }
 
-            for (const index of candidates) {
+            for (const index of order) {
                 try {
                     const texture = await loadWebTexture(realWebImages[index]);
                     return { texture, index };
-                } catch (err) {
-                    console.warn('PNG örümcek ağı yüklenemedi:', realWebImages[index], err);
+                } catch (error) {
+                    console.warn('Örümcek PNG yüklenemedi, sonraki kaynak deneniyor:', realWebImages[index], error);
                 }
             }
             return null;
@@ -701,7 +704,6 @@
             const vFov = THREE.MathUtils.degToRad(webCamera.fov);
             const visibleHeight = 2 * Math.tan(vFov / 2) * distance;
             const visibleWidth = visibleHeight * webCamera.aspect;
-
             return {
                 x: ndcX * visibleWidth / 2,
                 y: ndcY * visibleHeight / 2,
@@ -709,27 +711,25 @@
             };
         }
 
-        // Ağlar ekranın kenarlarında, dünyanın çevresinde değil.
-        // Her ağ ayrı bir bölgeye atanır; böylece spawn sırasında üst üste binmez.
+        // Dünya çevresine değil, ekranın arka plan bölgelerine dağıtılır.
+        // Her bölge yalnızca bir ağ alır; böylece ağlar spawn sırasında
+        // birbirinin üstüne gelmez.
         function getWebSpawnZones() {
-            const mobile = window.innerWidth < 600;
-
-            if (mobile) {
+            if (window.innerWidth < 600) {
                 return [
-                    { x: [-2, 23], y: [2, 23] },
-                    { x: [77, 102], y: [2, 23] },
-                    { x: [-2, 23], y: [72, 101] },
-                    { x: [77, 102], y: [72, 101] }
+                    { x: [-4, 25], y: [0, 25] },
+                    { x: [75, 104], y: [0, 25] },
+                    { x: [-4, 25], y: [73, 103] },
+                    { x: [75, 104], y: [73, 103] }
                 ];
             }
-
             return [
-                { x: [-5, 19], y: [-2, 24] },
-                { x: [81, 106], y: [-2, 24] },
-                { x: [-6, 20], y: [75, 105] },
-                { x: [80, 106], y: [75, 105] },
-                { x: [-8, 9],  y: [38, 61] },
-                { x: [91, 108], y: [38, 61] }
+                { x: [-8, 19], y: [-4, 25] },
+                { x: [81, 108], y: [-4, 25] },
+                { x: [-9, 20], y: [76, 106] },
+                { x: [80, 109], y: [76, 106] },
+                { x: [-10, 10], y: [37, 62] },
+                { x: [90, 110], y: [37, 62] }
             ];
         }
 
@@ -742,11 +742,56 @@
                 const mesh = webGroup.children.pop();
                 if (mesh.material) {
                     if (mesh.material.map) mesh.material.map.dispose();
+                    if (mesh.material.uniforms) {
+                        Object.keys(mesh.material.uniforms).forEach(key => {
+                            const u = mesh.material.uniforms[key];
+                            if (u && u.value && u.value.isTexture) u.value.dispose();
+                        });
+                    }
                     mesh.material.dispose();
                 }
                 if (mesh.geometry) mesh.geometry.dispose();
             }
         }
+
+        // Fotoğrafın parlak ağ tellerini alpha'ya çeviren shader.
+        // Kaynak dosya PNG'dir; shader yalnızca ağ dışındaki fotoğraf alanını
+        // görünmez yapar. Gerçek web dokusu korunur.
+        const webVertexShader = `
+            varying vec2 vUv;
+            void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+
+        const webFragmentShader = `
+            uniform sampler2D map;
+            uniform float opacity;
+            uniform float threshold;
+            uniform float softness;
+            uniform float brightness;
+            varying vec2 vUv;
+
+            void main() {
+                vec4 tex = texture2D(map, vUv);
+                float lum = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
+
+                // Web telleri çoğunlukla fotoğrafın parlak ince detaylarıdır.
+                // Karanlık/zemin pikselleri alpha ile atılır.
+                float webAlpha = smoothstep(threshold, threshold + softness, lum);
+
+                // Aşırı parlak büyük alanların fotoğraf olarak görünmesini azalt.
+                float highlight = smoothstep(0.72, 0.98, lum);
+                webAlpha *= mix(1.0, 0.72, highlight);
+
+                vec3 webColor = mix(vec3(0.68), vec3(1.0), smoothstep(0.20, 0.85, lum));
+                webColor *= brightness;
+
+                if (webAlpha < 0.035) discard;
+                gl_FragColor = vec4(webColor, webAlpha * opacity);
+            }
+        `;
 
         async function generatePhotoWebs() {
             destroyWebObjects();
@@ -754,8 +799,8 @@
             const zones = shuffleArray(getWebSpawnZones());
             const desiredCount = Math.min(zones.length, window.innerWidth < 600 ? 4 : 6);
             const sourceOrder = shuffleArray([...Array(realWebImages.length).keys()]);
-            const webPromises = [];
 
+            const webPromises = [];
             for (let i = 0; i < desiredCount; i++) {
                 let preferredIndex = sourceOrder[i % sourceOrder.length];
 
@@ -784,27 +829,30 @@
                 const image = texture.image;
                 const aspect = image && image.height ? image.width / image.height : 1;
 
-                // Biraz büyük tutuyoruz; PNG'nin şeffaf alanları doğal şekilde
-                // ekranın dışına taşabilir, ağ telleri ise kenarlarda görünür.
+                // Aşırı uzun dikey fotoğrafları daha küçük tut.
+                const maxAspect = THREE.MathUtils.clamp(aspect, 0.35, 2.2);
                 const worldHeight = randomBetween(
-                    window.innerWidth < 600 ? 1.55 : 1.75,
-                    window.innerWidth < 600 ? 2.35 : 3.15
+                    window.innerWidth < 600 ? 1.20 : 1.45,
+                    window.innerWidth < 600 ? 2.00 : 2.65
                 );
-                const worldWidth = worldHeight * aspect;
-
+                const worldWidth = worldHeight * maxAspect;
                 const geometry = new THREE.PlaneGeometry(worldWidth, worldHeight, 1, 1);
 
-                // PNG'nin alpha kanalı gerçek şeffaflığı sağlar.
-                // AdditiveBlending sadece ince tellerin karanlık arka planda
-                // daha okunaklı olmasına yardım eder; fotoğraf zemini yoktur.
-                const material = new THREE.MeshBasicMaterial({
-                    map: texture,
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        map: { value: texture },
+                        opacity: { value: randomBetween(0.72, 0.96) },
+                        threshold: { value: randomBetween(0.30, 0.43) },
+                        softness: { value: randomBetween(0.12, 0.22) },
+                        brightness: { value: randomBetween(1.05, 1.28) }
+                    },
+                    vertexShader: webVertexShader,
+                    fragmentShader: webFragmentShader,
                     transparent: true,
-                    opacity: randomBetween(0.68, 0.94),
-                    side: THREE.DoubleSide,
                     depthWrite: false,
                     depthTest: false,
-                    blending: THREE.AdditiveBlending,
+                    side: THREE.DoubleSide,
+                    blending: THREE.NormalBlending,
                     toneMapped: false
                 });
 
@@ -812,32 +860,28 @@
 
                 const xPercent = randomBetween(zone.x[0], zone.x[1]);
                 const yPercent = randomBetween(zone.y[0], zone.y[1]);
-                const z = randomBetween(0.9, 3.2);
+                // Kamera z=7; ağlar ön planda fakat dünya katmanının arkasında.
+                const z = randomBetween(0.6, 3.5);
                 const pos = screenToWorld(xPercent, yPercent, z);
-
                 mesh.position.set(pos.x, pos.y, z);
-                mesh.rotation.z = THREE.MathUtils.degToRad(randomBetween(-38, 38));
-                mesh.rotation.x = THREE.MathUtils.degToRad(randomBetween(-10, 10));
-                mesh.rotation.y = THREE.MathUtils.degToRad(randomBetween(-14, 14));
 
-                const depthScale = THREE.MathUtils.clamp(
-                    1.08 - (z + 1.2) * 0.07,
-                    0.82,
-                    1.10
-                );
+                mesh.rotation.z = THREE.MathUtils.degToRad(randomBetween(-40, 40));
+                mesh.rotation.x = THREE.MathUtils.degToRad(randomBetween(-12, 12));
+                mesh.rotation.y = THREE.MathUtils.degToRad(randomBetween(-18, 18));
+
+                const depthScale = THREE.MathUtils.clamp(1.16 - z * 0.045, 0.92, 1.13);
                 mesh.scale.setScalar(depthScale);
 
-                // KRİTİK: Artık yukarı/aşağı sürüklenme yok.
-                // Her ağın sabit başlangıç noktası korunuyor ve yalnızca
-                // çok küçük dairesel bir salınım yapıyor.
+                // Sabit merkez + çok hafif dairesel sallanma.
+                // Artık position.y += yok; ağlar ekrandan kaçamaz.
                 mesh.userData.baseX = pos.x;
                 mesh.userData.baseY = pos.y;
                 mesh.userData.baseRotZ = mesh.rotation.z;
                 mesh.userData.phase = Math.random() * Math.PI * 2;
-                mesh.userData.swaySpeed = randomBetween(0.16, 0.30);
-                mesh.userData.swayX = randomBetween(0.004, 0.010);
-                mesh.userData.swayY = randomBetween(0.003, 0.008);
-                mesh.userData.rotAmount = THREE.MathUtils.degToRad(randomBetween(0.10, 0.28));
+                mesh.userData.swaySpeed = randomBetween(0.12, 0.22);
+                mesh.userData.swayX = randomBetween(0.0025, 0.007);
+                mesh.userData.swayY = randomBetween(0.0015, 0.005);
+                mesh.userData.rotAmount = THREE.MathUtils.degToRad(randomBetween(0.08, 0.20));
 
                 webGroup.add(mesh);
             });
@@ -845,9 +889,9 @@
             lastWebTextureIndices = currentIndices;
 
             if (!currentIndices.length) {
-                console.error('Örümcek ağları: hiçbir PNG texture yüklenemedi.');
+                console.error('ÖRÜMCEK AĞI HATASI: İnternetten hiçbir PNG yüklenemedi.');
             } else {
-                console.log(`Örümcek ağları hazır: ${currentIndices.length} gerçek PNG texture.`);
+                console.log('ÖRÜMCEK AĞLARI AKTİF:', currentIndices.length, 'PNG texture');
             }
         }
 
@@ -862,9 +906,6 @@
                 if (!data) continue;
 
                 const t = webAnimationTime * data.swaySpeed + data.phase;
-
-                // Sadece çok hafif dairesel/salınım hareketi.
-                // Kalıcı yukarı veya aşağı drift kesinlikle yok.
                 mesh.position.x = data.baseX + Math.cos(t) * data.swayX;
                 mesh.position.y = data.baseY + Math.sin(t) * data.swayY;
                 mesh.rotation.z = data.baseRotZ + Math.sin(t * 0.82) * data.rotAmount;
@@ -873,6 +914,7 @@
 
         resizeWebScene();
         generatePhotoWebs();
+        window.addEventListener('resize', resizeWebScene);
 
         // Arka Plan "5" Yazıları Süslemeleri
         const gothicWords = ["5"];
