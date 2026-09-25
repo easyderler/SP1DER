@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>EA$Y FM | 7/24 YÜZDE YÜZ MÜZİK</title>
+    <title>EASYSP5DER FM | 7/24 YÜZDE YÜZ MÜZİK</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,6 +82,26 @@
         @keyframes scanlineAnim {
             0% { transform: translateY(-100%); }
             100% { transform: translateY(100%); }
+        }
+
+        /* Örümcek Ağları SVG Katmanı */
+        .spider-web {
+            position: fixed;
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0.18;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+            filter: drop-shadow(0 0 8px var(--accent-color));
+        }
+
+        .web-top-left { top: 0; left: 0; width: 280px; height: 280px; }
+        .web-top-right { top: 0; right: 0; width: 280px; height: 280px; transform: scaleX(-1); }
+        .web-bottom-left { bottom: 0; left: 0; width: 250px; height: 250px; transform: scaleY(-1); }
+        .web-bottom-right { bottom: 0; right: 0; width: 250px; height: 250px; transform: scale(-1); }
+
+        @media (max-width: 600px) {
+            .web-top-left, .web-top-right { width: 180px; height: 180px; }
+            .web-bottom-left, .web-bottom-right { width: 150px; height: 150px; }
         }
 
         /* Trap / Hiphop Arkaplan Yazı Kapsayıcısı */
@@ -537,6 +557,24 @@
 
     <div class="scanline-overlay"></div>
 
+    <!-- Örümcek Ağları Katmanı (SVG Köşeler) -->
+    <svg class="spider-web web-top-left" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    </svg>
+    <svg class="spider-web web-top-right" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    </svg>
+    <svg class="spider-web web-bottom-left" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    </svg>
+    <svg class="spider-web web-bottom-right" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
+        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    </svg>
+
     <!-- Trap / Hiphop Estetik Arkaplan Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
 
@@ -602,18 +640,18 @@
     </div>
 
     <script>
-        // --- TRAP & HIPHOP ESTETİK ARKA PLAN YAZILARI OLUŞTURUCU ---
+        // --- TRAP & HIPHOP ESTETİK ARKA PLAN YAZILARI OLUŞTURUCU ("5" HARFİ/RAKAMI EKLENDİ) ---
         const gothicWords = [
-            "EA$Y FM", "OPIUM 808", "TRAPHOUSE", "YSL", "WORLDWIDE", 
-            "CACTUS JACK", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST",
-            "999", "RAGE", "FE!N", "CARTI"
+            "5", "EA$Y FM", "OPIUM 808", "555", "TRAPHOUSE", "YSL", "WORLDWIDE", 
+            "CACTUS JACK", "5", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST",
+            "999", "RAGE", "FE!N", "CARTI", "FIVE 5", "5"
         ];
 
         function generateRandomGothicBg() {
             const container = document.getElementById('gothic-bg-container');
             container.innerHTML = '';
             
-            const count = window.innerWidth < 600 ? 8 : 14;
+            const count = window.innerWidth < 600 ? 12 : 20;
 
             for (let i = 0; i < count; i++) {
                 const el = document.createElement('div');
@@ -624,9 +662,9 @@
 
                 const top = Math.random() * 92; 
                 const left = Math.random() * 85 - 5; 
-                const fontSize = (Math.random() * 5 + 3.5).toFixed(1) + 'vw'; 
+                const fontSize = word === "5" ? (Math.random() * 8 + 6).toFixed(1) + 'vw' : (Math.random() * 5 + 3.5).toFixed(1) + 'vw'; 
                 const rotation = Math.floor(Math.random() * 50 - 25); 
-                const opacity = (Math.random() * 0.035 + 0.02).toFixed(3); 
+                const opacity = (Math.random() * 0.045 + 0.02).toFixed(3); 
 
                 const fontChoices = [
                     "'Rubik Glitch', display",
@@ -1218,7 +1256,7 @@
             renderer.render(scene, camera);
         }
 
-        // Parçacık Tuvali (Particle Canvas)
+        // Parçacık Tuvali (Particle Canvas - "5" Rakamı Parçacıkları Dahil Edildi)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particlesArray = [];
@@ -1248,7 +1286,8 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2.5 + 0.8;
+                this.isFive = Math.random() > 0.65; // %35 ihtimalle "5" sembolü
+                this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
                 this.speedX = (Math.random() - 0.5) * 0.8;
                 this.speedY = (Math.random() - 0.5) * 0.8;
                 this.opacity = Math.random() * 0.6 + 0.2;
@@ -1266,13 +1305,18 @@
             draw() {
                 ctx.fillStyle = currentAccentColor;
                 ctx.globalAlpha = this.opacity;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
+                if (this.isFive) {
+                    ctx.font = `900 ${this.size}px 'Syne', sans-serif`;
+                    ctx.fillText("5", this.x, this.y);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
         }
 
-        const particleCount = 45;
+        const particleCount = 55;
         for (let i = 0; i < particleCount; i++) particlesArray.push(new CyberParticle());
 
         function animateParticles() {
@@ -1291,48 +1335,48 @@
         animateParticles();
 
         // --- FIREBASE CANLI DİNLEYİCİ SİSTEMİ ---
-const firebaseConfig = {
-  apiKey: "AIzaSyBXFrrMQYuGJnbAZrYRxskJObfk-zUZt_c",
-  authDomain: "easyfm-749bd.firebaseapp.com",
-  databaseURL: "https://easyfm-749bd-default-rtdb.firebaseio.com",
-  projectId: "easyfm-749bd",
-  storageBucket: "easyfm-749bd.firebasestorage.app",
-  messagingSenderId: "43294673357",
-  appId: "1:43294673357:web:42dc0b2eefdb3a8a2bdc84",
-  measurementId: "G-V1JCFXPLCW"
-};
+        const firebaseConfig = {
+          apiKey: "AIzaSyBXFrrMQYuGJnbAZrYRxskJObfk-zUZt_c",
+          authDomain: "easyfm-749bd.firebaseapp.com",
+          databaseURL: "https://easyfm-749bd-default-rtdb.firebaseio.com",
+          projectId: "easyfm-749bd",
+          storageBucket: "easyfm-749bd.firebasestorage.app",
+          messagingSenderId: "43294673357",
+          appId: "1:43294673357:web:42dc0b2eefdb3a8a2bdc84",
+          measurementId: "G-V1JCFXPLCW"
+        };
 
-// Firebase Başlatma
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.database();
+        // Firebase Başlatma
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
 
-const listenersRef = db.ref('online_listeners');
-const listenerCountEl = document.getElementById('listener-count');
+        const listenersRef = db.ref('online_listeners');
+        const listenerCountEl = document.getElementById('listener-count');
 
-// Bağlantı durumunu takip et (.info/connected)
-db.ref('.info/connected').on('value', (snap) => {
-    if (snap.val() === true) {
-        // Kullanıcı bağlandığında benzersiz bir oturum kimliği (node) oluştur
-        const myPresenceRef = listenersRef.push();
+        // Bağlantı durumunu takip et (.info/connected)
+        db.ref('.info/connected').on('value', (snap) => {
+            if (snap.val() === true) {
+                // Kullanıcı bağlandığında benzersiz bir oturum kimliği (node) oluştur
+                const myPresenceRef = listenersRef.push();
 
-        // Kullanıcı sekmeyi veya siteyi kapattığında veritabanından otomatik sil
-        myPresenceRef.onDisconnect().remove();
+                // Kullanıcı sekmeyi veya siteyi kapattığında veritabanından otomatik sil
+                myPresenceRef.onDisconnect().remove();
 
-        // Bağlı olduğunu doğrula
-        myPresenceRef.set(true);
-    }
-});
+                // Bağlı olduğunu doğrula
+                myPresenceRef.set(true);
+            }
+        });
 
-// Veritabanındaki anlık dinleyici sayısını oku ve HTML'e yaz
-listenersRef.on('value', (snap) => {
-    const count = snap.numChildren();
-    if (listenerCountEl) {
-        // Dinleyici sıfır görünmesin diye varsayılan olarak minimum 1 veya gerçek sayıyı basar
-        listenerCountEl.innerText = count > 0 ? count : 1;
-    }
-});
+        // Veritabanındaki anlık dinleyici sayısını oku ve HTML'e yaz
+        listenersRef.on('value', (snap) => {
+            const count = snap.numChildren();
+            if (listenerCountEl) {
+                // Dinleyici sıfır görünmesin diye varsayılan olarak minimum 1 veya gerçek sayıyı basar
+                listenerCountEl.innerText = count > 0 ? count : 1;
+            }
+        });
     </script>
 </body>
 </html>
