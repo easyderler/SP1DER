@@ -342,6 +342,59 @@
             .volume-slider { width: 38px; }
         }
 
+        /* Mobilde uzun şarkı adlarını kesmek yerine okunabilir biçimde küçült/satırla */
+        @media (max-width: 600px) {
+            .now-playing-card {
+                padding: 11px 12px;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .track-info {
+                flex: 1 1 58%;
+                min-width: 0;
+                max-width: 58%;
+            }
+
+            .next-track {
+                flex: 1 1 38%;
+                min-width: 0;
+                max-width: 38%;
+            }
+
+            .track-title,
+            #next-track-name {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                overflow-wrap: anywhere;
+                word-break: normal;
+                line-height: 1.08;
+            }
+
+            .track-title {
+                font-size: clamp(9px, 3.15vw, 13px);
+                letter-spacing: 0.15px;
+            }
+
+            #next-track-name {
+                display: block;
+                font-size: clamp(7px, 2.45vw, 9px);
+                text-align: right;
+            }
+
+            .track-label {
+                font-size: 7px;
+                letter-spacing: 1.25px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .now-playing-card { padding: 9px 10px; gap: 7px; }
+            .track-title { font-size: clamp(8px, 3vw, 11px); }
+            #next-track-name { font-size: clamp(6.5px, 2.35vw, 8px); }
+        }
+
         .video-container {
             position: relative;
             width: 100%;
