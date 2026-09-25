@@ -27,11 +27,6 @@
             --glow-color: rgba(255, 255, 255, 0.55);
             --bg-glow: rgba(180, 220, 255, 0.1);
             --border-glow: rgba(255, 255, 255, 0.35);
-            --bass-scale: 1;
-            --bass-glow-scale: 1;
-            --bass-opacity: 0.55;
-            --glitch-x: 0px;
-            --glitch-y: 0px;
         }
 
         html, body {
@@ -155,8 +150,8 @@
             will-change: transform, opacity;
             filter: blur(58px);
             contain: strict;
-            transform: translate(-50%, -50%) scale(var(--bass-glow-scale));
-            opacity: var(--bass-opacity);
+            transform: translate(-50%, -50%);
+            opacity: 0.4;
         }
 
         .main-wrapper {
@@ -175,22 +170,6 @@
             margin: 0 auto;
             box-sizing: border-box;
             will-change: transform, filter;
-        }
-
-        .wrapper-shake {
-            animation: trapBassShake 0.085s cubic-bezier(.2,.8,.2,1) infinite alternate;
-        }
-
-        .wrapper-glitch {
-            filter: drop-shadow(-6px 0 0px rgba(255, 0, 50, 0.9)) drop-shadow(6px 0 0px rgba(0, 240, 255, 0.9)) !important;
-            transform: translate(var(--glitch-x), var(--glitch-y)) scale(1.035) !important;
-        }
-
-        @keyframes trapBassShake {
-            0% { transform: scale(1) translate(0, 0); }
-            35% { transform: scale(1.008) translate(-1.8px, 1.1px); }
-            70% { transform: scale(0.997) translate(1.6px, -1.2px); }
-            100% { transform: scale(1.004) translate(-0.9px, 1.5px); }
         }
 
         .logo-container {
@@ -293,12 +272,6 @@
 
         .volume-control-box.disabled {
             pointer-events: none;
-        }
-
-        .badge-bass-pulse {
-            transform: scale(1.04);
-            border-color: var(--accent-color) !important;
-            box-shadow: 0 0 22px var(--glow-color) !important;
         }
 
         .volume-btn {
@@ -408,7 +381,6 @@
             box-shadow: 0 16px 50px rgba(0, 0, 0, 0.95);
             border: 1px solid var(--border-glow);
             transition: border-color 0.3s, box-shadow 0.3s;
-            transform: scale(var(--bass-scale));
             background: #000;
             margin: 2px 0;
             will-change: transform;
@@ -936,12 +908,10 @@
                 isPlayingState = false;
                 vBox.classList.remove('playing-border');
                 waveBars.style.opacity = '0';
-                mainWrapper.classList.remove('wrapper-shake');
             } else {
                 isPlayingState = true;
                 vBox.classList.add('playing-border');
                 waveBars.style.opacity = '1';
-                mainWrapper.classList.add('wrapper-shake');
             }
         }
 
@@ -1345,34 +1315,22 @@
 
         document.fonts.ready.then(() => { createOrbitRingText(); });
 
-        let bassAngle = 0;
-        const badgeLiveEl = document.getElementById('badge-live');
-        const badgeListenerEl = document.getElementById('badge-listener');
-        const volumeBoxEl = document.getElementById('volume-box');
-
+        let ringMotionTime = 0;
         let lastTime = performance.now();
-        const rootStyle = document.documentElement.style;
-        const idleGlobeScale = new THREE.Vector3(1, 1, 1);
-        let lastGlitchUpdate = 0;
-        // FPS dengeleyici: efekt kalitesini korurken zayıf cihazlarda render yükünü otomatik düşürür.
+        // FPS dengeleyici: zayıf cihazlarda render çözünürlüğünü otomatik düşürür.
         let perfSampleStart = performance.now();
         let perfFrames = 0;
         let lastBarUpdate = 0;
-        let smoothedBass = 0;
-        let bassKick = 0;
-        const bassEase = 10.5;
 
-        // TEK BASS KAYNAĞI:
-        // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
-        // kullanır. Böylece efektler birebir aynı anda ve aynı şiddette patlar.
-function animateGlobe(currentTime) {
+        // Patlama/bass tepki sistemi kaldırıldı.
+        // Şarkı çalarken yalnızca dünyanın çevresindeki çizgiler canlı biçimde hareket eder.
+        function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
             if (document.hidden) { lastTime = currentTime; return; }
 
             perfFrames++;
             if (currentTime - perfSampleStart >= 2000) {
                 const fps = perfFrames * 1000 / (currentTime - perfSampleStart);
-                // Uzun süre 48 FPS altına düşerse WebGL çözünürlüğünü biraz azalt.
                 if (fps < 48 && adaptivePixelRatio > 0.82) {
                     adaptivePixelRatio = Math.max(0.82, adaptivePixelRatio - 0.08);
                     renderer.setPixelRatio(adaptivePixelRatio);
@@ -1386,25 +1344,19 @@ function animateGlobe(currentTime) {
                 perfSampleStart = currentTime;
             }
 
-            const deltaTime = (currentTime - lastTime) / 1000; 
+            const deltaTime = (currentTime - lastTime) / 1000;
             lastTime = currentTime;
-
             if (isNaN(deltaTime) || deltaTime > 0.1) return;
 
             const globeSpeed = isPlayingState ? 0.6 : 0.15;
             const ringSpeed = isPlayingState ? 0.75 : 0.22;
-
             globeMesh.rotation.y += globeSpeed * deltaTime;
+
             if (orbitTextGroup) {
                 orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
-
-                // SABİT TEK IŞIK: burada konum/intensity animasyonu YOK.
-                // Yazı dünya etrafında döndüğü için sabit ışığa yaklaşan yüzleri parlar,
-                // uzaklaşan yüzleri koyulaşır. Böylece yansıma fiziksel olarak konuma bağlıdır.
                 if (orbitChromeMaterials.length >= 2) {
                     const face = orbitChromeMaterials[0];
                     const side = orbitChromeMaterials[1];
-                    // Kromun karanlıkta tamamen siyaha düşmesini engelleyen düşük taban ışığı.
                     face.color.setRGB(0.82, 0.85, 0.88);
                     face.emissive.setRGB(0.085, 0.092, 0.10);
                     face.emissiveIntensity = 0.16;
@@ -1413,86 +1365,28 @@ function animateGlobe(currentTime) {
                     side.emissiveIntensity = 0.11;
                 }
             }
+
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
             if (isPlayingState) {
-                bassAngle += 5.2 * deltaTime;
-                
-                const rawBass = Math.max(0, Math.pow(Math.sin(bassAngle), 8));
-                // Sert aç/kapa yerine hızlı attack + yumuşak decay: kick daha tok, görüntü daha akıcı.
-                const follow = 1 - Math.exp(-bassEase * deltaTime);
-                smoothedBass += (rawBass - smoothedBass) * follow;
-                if (rawBass > 0.76 && bassKick < 0.22) bassKick = 0.82;
-                bassKick = Math.max(0, bassKick - deltaTime * 3.2);
-                const bassPower = Math.min(1, smoothedBass * 0.82 + bassKick * 0.48);
-                // Daha sert kick: dünya vuruş anında belirgin biçimde nefes alır.
-                const bassScale = 1 + bassPower * 0.048 + bassKick * 0.012; 
-                globeMesh.scale.set(bassScale, bassScale, bassScale);
-
-                dirLight.intensity = 0.92 + bassPower * 0.48 + bassKick * 0.16;
-
-                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.022 + bassKick * 0.008).toFixed(3));
-                rootStyle.setProperty('--bass-glow-scale', (1 + bassPower * 0.28 + bassKick * 0.10).toFixed(3));
-                rootStyle.setProperty('--bass-opacity', (0.40 + bassPower * 0.38 + bassKick * 0.08).toFixed(2));
-
-                if (bassPower > 0.46) {
-                    badgeLiveEl.classList.add('badge-bass-pulse');
-                    badgeListenerEl.classList.add('badge-bass-pulse');
-                    volumeBoxEl.classList.add('badge-bass-pulse');
-                } else {
-                    badgeLiveEl.classList.remove('badge-bass-pulse');
-                    badgeListenerEl.classList.remove('badge-bass-pulse');
-                    volumeBoxEl.classList.remove('badge-bass-pulse');
-                }
-
-                if (bassPower > 0.68 && bassKick > 0.10) {
-                    // Glitch konumu her frame değil, yaklaşık 12.5 kez/sn güncellenir.
-                    if (currentTime - lastGlitchUpdate > 130) {
-                        lastGlitchUpdate = currentTime;
-                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
-                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 10).toFixed(1) + 'px');
-                    }
-                    mainWrapper.classList.add('wrapper-glitch');
-                } else {
-                    mainWrapper.classList.remove('wrapper-glitch');
-                }
-
-                // Spektrum halkası 30 FPS güncellenir; dünya/yazı 60 FPS akmaya devam eder.
+                ringMotionTime += deltaTime * 3.2;
+                // Gerçek bass analizi/patlama yok: sadece sürekli, dengeli görsel hareket.
                 if (currentTime - lastBarUpdate >= 33) {
                     lastBarUpdate = currentTime;
-                    const currentRadius = (baseRadius * bassScale) + 0.01;
                     for (let idx = 0; idx < ringBarsCount; idx++) {
                         const bar = ringBarMeshes[idx];
-                        const rnd = Math.sin(bassAngle * 2.7 + idx * 0.82) * 0.5 + 0.5;
-                        const scaleY = Math.min(1.85, 0.24 + rnd * 1.42 * (bassPower + 0.30) + bassKick * (0.24 + rnd * 0.34));
-                        bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
-                        bar.scale.y = scaleY;
-                        bar.material.opacity = Math.min(0.96, 0.40 + rnd * 0.30 + bassPower * 0.28 + bassKick * 0.12);
+                        const wave1 = Math.sin(ringMotionTime + idx * 0.52) * 0.5 + 0.5;
+                        const wave2 = Math.sin(ringMotionTime * 0.63 - idx * 0.27) * 0.5 + 0.5;
+                        const motion = wave1 * 0.65 + wave2 * 0.35;
+                        bar.position.set(ringBarCos[idx] * (baseRadius + 0.01), ringBarSin[idx] * (baseRadius + 0.01), 0);
+                        bar.scale.set(1, 0.42 + motion * 0.72, 1);
+                        bar.material.opacity = 0.48 + motion * 0.34;
                     }
                 }
-
             } else {
-                // Yayın başlamadıysa, durmuşsa veya ses kapalıysa BASS = 0.
-                smoothedBass *= Math.max(0, 1 - deltaTime * 8);
-                bassKick = 0;
-                // Böylece hiçbir arka plan öğesi patlamaz.
-globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
-                dirLight.intensity = 0.48;
-
-                rootStyle.setProperty('--bass-scale', '1');
-                rootStyle.setProperty('--bass-glow-scale', '1');
-                rootStyle.setProperty('--bass-opacity', '0.4');
-
-                mainWrapper.classList.remove('wrapper-glitch');
-                badgeLiveEl.classList.remove('badge-bass-pulse');
-                badgeListenerEl.classList.remove('badge-bass-pulse');
-                volumeBoxEl.classList.remove('badge-bass-pulse');
-
                 for (let idx = 0; idx < ringBarsCount; idx++) {
                     const bar = ringBarMeshes[idx];
-                    const currentRadius = baseRadius + 0.01;
-                    bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
-
+                    bar.position.set(ringBarCos[idx] * (baseRadius + 0.01), ringBarSin[idx] * (baseRadius + 0.01), 0);
                     bar.scale.set(1, 0.25, 1);
                     bar.material.opacity = 0.35;
                 }
