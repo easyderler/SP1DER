@@ -653,7 +653,7 @@
                 webTextureLoader.load(
                     url,
                     texture => {
-                        if ('colorSpace' in texture) texture.colorSpace = THREE.SRGBColorSpace;
+                        if ('encoding' in texture && THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
                         texture.minFilter = THREE.LinearFilter;
                         texture.magFilter = THREE.LinearFilter;
                         texture.generateMipmaps = true;
