@@ -1363,9 +1363,11 @@
 
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
-            // Çizgiler artık şekil değiştirmiyor. Daire her zaman temiz ve simetrik kalır.
-            // Şarkı başlayınca yalnızca halka dönmeye başlar ve çizgiler hafifçe belirginleşir.
-            const targetBarScale = isPlayingState ? 0.62 : 0.25;
+            // Canlı yayın sırasında çizgiler temiz halka formunu korurken hafifçe nefes alır.
+            // Komşu çizgiler birbirine yakın hareket eder; rastgele/equalizer gibi şekilsiz görünmez.
+            const ringTime = currentTime * 0.001;
+            const idleBarScale = 0.25;
+            const playingBaseScale = 0.58;
             const targetBarOpacity = isPlayingState ? 0.72 : 0.35;
             for (let idx = 0; idx < ringBarsCount; idx++) {
                 const bar = ringBarMeshes[idx];
@@ -1374,11 +1376,20 @@
                     ringBarSin[idx] * (baseRadius + 0.01),
                     0
                 );
-                // Ani sıçrama yerine temiz bir geçiş. Bütün çizgiler eşit uzunlukta kalır.
-                bar.scale.y += (targetBarScale - bar.scale.y) * Math.min(1, deltaTime * 6.5);
+
+                // Yumuşak iki dalga üst üste biner: maksimum fark küçük tutulduğu için
+                // halka hâlâ düzenli görünür, sadece canlı yayın sırasında hafif yükselip alçalır.
+                const waveA = Math.sin(ringTime * 2.15 + ringBarAngles[idx] * 3.0);
+                const waveB = Math.sin(ringTime * 1.35 - ringBarAngles[idx] * 2.0) * 0.35;
+                const gentleWave = (waveA + waveB) / 1.35;
+                const targetBarScale = isPlayingState
+                    ? playingBaseScale + gentleWave * 0.105
+                    : idleBarScale;
+
+                bar.scale.y += (targetBarScale - bar.scale.y) * Math.min(1, deltaTime * 5.2);
                 bar.scale.x = 1;
                 bar.scale.z = 1;
-                bar.material.opacity += (targetBarOpacity - bar.material.opacity) * Math.min(1, deltaTime * 6.5);
+                bar.material.opacity += (targetBarOpacity - bar.material.opacity) * Math.min(1, deltaTime * 5.2);
             }
 
             animatePhotoWebs(deltaTime);
