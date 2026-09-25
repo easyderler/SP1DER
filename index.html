@@ -1159,7 +1159,6 @@
         const preferredPixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth <= 600 ? 1.0 : 1.15);
         let adaptivePixelRatio = preferredPixelRatio;
         renderer.setPixelRatio(adaptivePixelRatio);
-        renderer.outputEncoding = THREE.sRGBEncoding;
         globeContainer.appendChild(renderer.domElement);
 
         function resizeThreeJS() {
@@ -1237,28 +1236,28 @@
                     // Krom yüzey: açık gümüş taban + koyu yan yüzey. Işık hareket ettikçe
                     // clearcoat/specular yansımaları yüzeyde canlı bir chrome geçişi oluşturur.
                     const chromeFace = new THREE.MeshPhysicalMaterial({
-                        color: 0xd1d9e0,
+                        color: 0xf4f7f8,
                         metalness: 0.72,
                         roughness: 0.20,
                         clearcoat: 1.0,
                         clearcoatRoughness: 0.055,
                         reflectivity: 1.0,
-                        emissive: 0x161719,
-                        emissiveIntensity: 0.16,
+                        emissive: 0x252b30,
+                        emissiveIntensity: 0.10,
                         side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
                     });
 
                     const chromeSide = new THREE.MeshPhysicalMaterial({
-                        color: 0x78828c,
+                        color: 0xaab2b8,
                         metalness: 0.76,
                         roughness: 0.24,
                         clearcoat: 0.92,
                         clearcoatRoughness: 0.09,
                         reflectivity: 1.0,
-                        emissive: 0x0b0d0e,
-                        emissiveIntensity: 0.11,
+                        emissive: 0x171b1e,
+                        emissiveIntensity: 0.07,
                         side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
@@ -1402,6 +1401,17 @@
 
             if (orbitTextGroup) {
                 orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
+                // Orijinal kontrastlı krom görünümü birebir koru.
+                if (orbitChromeMaterials.length >= 2) {
+                    const face = orbitChromeMaterials[0];
+                    const side = orbitChromeMaterials[1];
+                    face.color.setRGB(0.82, 0.85, 0.88);
+                    face.emissive.setRGB(0.085, 0.092, 0.10);
+                    face.emissiveIntensity = 0.16;
+                    side.color.setRGB(0.47, 0.51, 0.55);
+                    side.emissive.setRGB(0.045, 0.050, 0.056);
+                    side.emissiveIntensity = 0.11;
+                }
             }
 
             animatePhotoWebs(deltaTime);
