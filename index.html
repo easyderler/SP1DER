@@ -673,20 +673,20 @@
         function getWebSpawnZones() {
             const mobile = window.innerWidth < 600;
             return mobile ? [
-                {x:[1,18],  y:[2,23]},
-                {x:[82,99], y:[2,23]},
-                {x:[1,18],  y:[76,97]},
-                {x:[82,99], y:[76,97]},
-                {x:[0,12],  y:[38,58]}
+                {x:[-4,16], y:[-2,24]},
+                {x:[84,104], y:[-2,24]},
+                {x:[-4,16], y:[74,104]},
+                {x:[84,104], y:[74,104]},
+                {x:[-8,12], y:[34,64]}
             ] : [
-                {x:[0,17],  y:[1,23]},
-                {x:[83,100],y:[1,23]},
-                {x:[0,18],  y:[76,99]},
-                {x:[82,100],y:[76,99]},
-                {x:[0,10],  y:[36,62]},
-                {x:[90,100],y:[36,62]},
-                {x:[18,30], y:[1,16]},
-                {x:[70,82], y:[1,16]}
+                {x:[-6,20], y:[-4,27]},
+                {x:[80,106], y:[-4,27]},
+                {x:[-6,20], y:[72,105]},
+                {x:[80,106], y:[72,105]},
+                {x:[-10,14], y:[33,67]},
+                {x:[86,110], y:[33,67]},
+                {x:[14,31], y:[-4,19]},
+                {x:[69,86], y:[-4,19]}
             ];
         }
 
@@ -715,7 +715,7 @@
                 left: randomBetween(zone.x[0], zone.x[1]),
                 top: randomBetween(zone.y[0], zone.y[1]),
                 depth: randomBetween(-80, 90),
-                width: mobile ? randomBetween(17, 27) : randomBetween(13, 23),
+                width: mobile ? randomBetween(30, 44) : randomBetween(24, 38),
                 rotX: randomBetween(-4, 4),
                 rotY: randomBetween(-7, 7),
                 rotZ: randomBetween(-28, 28),
@@ -734,6 +734,7 @@
             img.style.left = item.left + 'vw';
             img.style.top = item.top + 'vh';
             img.style.width = item.width + 'vw';
+            img.style.maxWidth = 'none';
             img.style.height = 'auto';
             img.style.opacity = randomBetween(0.72, 0.96).toFixed(3);
             img.style.zIndex = String(3 + index);
@@ -1375,7 +1376,6 @@
                 rootStyle.setProperty('--bass-scale', '1');
                 rootStyle.setProperty('--bass-glow-scale', '1');
                 rootStyle.setProperty('--bass-opacity', '0.4');
-                webBassPulse = 0;
 
                 mainWrapper.classList.remove('wrapper-glitch');
                 badgeLiveEl.classList.remove('badge-bass-pulse');
@@ -1421,7 +1421,11 @@
                 });
             }
         }
-        window.addEventListener('resize', handleResize);
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(handleResize, 120);
+        });
 
         class CyberParticle {
             constructor() { this.reset(); }
