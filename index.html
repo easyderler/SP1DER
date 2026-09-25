@@ -110,54 +110,57 @@
         }
 
         
-        /* Örümcek ağı PNG'lerinin dört kenarında yumuşak kaybolma.
-           Böylece kare PNG sınırı görünmez; ağ her tarafta transparanlaşarak biter. */
-        .photo-web-3d {
-            -webkit-mask-image: radial-gradient(
-                ellipse 82% 82% at 50% 50%,
-                #000 48%,
-                rgba(0,0,0,0.96) 57%,
-                rgba(0,0,0,0.72) 67%,
-                rgba(0,0,0,0.35) 78%,
-                transparent 94%
-            );
-            mask-image: radial-gradient(
-                ellipse 82% 82% at 50% 50%,
-                #000 48%,
-                rgba(0,0,0,0.96) 57%,
-                rgba(0,0,0,0.72) 67%,
-                rgba(0,0,0,0.35) 78%,
-                transparent 94%
-            );
-            -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
-            -webkit-mask-size: 100% 100%;
-            mask-size: 100% 100%;
+        /* PNG'lerin kenarlarını/köşelerini çok yumuşak biçimde yok et.
+           Merkez tamamen görünür kalır; dört kenara ve özellikle köşelere
+           yaklaştıkça alpha kademeli olarak sıfıra iner. */
+        #photo-webs-container {
+            perspective: 1500px;
+            perspective-origin: 50% 50%;
+            transform-style: preserve-3d;
         }
 
-.photo-web-3d {
-            position:absolute;
-            display:block;
-            pointer-events:none;
-            user-select:none;
-            -webkit-user-drag:none;
-            object-fit:contain;
-            object-position:center;
-            transform-origin:center center;
-            transform-style:preserve-3d;
-            backface-visibility:visible;
-            will-change:transform;
-            filter:none;
-            perspective:1200px;
-            /* PNG'nin kare kenarını yumuşat: kenarlarda alpha'ya doğru fade. */
-            -webkit-mask-image: radial-gradient(ellipse 68% 68% at 50% 50%, #000 38%, rgba(0,0,0,.96) 52%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.24) 84%, transparent 100%);
-            mask-image: radial-gradient(ellipse 68% 68% at 50% 50%, #000 38%, rgba(0,0,0,.96) 52%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.24) 84%, transparent 100%);
-            -webkit-mask-repeat:no-repeat;
-            mask-repeat:no-repeat;
-            -webkit-mask-size:100% 100%;
-            mask-size:100% 100%;
-            image-rendering:auto;
-            opacity:1;
+        .photo-web-3d {
+            position: absolute;
+            display: block;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            object-fit: contain;
+            object-position: center;
+            transform-origin: center center;
+            transform-style: preserve-3d;
+            backface-visibility: visible;
+            will-change: transform;
+            perspective: 1500px;
+            image-rendering: auto;
+            opacity: 1;
+
+            /* Çok geniş ve kademeli bir eliptik alpha maskesi.
+               Böylece PNG'nin dört kenarı da sert çizgi halinde bitmez. */
+            -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%,
+                #000 28%,
+                rgba(0,0,0,.995) 40%,
+                rgba(0,0,0,.94) 52%,
+                rgba(0,0,0,.72) 64%,
+                rgba(0,0,0,.40) 76%,
+                rgba(0,0,0,.14) 88%,
+                transparent 100%);
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%,
+                #000 28%,
+                rgba(0,0,0,.995) 40%,
+                rgba(0,0,0,.94) 52%,
+                rgba(0,0,0,.72) 64%,
+                rgba(0,0,0,.40) 76%,
+                rgba(0,0,0,.14) 88%,
+                transparent 100%);
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+            -webkit-mask-mode: alpha;
+            mask-mode: alpha;
         }
 
         .photo-web-3d.bass-hit {
@@ -847,11 +850,11 @@
                 scale: randomBetween(0.92, 1.08),
 
                 phase: Math.random() * Math.PI * 2,
-                speed: randomBetween(0.75, 1.15),
-                moveX: randomBetween(1.5, 3.2),
-                moveY: randomBetween(1.2, 2.8),
-                moveZ: randomBetween(1.0, 3.0),
-                rotate: randomBetween(0.18, 0.45)
+                speed: randomBetween(0.9, 1.35),
+                moveX: randomBetween(4.0, 6.5),
+                moveY: randomBetween(3.0, 5.2),
+                moveZ: randomBetween(2.0, 4.0),
+                rotate: randomBetween(0.25, 0.55)
             };
 
             // left/top ağın merkezidir.
@@ -907,17 +910,19 @@
 
                 // Çok hafif sağ-sol / yukarı-aşağı salınım.
                 // Sinüsler farklı frekansta olduğu için hareket dairesel/organik görünür.
-                const dx = Math.cos(t) * item.moveX;
-                const dy = Math.sin(t * 1.08) * item.moveY;
-                const dz = Math.sin(t * 0.72) * item.moveZ;
-                const rz = Math.sin(t * 0.62) * item.rotate;
-                const bassScale = 1;
-                const rx = item.rotX + Math.sin(t * 0.55) * 0.45;
-                const ry = item.rotY + Math.cos(t * 0.48) * 0.60;
+                /* Gerçek CSS 3D hareket: X/Y kayma + Z derinlik + üç eksende dönüş.
+                   Farklı frekanslar ağların birbirinden bağımsız, doğal hareket etmesini sağlar. */
+                const dx = (Math.cos(t) * 0.72 + Math.sin(t * 1.71) * 0.28) * item.moveX;
+                const dy = (Math.sin(t * 1.08) * 0.72 + Math.cos(t * 1.63) * 0.28) * item.moveY;
+                const dz = (Math.sin(t * 0.72) * 0.78 + Math.cos(t * 1.37) * 0.22) * item.moveZ;
+
+                const rx = item.rotX + Math.sin(t * 0.55) * 5.5;
+                const ry = item.rotY + Math.cos(t * 0.48) * 7.0;
+                const rz = (Math.sin(t * 0.62) * 0.78 + Math.cos(t * 1.41) * 0.22) * item.rotate * 8;
 
                 item.el.style.transform =
                     `translate3d(calc(-50% + ${dx.toFixed(2)}px), calc(-50% + ${dy.toFixed(2)}px), ${item.depth + dz}px) ` +
-                    `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${(item.scale * bassScale).toFixed(4)})`;
+                    `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${item.scale.toFixed(4)})`;
             });
         }
 
