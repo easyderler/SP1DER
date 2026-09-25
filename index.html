@@ -386,10 +386,7 @@
             will-change: transform;
         }
 
-        .video-container.playing-border {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 40px var(--glow-color), inset 0 0 25px var(--glow-color);
-        }
+        /* Video kartında oynatma sırasında ekstra parlama yok. */
 
         #youtube-player {
             position: absolute;
@@ -906,11 +903,9 @@
 
             if (!userHasClicked || vol === 0 || isMuted || !actualPlayerStatePlaying) {
                 isPlayingState = false;
-                vBox.classList.remove('playing-border');
                 waveBars.style.opacity = '0';
             } else {
                 isPlayingState = true;
-                vBox.classList.add('playing-border');
                 waveBars.style.opacity = '1';
             }
         }
@@ -1368,28 +1363,22 @@
 
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
-            if (isPlayingState) {
-                ringMotionTime += deltaTime * 3.2;
-                // Gerçek bass analizi/patlama yok: sadece sürekli, dengeli görsel hareket.
-                if (currentTime - lastBarUpdate >= 33) {
-                    lastBarUpdate = currentTime;
-                    for (let idx = 0; idx < ringBarsCount; idx++) {
-                        const bar = ringBarMeshes[idx];
-                        const wave1 = Math.sin(ringMotionTime + idx * 0.52) * 0.5 + 0.5;
-                        const wave2 = Math.sin(ringMotionTime * 0.63 - idx * 0.27) * 0.5 + 0.5;
-                        const motion = wave1 * 0.65 + wave2 * 0.35;
-                        bar.position.set(ringBarCos[idx] * (baseRadius + 0.01), ringBarSin[idx] * (baseRadius + 0.01), 0);
-                        bar.scale.set(1, 0.42 + motion * 0.72, 1);
-                        bar.material.opacity = 0.48 + motion * 0.34;
-                    }
-                }
-            } else {
-                for (let idx = 0; idx < ringBarsCount; idx++) {
-                    const bar = ringBarMeshes[idx];
-                    bar.position.set(ringBarCos[idx] * (baseRadius + 0.01), ringBarSin[idx] * (baseRadius + 0.01), 0);
-                    bar.scale.set(1, 0.25, 1);
-                    bar.material.opacity = 0.35;
-                }
+            // Çizgiler artık şekil değiştirmiyor. Daire her zaman temiz ve simetrik kalır.
+            // Şarkı başlayınca yalnızca halka dönmeye başlar ve çizgiler hafifçe belirginleşir.
+            const targetBarScale = isPlayingState ? 0.62 : 0.25;
+            const targetBarOpacity = isPlayingState ? 0.72 : 0.35;
+            for (let idx = 0; idx < ringBarsCount; idx++) {
+                const bar = ringBarMeshes[idx];
+                bar.position.set(
+                    ringBarCos[idx] * (baseRadius + 0.01),
+                    ringBarSin[idx] * (baseRadius + 0.01),
+                    0
+                );
+                // Ani sıçrama yerine temiz bir geçiş. Bütün çizgiler eşit uzunlukta kalır.
+                bar.scale.y += (targetBarScale - bar.scale.y) * Math.min(1, deltaTime * 6.5);
+                bar.scale.x = 1;
+                bar.scale.z = 1;
+                bar.material.opacity += (targetBarOpacity - bar.material.opacity) * Math.min(1, deltaTime * 6.5);
             }
 
             animatePhotoWebs(deltaTime);
