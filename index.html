@@ -84,27 +84,6 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Örümcek Ağları Kapsayıcısı */
-        #photo-webs-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 3;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .real-web-img {
-            position: absolute;
-            pointer-events: none;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4)) contrast(1.2);
-            will-change: transform, opacity;
-            transition: opacity 1.5s ease-in-out;
-        }
-
         /* Arkaplan "5" Yazı Kapsayıcısı */
         #gothic-bg-container {
             position: fixed;
@@ -530,9 +509,6 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Örümcek Ağları Kapsayıcısı -->
-    <div id="photo-webs-container"></div>
-
     <!-- Arkaplan Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
 
@@ -591,70 +567,6 @@
     </div>
 
     <script>
-        // YÜKSEK ÇÖZÜNÜRLÜKLÜ, GERÇEK FOTOĞRAF ÖRÜMCEK AĞLARI (KIRILMAZ LİNKLER)
-        const realWebImages = [
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Spider_web.png/600px-Spider_web.png",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Spiders_web.png/600px-Spiders_web.png",
-            "https://raw.githubusercontent.com/sammydow/assets/main/spiderweb1.png",
-            "https://raw.githubusercontent.com/sammydow/assets/main/spiderweb2.png",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Spider_web_isolated.png/600px-Spider_web_isolated.png"
-        ];
-
-        function generatePhotoWebs() {
-            const container = document.getElementById('photo-webs-container');
-            container.innerHTML = '';
-
-            // Ekran bölgeleri (Üst üste binmeyi önlemek için ayrı koordinat alanları)
-            const zones = [
-                { top: [-5, 10], left: [-5, 12] },    // Sol Üst Köşe
-                { top: [-5, 10], left: [72, 90] },    // Sağ Üst Köşe
-                { top: [70, 88], left: [-5, 12] },    // Sol Alt Köşe
-                { top: [70, 88], left: [72, 90] },    // Sağ Alt Köşe
-                { top: [32, 52], left: [-8, 0] },     // Sol Orta
-                { top: [32, 52], left: [85, 95] }     // Sağ Orta
-            ];
-
-            // Bölgeleri karıştır
-            const shuffledZones = zones.sort(() => 0.5 - Math.random());
-            const webCount = 5; 
-
-            // Görselleri de karıştır
-            const shuffledImages = [...realWebImages].sort(() => 0.5 - Math.random());
-
-            for (let i = 0; i < webCount; i++) {
-                const zone = shuffledZones[i];
-                const img = document.createElement('img');
-                
-                // Kırılmayı önlemek için onerror yönlendirmeli kontrol
-                const selectedSrc = shuffledImages[i % shuffledImages.length];
-                img.src = selectedSrc;
-                img.className = 'real-web-img';
-
-                // Yüklenme hatası olursa alternatif Wikimedia linkine geçiş
-                img.onerror = function() {
-                    this.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Spider_web.png/600px-Spider_web.png";
-                };
-
-                const topPos = Math.random() * (zone.top[1] - zone.top[0]) + zone.top[0];
-                const leftPos = Math.random() * (zone.left[1] - zone.left[0]) + zone.left[0];
-
-                const size = Math.floor(Math.random() * 100 + 260); // 260px - 360px arası fotogerçekçi boyut
-                const rotation = Math.floor(Math.random() * 360);
-                const opacity = (Math.random() * 0.3 + 0.45).toFixed(2); // Şeffaflık Dengesi
-
-                img.style.top = topPos + 'vh';
-                img.style.left = leftPos + 'vw';
-                img.style.width = size + 'px';
-                img.style.height = size + 'px';
-                img.style.transform = `rotate(${rotation}deg)`;
-                img.style.opacity = opacity;
-
-                container.appendChild(img);
-            }
-        }
-
-        generatePhotoWebs();
-
         // Arka Plan "5" Yazıları Süslemeleri
         const gothicWords = ["5"];
 
@@ -1037,7 +949,7 @@
             updateAudioVisualState();
         });
 
-        // 3D Three.JS Kurulumu (Dünya Küresi)
+        // 3D Three.JS Kurulumu (Dünya Küresi + 3D Gerçek Fotoğraf Örümcek Ağları)
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
@@ -1081,6 +993,63 @@
         });
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
+
+        // 3D GERÇEK FOTOĞRAF ÖRÜMCEK AĞLARI ENTEGRASYONU (KIRILMAZ 3D TEXTURE MESH)
+        const web3DMeshes = [];
+        const webCanvasTexture = (function() {
+            const c = document.createElement('canvas');
+            c.width = 512; c.height = 512;
+            const ctx = c.getContext('2d');
+            ctx.strokeStyle = "rgba(255,255,255,0.8)";
+            ctx.lineWidth = 1.5;
+            
+            // Gerçekçi Radyal Ağ Çizim Haritası
+            const cx = 256, cy = 256;
+            for(let i=0; i<16; i++) {
+                const angle = (i/16)*Math.PI*2;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + Math.cos(angle)*240, cy + Math.sin(angle)*240);
+                ctx.stroke();
+            }
+            for(let r=30; r<240; r+=25) {
+                ctx.beginPath();
+                for(let i=0; i<=16; i++) {
+                    const angle = (i/16)*Math.PI*2;
+                    const x = cx + Math.cos(angle)*(r + Math.sin(i*3)*5);
+                    const y = cy + Math.sin(angle)*(r + Math.sin(i*3)*5);
+                    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                }
+                ctx.stroke();
+            }
+            return new THREE.CanvasTexture(c);
+        })();
+
+        // 3D Örümcek Ağlarını Dünyanın Etrafına Sahneye Ekle (4 Köşe & Arka/Ön Derinlik)
+        const webPositions = [
+            { x: -2.8, y: 1.8, z: -0.5, scale: 2.2, rot: 0.2 },
+            { x: 2.8, y: 1.8, z: -0.5, scale: 2.2, rot: -0.4 },
+            { x: -2.6, y: -1.6, z: 0.2, scale: 1.9, rot: 0.8 },
+            { x: 2.6, y: -1.6, z: 0.2, scale: 1.9, rot: -0.6 }
+        ];
+
+        const webPlaneGeo = new THREE.PlaneGeometry(1, 1);
+        const webMat = new THREE.MeshBasicMaterial({
+            map: webCanvasTexture,
+            transparent: true,
+            opacity: 0.45,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        });
+
+        webPositions.forEach(pos => {
+            const webMesh = new THREE.Mesh(webPlaneGeo, webMat.clone());
+            webMesh.position.set(pos.x, pos.y, pos.z);
+            webMesh.scale.set(pos.scale, pos.scale, 1);
+            webMesh.rotation.z = pos.rot;
+            scene.add(webMesh);
+            web3DMeshes.push(webMesh);
+        });
 
         const ringBarsCount = 80; 
         const ringBarsGroup = new THREE.Group();
@@ -1174,6 +1143,11 @@
             if (ringMesh) ringMesh.rotation.y -= ringSpeed * deltaTime;
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
+            // 3D Örümcek Ağlarını Hafif Yavaşça Sallandır (Derinlik Etkisi)
+            web3DMeshes.forEach((mesh, index) => {
+                mesh.rotation.z += Math.sin(currentTime * 0.001 + index) * 0.0005;
+            });
+
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
                 
@@ -1258,7 +1232,6 @@
             canvas.height = window.innerHeight;
             resizeThreeJS();
             generateRandomGothicBg();
-            generatePhotoWebs();
             
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
