@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>EASYSP5DER FM | 7/24 YÜZDE YÜZ MÜZİK</title>
+    <link rel="preload" as="image" href="https://i.hizliresim.com/av8t7brd.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/xllwx1bt.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/tcbusgul.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/bhocuany.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/bkslqch8.png" fetchpriority="high">
+
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,6 +32,8 @@
             --bass-opacity: 0.55;
             --glitch-x: 0px;
             --glitch-y: 0px;
+            --web-bass: 0;
+            --web-bass-opacity: 1;
         }
 
         html, body {
@@ -115,9 +123,21 @@
             transform-style:preserve-3d;
             backface-visibility:visible;
             will-change:transform;
-            /* PNG'ler zaten transparan: blend-mode/fotoğraf arka planı hilesi yok. */
             filter:none;
             perspective:1200px;
+            /* PNG'nin kare kenarını yumuşat: kenarlarda alpha'ya doğru fade. */
+            -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, rgba(0,0,0,.92) 66%, rgba(0,0,0,.42) 82%, transparent 100%);
+            mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, rgba(0,0,0,.92) 66%, rgba(0,0,0,.42) 82%, transparent 100%);
+            -webkit-mask-repeat:no-repeat;
+            mask-repeat:no-repeat;
+            -webkit-mask-size:100% 100%;
+            mask-size:100% 100%;
+            image-rendering:auto;
+            opacity:var(--web-bass-opacity, 1);
+        }
+
+        .photo-web-3d.bass-hit {
+            filter: brightness(1.45) drop-shadow(0 0 18px rgba(255,255,255,.9)) !important;
         }
 
         #photo-webs-container canvas {
@@ -682,8 +702,9 @@
             img.className = 'photo-web-3d';
             img.src = src;
             img.alt = '';
-            img.decoding = 'async';
+            img.decoding = 'sync';
             img.loading = 'eager';
+            img.fetchPriority = 'high';
             img.draggable = false;
             img.setAttribute('aria-hidden', 'true');
 
@@ -704,10 +725,10 @@
                 // Sürekli bir yöne gitmez; başlangıç konumunu terk etmez.
                 phase: Math.random() * Math.PI * 2,
                 speed: randomBetween(0.75, 1.15),
-                moveX: randomBetween(2.5, 6.5),
-                moveY: randomBetween(2.0, 5.0),
-                moveZ: randomBetween(2, 6),
-                rotate: randomBetween(0.25, 0.75)
+                moveX: randomBetween(1.8, 4.0),
+                moveY: randomBetween(1.4, 3.2),
+                moveZ: randomBetween(1.0, 3.0),
+                rotate: randomBetween(0.18, 0.45)
             };
 
             img.style.left = item.left + 'vw';
@@ -760,12 +781,13 @@
                 const dy = Math.sin(t * 1.08) * item.moveY;
                 const dz = Math.sin(t * 0.72) * item.moveZ;
                 const rz = Math.sin(t * 0.62) * item.rotate;
+                const bassScale = 1 + webBassPulse * 0.045;
                 const rx = item.rotX + Math.sin(t * 0.55) * 0.45;
                 const ry = item.rotY + Math.cos(t * 0.48) * 0.60;
 
                 item.el.style.transform =
                     `translate3d(calc(-50% + ${dx.toFixed(2)}px), calc(-50% + ${dy.toFixed(2)}px), ${item.depth + dz}px) ` +
-                    `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${item.scale})`;
+                    `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${(item.scale * bassScale).toFixed(4)})`;
             });
         }
 
@@ -1275,6 +1297,28 @@
         let lastTime = performance.now();
         const rootStyle = document.documentElement.style;
 
+        let webBassPulse = 0;
+        let lastBassHit = 0;
+
+        function triggerWebBassHit(power) {
+            if (power < 0.62) return;
+            const now = performance.now();
+            if (now - lastBassHit < 85) return;
+            lastBassHit = now;
+
+            photoWebElements.forEach((item, i) => {
+                const el = item.el;
+                el.classList.add('bass-hit');
+                el.style.setProperty('--web-bass-opacity', '1');
+                clearTimeout(item.bassTimer);
+                item.bassTimer = setTimeout(() => {
+                    el.classList.remove('bass-hit');
+                }, 90 + i * 8);
+            });
+
+            webBassPulse = Math.min(1, power);
+        }
+
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
 
@@ -1293,7 +1337,8 @@
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
                 
-                const bassPower = Math.pow(Math.sin(bassAngle), 5);
+                const bassPower = Math.max(0, Math.pow(Math.sin(bassAngle), 5));
+                triggerWebBassHit(bassPower);
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
@@ -1341,6 +1386,7 @@
                 rootStyle.setProperty('--bass-scale', '1');
                 rootStyle.setProperty('--bass-glow-scale', '1');
                 rootStyle.setProperty('--bass-opacity', '0.4');
+                webBassPulse = 0;
 
                 mainWrapper.classList.remove('wrapper-glitch');
                 badgeLiveEl.classList.remove('badge-bass-pulse');
@@ -1358,6 +1404,7 @@
                 }
             }
 
+            webBassPulse *= Math.pow(0.06, deltaTime);
             animatePhotoWebs(deltaTime);
             renderer.render(scene, camera);
         }
