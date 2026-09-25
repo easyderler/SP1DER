@@ -84,7 +84,7 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Gerçek Fotoğraf Örümcek Ağları Kapsayıcısı */
+        /* Örümcek Ağları Kapsayıcısı */
         #photo-webs-container {
             position: fixed;
             top: 0;
@@ -100,12 +100,12 @@
             position: absolute;
             pointer-events: none;
             object-fit: contain;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
             will-change: transform, opacity;
             transition: opacity 1.5s ease-in-out;
         }
 
-        /* Arkaplan "5" Yazı Kapsayıcısı ve Yumuşak Geçişler */
+        /* Arkaplan "5" Yazı Kapsayıcısı */
         #gothic-bg-container {
             position: fixed;
             top: 0;
@@ -530,7 +530,7 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Gerçek Örümcek Ağı Fotoğrafları Kapsayıcısı -->
+    <!-- Örümcek Ağları Kapsayıcısı -->
     <div id="photo-webs-container"></div>
 
     <!-- Arkaplan Kapsayıcısı -->
@@ -591,46 +591,45 @@
     </div>
 
     <script>
-        // GERÇEK FOTOĞRAF ÖRÜMCEK AĞLARI YERLEŞTİRME SİSTEMİ
-        const realWebImages = [
-            'https://png.pngtree.com/png-vector/20220612/ourmid/pngtree-spider-web-corner-creepy-png-image_5033481.png',
-            'https://png.pngtree.com/png-vector/20230906/ourmid/pngtree-realistic-spider-web-transparent-background-png-image_10006764.png',
-            'https://png.pngtree.com/png-clipart/20230408/original/pngtree-cobweb-3d-illustration-png-image_9038236.png',
-            'https://png.pngtree.com/png-vector/20220808/ourmid/pngtree-cobweb-or-spider-web-png-image_6103632.png'
+        // GARANTİLİ ŞEFFAF SVG ÖRÜMCEK AĞLARI (Data URI - Resim sunucusu gerektirmez, kırılmaz)
+        const svgWebs = [
+            // Köşe Örümcek Ağı Deseni 1
+            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='1.2'><path d='M0 0 L200 200 M0 0 L100 200 M0 0 L200 100 M0 0 L0 200 M0 0 L200 0'/><path d='M 30 0 Q 30 30 0 30'/><path d='M 60 0 Q 60 60 0 60'/><path d='M 100 0 Q 100 100 0 100'/><path d='M 150 0 Q 150 150 0 150'/><path d='M 200 0 Q 200 200 0 200'/></svg>",
+            // Dairesel Örümcek Ağı Deseni 2
+            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='1'><line x1='100' y1='0' x2='100' y2='200'/><line x1='0' y1='100' x2='200' y2='100'/><line x1='29' y1='29' x2='171' y2='171'/><line x1='171' y1='29' x2='29' y2='171'/><polygon points='100,80 114,86 120,100 114,114 100,120 86,114 80,100 86,86'/><polygon points='100,60 128,72 140,100 128,128 100,140 72,128 60,100 72,72'/><polygon points='100,30 149,51 170,100 149,149 100,170 51,149 30,100 51,51'/><polygon points='100,5 167,33 195,100 167,167 100,195 33,167 5,100 33,33'/></svg>",
+            // Köşe Örümcek Ağı Deseni 3
+            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgba(255,255,255,0.8)' stroke-width='1.2'><line x1='200' y1='0' x2='0' y2='200'/><line x1='200' y1='0' x2='0' y2='100'/><line x1='200' y1='0' x2='100' y2='200'/><path d='M 170 0 Q 170 30 200 30'/><path d='M 140 0 Q 140 60 200 60'/><path d='M 100 0 Q 100 100 200 100'/><path d='M 50 0 Q 50 150 200 150'/><path d='M 0 0 Q 0 200 200 200'/></svg>"
         ];
 
         function generatePhotoWebs() {
             const container = document.getElementById('photo-webs-container');
             container.innerHTML = '';
 
-            // Ekran bölgeleri (Çakışmayı/Üst üste binmeyi önlemek için bölge bazlı rastgele konum)
             const zones = [
-                { top: [0, 15], left: [0, 20] },       // Sol Üst
-                { top: [0, 15], left: [65, 85] },      // Sağ Üst
-                { top: [70, 85], left: [0, 20] },      // Sol Alt
-                { top: [70, 85], left: [65, 85] },     // Sağ Alt
-                { top: [35, 55], left: [-5, 10] },     // Sol Orta Kenar
-                { top: [35, 55], left: [75, 90] }      // Sağ Orta Kenar
+                { top: [-2, 10], left: [-2, 15] },     // Sol Üst
+                { top: [-2, 10], left: [70, 85] },    // Sağ Üst
+                { top: [72, 85], left: [-2, 15] },    // Sol Alt
+                { top: [72, 85], left: [70, 85] },    // Sağ Alt
+                { top: [35, 55], left: [-5, 5] },      // Sol Orta Kenar
+                { top: [35, 55], left: [80, 90] }     // Sağ Orta Kenar
             ];
 
-            // Bölgeleri karıştır
             const shuffledZones = zones.sort(() => 0.5 - Math.random());
-            const webCount = Math.floor(Math.random() * 2) + 4; // 4-5 adet örümcek ağı
+            const webCount = 5;
 
             for (let i = 0; i < webCount; i++) {
                 const zone = shuffledZones[i];
                 const img = document.createElement('img');
                 
-                // Rastgele resim seçimi
-                img.src = realWebImages[i % realWebImages.length];
+                img.src = svgWebs[i % svgWebs.length];
                 img.className = 'real-web-img';
 
                 const topPos = Math.random() * (zone.top[1] - zone.top[0]) + zone.top[0];
                 const leftPos = Math.random() * (zone.left[1] - zone.left[0]) + zone.left[0];
 
-                const size = Math.floor(Math.random() * 120 + 180); // 180px - 300px arası
+                const size = Math.floor(Math.random() * 100 + 200); // 200px - 300px arası
                 const rotation = Math.floor(Math.random() * 360);
-                const opacity = (Math.random() * 0.4 + 0.35).toFixed(2); // Yüksek görünürlük
+                const opacity = (Math.random() * 0.35 + 0.45).toFixed(2);
 
                 img.style.top = topPos + 'vh';
                 img.style.left = leftPos + 'vw';
@@ -645,7 +644,7 @@
 
         generatePhotoWebs();
 
-        // Sadece "5" Karakteri İçeren Arka Plan Yazıları Ve Soft Geçişler
+        // Arka Plan "5" Yazıları Süslemeleri
         const gothicWords = ["5"];
 
         function generateRandomGothicBg() {
@@ -1027,7 +1026,7 @@
             updateAudioVisualState();
         });
 
-        // 3D Three.JS Kurulumu (Dünya + 3D Örümcek)
+        // 3D Three.JS Kurulumu (Dünya Küresi)
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
@@ -1071,60 +1070,6 @@
         });
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
-
-        // --- 3D ÖRÜMCEK MODELİ VE İPİ ---
-        const spiderGroup = new THREE.Group();
-        
-        // Örümcek Gövdesi
-        const bodyGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const spiderMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 });
-        const bodyMesh = new THREE.Mesh(bodyGeo, spiderMat);
-        spiderGroup.add(bodyMesh);
-
-        // Örümcek Başı
-        const headGeo = new THREE.SphereGeometry(0.07, 16, 16);
-        const headMesh = new THREE.Mesh(headGeo, spiderMat);
-        headMesh.position.set(0, -0.1, 0.05);
-        spiderGroup.add(headMesh);
-
-        // Kırmızı Örümcek Gözleri
-        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const eyeGeo = new THREE.SphereGeometry(0.015, 8, 8);
-        const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-        const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
-        eye1.position.set(-0.025, -0.13, 0.1);
-        eye2.position.set(0.025, -0.13, 0.1);
-        spiderGroup.add(eye1);
-        spiderGroup.add(eye2);
-
-        // Örümcek Bacakları
-        const spiderLegs = [];
-        for (let i = 0; i < 8; i++) {
-            const side = i % 2 === 0 ? 1 : -1;
-            const legIdx = Math.floor(i / 2);
-            
-            const legCurve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(side * 0.15, (legIdx - 1.5) * 0.05 + 0.08, 0.1),
-                new THREE.Vector3(side * 0.28, (legIdx - 1.5) * 0.08 - 0.05, 0)
-            ]);
-            
-            const legGeo = new THREE.TubeGeometry(legCurve, 8, 0.012, 6, false);
-            const legMesh = new THREE.Mesh(legGeo, spiderMat);
-            spiderGroup.add(legMesh);
-            spiderLegs.push(legMesh);
-        }
-
-        // Örümceğin İpi
-        const threadGeo = new THREE.CylinderGeometry(0.002, 0.002, 3, 4);
-        const threadMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
-        const threadMesh = new THREE.Mesh(threadGeo, threadMat);
-        threadMesh.position.set(0, 1.5, 0);
-        spiderGroup.add(threadMesh);
-
-        spiderGroup.position.set(0, 1.6, 0.4);
-        spiderGroup.scale.set(1.2, 1.2, 1.2);
-        scene.add(spiderGroup);
 
         const ringBarsCount = 80; 
         const ringBarsGroup = new THREE.Group();
@@ -1218,18 +1163,12 @@
             if (ringMesh) ringMesh.rotation.y -= ringSpeed * deltaTime;
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
-            // Örümcek Sallanma ve Ritim Animasyonu
-            spiderGroup.position.y = 1.55 + Math.sin(currentTime * 0.002) * 0.08;
-            spiderGroup.rotation.z = Math.sin(currentTime * 0.0015) * 0.12;
-
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
                 
                 const bassPower = Math.pow(Math.sin(bassAngle), 5);
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
-
-                spiderGroup.position.y += bassPower * 0.05;
 
                 dirLight.intensity = 2.5 + bassPower * 3.0;
 
@@ -1326,12 +1265,11 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.isFive = Math.random() > 0.65; // "5" sembolü ve nokta harmanı
+                this.isFive = Math.random() > 0.65;
                 this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
                 this.speedX = (Math.random() - 0.5) * 0.6;
                 this.speedY = (Math.random() - 0.5) * 0.6;
                 
-                // Yumuşak geçiş (Fade In / Fade Out) değişkenleri
                 this.opacity = 0;
                 this.maxOpacity = Math.random() * 0.5 + 0.25;
                 this.fadeIn = true;
@@ -1342,7 +1280,6 @@
                 this.x += this.speedX * speedMult;
                 this.y += this.speedY * speedMult;
 
-                // Yumuşak opaklık geçişi
                 if (this.fadeIn) {
                     this.opacity += this.fadeSpeed;
                     if (this.opacity >= this.maxOpacity) {
@@ -1390,7 +1327,7 @@
         requestAnimationFrame(animateGlobe);
         animateParticles();
 
-        // --- FIREBASE CANLI DİNLEYİCİ SİSTEMİ ---
+        // FIREBASE CANLI DİNLEYİCİ SİSTEMİ
         const firebaseConfig = {
           apiKey: "AIzaSyBXFrrMQYuGJnbAZrYRxskJObfk-zUZt_c",
           authDomain: "easyfm-749bd.firebaseapp.com",
