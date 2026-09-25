@@ -114,20 +114,22 @@
            Böylece kare PNG sınırı görünmez; ağ her tarafta transparanlaşarak biter. */
         .photo-web-3d {
             -webkit-mask-image: radial-gradient(
-                ellipse 82% 82% at 50% 50%,
-                #000 48%,
-                rgba(0,0,0,0.96) 57%,
-                rgba(0,0,0,0.72) 67%,
-                rgba(0,0,0,0.35) 78%,
-                transparent 94%
+                ellipse 72% 72% at 50% 50%,
+                #000 32%,
+                rgba(0,0,0,0.98) 45%,
+                rgba(0,0,0,0.88) 57%,
+                rgba(0,0,0,0.58) 69%,
+                rgba(0,0,0,0.24) 82%,
+                transparent 100%
             );
             mask-image: radial-gradient(
-                ellipse 82% 82% at 50% 50%,
-                #000 48%,
-                rgba(0,0,0,0.96) 57%,
-                rgba(0,0,0,0.72) 67%,
-                rgba(0,0,0,0.35) 78%,
-                transparent 94%
+                ellipse 72% 72% at 50% 50%,
+                #000 32%,
+                rgba(0,0,0,0.98) 45%,
+                rgba(0,0,0,0.88) 57%,
+                rgba(0,0,0,0.58) 69%,
+                rgba(0,0,0,0.24) 82%,
+                transparent 100%
             );
             -webkit-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
@@ -150,18 +152,14 @@
             filter:none;
             perspective:1200px;
             /* PNG'nin kare kenarını yumuşat: kenarlarda alpha'ya doğru fade. */
-            -webkit-mask-image: radial-gradient(ellipse 68% 68% at 50% 50%, #000 38%, rgba(0,0,0,.96) 52%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.24) 84%, transparent 100%);
-            mask-image: radial-gradient(ellipse 68% 68% at 50% 50%, #000 38%, rgba(0,0,0,.96) 52%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.24) 84%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 30%, rgba(0,0,0,.98) 43%, rgba(0,0,0,.86) 55%, rgba(0,0,0,.52) 68%, rgba(0,0,0,.18) 84%, transparent 100%);
+            mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 30%, rgba(0,0,0,.98) 43%, rgba(0,0,0,.86) 55%, rgba(0,0,0,.52) 68%, rgba(0,0,0,.18) 84%, transparent 100%);
             -webkit-mask-repeat:no-repeat;
             mask-repeat:no-repeat;
             -webkit-mask-size:100% 100%;
             mask-size:100% 100%;
             image-rendering:auto;
             opacity:1;
-        }
-
-        .photo-web-3d.bass-hit {
-            filter: brightness(1.45) drop-shadow(0 0 18px rgba(255,255,255,.9)) !important;
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -832,11 +830,11 @@
                 scale: randomBetween(0.92, 1.08),
 
                 phase: Math.random() * Math.PI * 2,
-                speed: randomBetween(0.75, 1.15),
-                moveX: randomBetween(1.5, 3.2),
-                moveY: randomBetween(1.2, 2.8),
-                moveZ: randomBetween(1.0, 3.0),
-                rotate: randomBetween(0.18, 0.45)
+                speed: randomBetween(0.95, 1.40),
+                moveX: randomBetween(2.4, 4.8),
+                moveY: randomBetween(2.0, 4.2),
+                moveZ: randomBetween(1.6, 4.0),
+                rotate: randomBetween(0.28, 0.65)
             };
 
             // left/top ağın merkezidir.
@@ -896,13 +894,11 @@
                 const dy = Math.sin(t * 1.08) * item.moveY;
                 const dz = Math.sin(t * 0.72) * item.moveZ;
                 const rz = Math.sin(t * 0.62) * item.rotate;
-                const bassScale = 1;
-                const rx = item.rotX + Math.sin(t * 0.55) * 0.45;
-                const ry = item.rotY + Math.cos(t * 0.48) * 0.60;
+                const rx = item.rotX + Math.sin(t * 0.55) * 0.70;
+                const ry = item.rotY + Math.cos(t * 0.48) * 0.90;
 
                 // Dünya ile aynı bassScale: bass yükseldiğinde ağ da aynı anda,
                 // aynı oranda büyür. Bass yoksa efekt sıfırdır.
-                item.el.classList.toggle('bass-hit', currentBassPower > 0.60);
                 item.el.style.transform =
                     `translate3d(calc(-50% + ${dx.toFixed(2)}px), calc(-50% + ${dy.toFixed(2)}px), ${item.depth + dz}px) ` +
                     `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${(item.scale * bassScale).toFixed(4)})`;
@@ -1459,13 +1455,7 @@
                     volumeBoxEl.classList.remove('badge-bass-pulse');
                 }
 
-                if (bassPower > 0.65) {
-                    rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
-                    rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 8).toFixed(1) + 'px');
-                    mainWrapper.classList.add('wrapper-glitch');
-                } else {
-                    mainWrapper.classList.remove('wrapper-glitch');
-                }
+                mainWrapper.classList.remove('wrapper-glitch');
 
                 for (let idx = 0; idx < ringBarsCount; idx++) {
                     const bar = ringBarMeshes[idx];
@@ -1579,24 +1569,21 @@
             draw() {
                 // Dünya ile aynı bassPower / bassScale kullanılır.
                 // isPlayingState false ise currentBassPower zaten 0'dır.
-                const bassScale = 1 + currentBassPower * 0.04;
-                const bassAlpha = Math.max(0, this.opacity);
-                const bassGlow = currentBassPower * 18;
 
                 ctx.save();
                 ctx.fillStyle = currentAccentColor;
                 ctx.globalAlpha = bassAlpha;
 
                 if (this.isFive) {
-                    ctx.font = `900 ${this.size * bassScale}px 'Syne', sans-serif`;
-                    ctx.shadowColor = currentAccentColor;
-                    ctx.shadowBlur = bassGlow;
+                    ctx.font = `900 ${this.size}px 'Syne', sans-serif`;
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
                     ctx.fillText("5", this.x, this.y);
                 } else {
-                    ctx.shadowColor = currentAccentColor;
-                    ctx.shadowBlur = bassGlow;
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size * bassScale, 0, Math.PI * 2);
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                     ctx.fill();
                 }
 
