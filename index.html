@@ -1170,12 +1170,18 @@
         }
         scene.add(ringBarsGroup);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2.2);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.72);
         scene.add(ambientLight);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 3.2);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.55);
         dirLight.position.set(5, 4, 5);
         scene.add(dirLight);
+
+        // TEK hareketli yansıma ışığı: dünya + krom yazı için ortak tek highlight.
+        // PointLight'ın kendisi görünür bir mesh değildir; yalnızca yüzeylerde TEK parlak nokta üretir.
+        const orbitHighlightLight = new THREE.PointLight(0xf2f7ff, 3.15, 10.0, 2.0);
+        orbitHighlightLight.position.set(2.8, 0.45, 3.2);
+        scene.add(orbitHighlightLight);
 
         let ringMesh = null;
         let ringDepthMeshes = [];
@@ -1210,8 +1216,8 @@
                         clearcoat: 1.0,
                         clearcoatRoughness: 0.055,
                         reflectivity: 1.0,
-                        emissive: 0x7f8991,
-                        emissiveIntensity: 0.42,
+                        emissive: 0x252b30,
+                        emissiveIntensity: 0.10,
                         side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
@@ -1224,8 +1230,8 @@
                         clearcoat: 0.92,
                         clearcoatRoughness: 0.09,
                         reflectivity: 1.0,
-                        emissive: 0x555d63,
-                        emissiveIntensity: 0.30,
+                        emissive: 0x171b1e,
+                        emissiveIntensity: 0.07,
                         side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
@@ -1360,22 +1366,28 @@ function animateGlobe(currentTime) {
             if (orbitTextGroup) {
                 orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
 
-                // Canlı krom: iki ışık farklı hızlarda yazının çevresinde dolaşır.
-                // MeshPhysicalMaterial gerçek yüzey normallerine tepki verdiği için
-                // ön, bevel, yan ve arka yüzeylerin parlaması açıya göre doğal değişir.
+                // TEK ışıkla canlı krom + dünya yansıması.
+                // Aynı ışık dünya ve 3D yazı üzerinde dolaştığı için eski şık metal hissi geri gelir,
+                // fakat yüzeyde aynı anda yalnızca tek belirgin highlight bulunur.
                 const chromeT = currentTime * 0.001;
+                orbitHighlightLight.position.set(
+                    Math.cos(chromeT * 0.62) * 3.25,
+                    0.35 + Math.sin(chromeT * 0.47) * 1.05,
+                    2.65 + Math.sin(chromeT * 0.62) * 1.55
+                );
+                orbitHighlightLight.intensity = 2.65 + (Math.sin(chromeT * 0.93) * 0.5 + 0.5) * 0.95;
+
                 if (orbitChromeMaterials.length >= 2) {
-                    // Işık kaynağı olmadan canlı krom: ton ve emissive parlaklığı çok hafif
-                    // değişir; yazı gümüş/metalik kalır, siyaha düşmez.
-                    const shine = Math.sin(chromeT * 1.15) * 0.5 + 0.5;
+                    const shine = Math.sin(chromeT * 0.72) * 0.5 + 0.5;
                     const face = orbitChromeMaterials[0];
                     const side = orbitChromeMaterials[1];
-                    face.color.setRGB(0.86 + shine * 0.12, 0.89 + shine * 0.09, 0.91 + shine * 0.07);
-                    face.emissive.setRGB(0.34 + shine * 0.16, 0.37 + shine * 0.15, 0.40 + shine * 0.14);
-                    face.emissiveIntensity = 0.38 + shine * 0.16;
-                    side.color.setRGB(0.50 + shine * 0.16, 0.54 + shine * 0.15, 0.57 + shine * 0.14);
-                    side.emissive.setRGB(0.20 + shine * 0.10, 0.22 + shine * 0.10, 0.24 + shine * 0.10);
-                    side.emissiveIntensity = 0.26 + shine * 0.12;
+                    // Materyal kendi kendine parlamaz; ana parlama fiziksel olarak tek PointLight'tan gelir.
+                    face.color.setRGB(0.74 + shine * 0.10, 0.77 + shine * 0.09, 0.80 + shine * 0.08);
+                    face.emissive.setRGB(0.055, 0.062, 0.068);
+                    face.emissiveIntensity = 0.10;
+                    side.color.setRGB(0.36 + shine * 0.08, 0.39 + shine * 0.08, 0.42 + shine * 0.08);
+                    side.emissive.setRGB(0.025, 0.030, 0.034);
+                    side.emissiveIntensity = 0.07;
                 }
             }
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
@@ -1387,7 +1399,7 @@ function animateGlobe(currentTime) {
 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
-                dirLight.intensity = 2.5 + bassPower * 3.0;
+                dirLight.intensity = 0.50 + bassPower * 0.28;
 
                 rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.012).toFixed(3));
                 rootStyle.setProperty('--bass-glow-scale', (1 + Math.sin(bassAngle) * 0.16).toFixed(3));
@@ -1431,7 +1443,7 @@ const bassScale = 1 + bassPower * 0.04;
                 // Yayın başlamadıysa, durmuşsa veya ses kapalıysa BASS = 0.
                 // Böylece hiçbir arka plan öğesi patlamaz.
 globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
-                dirLight.intensity = 2.2;
+                dirLight.intensity = 0.48;
 
                 rootStyle.setProperty('--bass-scale', '1');
                 rootStyle.setProperty('--bass-glow-scale', '1');
