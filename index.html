@@ -1178,9 +1178,10 @@
         let ringMesh = null;
 
         function createOrbitRingText() {
+            // Daha yüksek çözünürlük: özellikle mobilde büyük SP1DER yazısı keskin kalsın.
             const canvas = document.createElement('canvas');
-            canvas.width = 1024;
-            canvas.height = 256;
+            canvas.width = 1536;
+            canvas.height = 384;
             const ctx = canvas.getContext('2d');
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1188,62 +1189,67 @@
             ctx.textBaseline = 'middle';
             ctx.lineJoin = 'round';
 
-            // Site konseptine uygun: sade, karanlık, keskin ve okunaklı.
-            // Abartılı chrome/neon yerine hafif kabartma + siyah kontur kullanılır.
-            const drawOrbitText = (text, y, font, outline) => {
+            // Siyah dış kontur yok. Chrome hissi tamamen metalik yüzey,
+            // ince ışık kırılmaları ve çok hafif gölge ile oluşturuluyor.
+            const drawChromeText = (text, y, font, halfHeight, glow) => {
                 ctx.font = font;
 
-                // Çok hafif 3D/kabartma derinliği.
+                // Çok hafif derinlik: dış çizgi gibi görünmeyecek kadar yumuşak.
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(0,0,0,0.92)';
-                ctx.fillText(text, canvas.width / 2 + 3, y + 4);
-                ctx.fillStyle = 'rgba(0,0,0,0.72)';
-                ctx.fillText(text, canvas.width / 2 + 1.5, y + 2);
+                ctx.fillStyle = 'rgba(15,15,18,0.34)';
+                ctx.fillText(text, canvas.width / 2 + 2.2, y + 3.2);
 
-                // Dünya üzerindeki açık alanlarda yazının kaybolmasını engelleyen kontur.
-                ctx.strokeStyle = 'rgba(0,0,0,0.96)';
-                ctx.lineWidth = outline;
-                ctx.strokeText(text, canvas.width / 2, y);
+                // Çok katmanlı krom yüzey: parlak -> koyu metal -> parlak kırılma.
+                const chrome = ctx.createLinearGradient(0, y - halfHeight, 0, y + halfHeight);
+                chrome.addColorStop(0.00, '#ffffff');
+                chrome.addColorStop(0.10, '#e8edf2');
+                chrome.addColorStop(0.24, '#8e969f');
+                chrome.addColorStop(0.39, '#f8fafc');
+                chrome.addColorStop(0.49, '#ffffff');
+                chrome.addColorStop(0.53, '#777f88');
+                chrome.addColorStop(0.66, '#252a30');
+                chrome.addColorStop(0.79, '#aeb5bc');
+                chrome.addColorStop(0.91, '#f4f6f8');
+                chrome.addColorStop(1.00, '#737a82');
 
-                // Ana yüz: saf beyaz yerine hafif gri/metalik ton.
-                const face = ctx.createLinearGradient(0, y - 42, 0, y + 42);
-                face.addColorStop(0, '#ffffff');
-                face.addColorStop(0.42, '#d7d7d7');
-                face.addColorStop(0.58, '#9f9f9f');
-                face.addColorStop(1, '#f1f1f1');
-                ctx.fillStyle = face;
-                ctx.shadowColor = 'rgba(255,255,255,0.30)';
-                ctx.shadowBlur = 7;
+                ctx.fillStyle = chrome;
+                ctx.shadowColor = `rgba(255,255,255,${glow})`;
+                ctx.shadowBlur = 9;
                 ctx.fillText(text, canvas.width / 2, y);
 
-                // İnce üst highlight; sadece derinlik hissi verir.
+                // Metal yüzeydeki ince ışık yansımaları. Bunlar kontur değil,
+                // yazının kendi yüzeyinde highlight olarak kalır.
                 ctx.shadowBlur = 0;
-                ctx.strokeStyle = 'rgba(255,255,255,0.32)';
-                ctx.lineWidth = 1;
-                ctx.strokeText(text, canvas.width / 2, y - 0.8);
+                ctx.globalAlpha = 0.62;
+                ctx.fillStyle = 'rgba(255,255,255,0.30)';
+                ctx.fillText(text, canvas.width / 2, y - 1.15);
+                ctx.globalAlpha = 1;
             };
 
-            drawOrbitText('SP1DER', 84, '900 76px "Montserrat", sans-serif', 8);
-            drawOrbitText('7/24 YÜZDE YÜZ MÜZİK', 169, '800 29px "Space Grotesk", sans-serif', 5);
+            // SP1DER belirgin biçimde büyütüldü; alt slogan da onunla birlikte
+            // büyüyor fakat hiyerarşide net biçimde küçük kalıyor.
+            drawChromeText('SP1DER', 128, '900 126px "Montserrat", sans-serif', 68, 0.34);
+            drawChromeText('7/24 YÜZDE YÜZ MÜZİK', 268, '800 43px "Space Grotesk", sans-serif', 30, 0.22);
 
             const ringTex = new THREE.CanvasTexture(canvas);
             ringTex.minFilter = THREE.LinearFilter;
             ringTex.magFilter = THREE.LinearFilter;
             ringTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
-            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.30, baseRadius + 0.30, 0.65, 64, 1, true);
+            // Biraz daha geniş/yüksek orbit yüzeyi: büyüyen yazı sıkışmadan dolaşır.
+            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.36, baseRadius + 0.36, 0.82, 72, 1, true);
             const ringMat = new THREE.MeshBasicMaterial({
                 map: ringTex,
                 transparent: true,
                 side: THREE.DoubleSide,
                 depthWrite: false,
                 depthTest: true,
-                opacity: 0.96
+                opacity: 0.98
             });
 
             ringMesh = new THREE.Mesh(ringGeo, ringMat);
             ringMesh.rotation.z = 0.08;
-            // depthTest açık: halkanın arka yarısı dünyanın arkasında gerçek şekilde kaybolur.
+            // Depth test korunuyor: yazı ön tarafta görünür, arka tarafta dünyanın arkasına geçer.
             scene.add(ringMesh);
         }
 
