@@ -84,27 +84,27 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Örümcek Ağları SVG Katmanı */
+        /* Gerçekçi Örümcek Ağları SVG Katmanı */
         .spider-web {
             position: fixed;
             pointer-events: none;
             z-index: 3;
-            opacity: 0.18;
+            opacity: 0.28;
             transition: opacity 0.3s ease, filter 0.3s ease;
-            filter: drop-shadow(0 0 8px var(--accent-color));
+            filter: drop-shadow(0 0 5px var(--accent-color));
         }
 
-        .web-top-left { top: 0; left: 0; width: 280px; height: 280px; }
-        .web-top-right { top: 0; right: 0; width: 280px; height: 280px; transform: scaleX(-1); }
-        .web-bottom-left { bottom: 0; left: 0; width: 250px; height: 250px; transform: scaleY(-1); }
-        .web-bottom-right { bottom: 0; right: 0; width: 250px; height: 250px; transform: scale(-1); }
+        .web-top-left { top: 0; left: 0; width: 320px; height: 320px; }
+        .web-top-right { top: 0; right: 0; width: 320px; height: 320px; transform: scaleX(-1); }
+        .web-bottom-left { bottom: 0; left: 0; width: 290px; height: 290px; transform: scaleY(-1); }
+        .web-bottom-right { bottom: 0; right: 0; width: 290px; height: 290px; transform: scale(-1); }
 
         @media (max-width: 600px) {
-            .web-top-left, .web-top-right { width: 180px; height: 180px; }
-            .web-bottom-left, .web-bottom-right { width: 150px; height: 150px; }
+            .web-top-left, .web-top-right { width: 210px; height: 210px; }
+            .web-bottom-left, .web-bottom-right { width: 180px; height: 180px; }
         }
 
-        /* Trap / Hiphop Arkaplan Yazı Kapsayıcısı */
+        /* Arkaplan "5" Yazı Kapsayıcısı */
         #gothic-bg-container {
             position: fixed;
             top: 0;
@@ -557,25 +557,31 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Örümcek Ağları Katmanı (SVG Köşeler) -->
-    <svg class="spider-web web-top-left" viewBox="0 0 100 100" fill="none" stroke="currentColor">
-        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
-        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    <!-- Gerçekçi Örümcek Ağları Katmanı (Yüksek Detaylı Vektörel Tasarım) -->
+    <svg class="spider-web web-top-left" viewBox="0 0 200 200" fill="none" stroke="currentColor">
+        <!-- Ana Destek İpleri -->
+        <path d="M0,0 L200,200 M0,0 L80,200 M0,0 L200,80 M0,0 L35,200 M0,0 L200,35 M0,0 L135,200 M0,0 L200,135 M0,0 L200,0 M0,0 L0,200" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
+        <!-- Gerçekçi İç İçe Geçen Sarkık Spiral İpler -->
+        <path d="M15,0 Q13,13 0,15 M30,0 Q26,26 0,30 M48,0 Q41,41 0,48 M70,0 Q60,60 0,70 M95,0 Q80,80 0,95 M125,0 Q105,105 0,125 M160,0 Q135,135 0,160 M200,0 Q170,170 0,200" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
+        <path d="M10,0 Q18,18 0,10 M22,0 Q35,35 0,22 M38,0 Q55,55 0,38 M58,0 Q82,82 0,58 M82,0 Q115,115 0,82 M110,0 Q150,150 0,110 M142,0 Q185,185 0,142" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>
     </svg>
-    <svg class="spider-web web-top-right" viewBox="0 0 100 100" fill="none" stroke="currentColor">
-        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
-        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    <svg class="spider-web web-top-right" viewBox="0 0 200 200" fill="none" stroke="currentColor">
+        <path d="M0,0 L200,200 M0,0 L80,200 M0,0 L200,80 M0,0 L35,200 M0,0 L200,35 M0,0 L135,200 M0,0 L200,135 M0,0 L200,0 M0,0 L0,200" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
+        <path d="M15,0 Q13,13 0,15 M30,0 Q26,26 0,30 M48,0 Q41,41 0,48 M70,0 Q60,60 0,70 M95,0 Q80,80 0,95 M125,0 Q105,105 0,125 M160,0 Q135,135 0,160 M200,0 Q170,170 0,200" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
+        <path d="M10,0 Q18,18 0,10 M22,0 Q35,35 0,22 M38,0 Q55,55 0,38 M58,0 Q82,82 0,58 M82,0 Q115,115 0,82 M110,0 Q150,150 0,110 M142,0 Q185,185 0,142" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>
     </svg>
-    <svg class="spider-web web-bottom-left" viewBox="0 0 100 100" fill="none" stroke="currentColor">
-        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
-        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    <svg class="spider-web web-bottom-left" viewBox="0 0 200 200" fill="none" stroke="currentColor">
+        <path d="M0,0 L200,200 M0,0 L80,200 M0,0 L200,80 M0,0 L35,200 M0,0 L200,35 M0,0 L135,200 M0,0 L200,135 M0,0 L200,0 M0,0 L0,200" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
+        <path d="M15,0 Q13,13 0,15 M30,0 Q26,26 0,30 M48,0 Q41,41 0,48 M70,0 Q60,60 0,70 M95,0 Q80,80 0,95 M125,0 Q105,105 0,125 M160,0 Q135,135 0,160 M200,0 Q170,170 0,200" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
+        <path d="M10,0 Q18,18 0,10 M22,0 Q35,35 0,22 M38,0 Q55,55 0,38 M58,0 Q82,82 0,58 M82,0 Q115,115 0,82 M110,0 Q150,150 0,110 M142,0 Q185,185 0,142" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>
     </svg>
-    <svg class="spider-web web-bottom-right" viewBox="0 0 100 100" fill="none" stroke="currentColor">
-        <path d="M0,0 L100,100 M0,0 L50,100 M0,0 L100,50 M0,0 L20,100 M0,0 L100,20 M0,0 L100,0 M0,0 L0,100" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
-        <path d="M20,0 Q20,20 0,20 M40,0 Q40,40 0,40 M60,0 Q60,60 0,60 M80,0 Q80,80 0,80 M100,0 Q100,100 0,100" stroke="rgba(255,255,255,0.5)" stroke-width="0.8"/>
+    <svg class="spider-web web-bottom-right" viewBox="0 0 200 200" fill="none" stroke="currentColor">
+        <path d="M0,0 L200,200 M0,0 L80,200 M0,0 L200,80 M0,0 L35,200 M0,0 L200,35 M0,0 L135,200 M0,0 L200,135 M0,0 L200,0 M0,0 L0,200" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
+        <path d="M15,0 Q13,13 0,15 M30,0 Q26,26 0,30 M48,0 Q41,41 0,48 M70,0 Q60,60 0,70 M95,0 Q80,80 0,95 M125,0 Q105,105 0,125 M160,0 Q135,135 0,160 M200,0 Q170,170 0,200" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
+        <path d="M10,0 Q18,18 0,10 M22,0 Q35,35 0,22 M38,0 Q55,55 0,38 M58,0 Q82,82 0,58 M82,0 Q115,115 0,82 M110,0 Q150,150 0,110 M142,0 Q185,185 0,142" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>
     </svg>
 
-    <!-- Trap / Hiphop Estetik Arkaplan Kapsayıcısı -->
+    <!-- Arkaplan Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
 
     <canvas id="bg-canvas"></canvas>
@@ -640,29 +646,25 @@
     </div>
 
     <script>
-        // --- TRAP & HIPHOP ESTETİK ARKA PLAN YAZILARI OLUŞTURUCU ("5" HARFİ/RAKAMI EKLENDİ) ---
-        const gothicWords = [
-            "5", "EASYSP5DER", "OPIUM 808", "555", "TRAPHOUSE", "YSL", "WORLDWIDE", 
-            "CACTUS JACK", "5", "00VOX", "NARCISSIST", "WHOLE LOTTA", "NO STYLIST",
-            "999", "RAGE", "FE!N", "CARTI", "FIVE 5", "5"
-        ];
+        // Sadece "5" Karakteri İçeren Arka Plan Yazıları
+        const gothicWords = ["5"];
 
         function generateRandomGothicBg() {
             const container = document.getElementById('gothic-bg-container');
             container.innerHTML = '';
             
-            const count = window.innerWidth < 600 ? 12 : 20;
+            const count = window.innerWidth < 600 ? 14 : 24;
 
             for (let i = 0; i < count; i++) {
                 const el = document.createElement('div');
                 el.className = 'random-gothic-text';
                 
-                const word = gothicWords[Math.floor(Math.random() * gothicWords.length)];
+                const word = gothicWords[0];
                 el.innerText = word;
 
                 const top = Math.random() * 92; 
                 const left = Math.random() * 85 - 5; 
-                const fontSize = word === "5" ? (Math.random() * 8 + 6).toFixed(1) + 'vw' : (Math.random() * 5 + 3.5).toFixed(1) + 'vw'; 
+                const fontSize = (Math.random() * 8 + 6).toFixed(1) + 'vw'; 
                 const rotation = Math.floor(Math.random() * 50 - 25); 
                 const opacity = (Math.random() * 0.045 + 0.02).toFixed(3); 
 
@@ -1256,7 +1258,7 @@
             renderer.render(scene, camera);
         }
 
-        // Parçacık Tuvali (Particle Canvas - "5" Rakamı Parçacıkları Dahil Edildi)
+        // Parçacık Tuvali (Noktalar & "5" Karakterleri)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particlesArray = [];
@@ -1286,7 +1288,7 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.isFive = Math.random() > 0.65; // %35 ihtimalle "5" sembolü
+                this.isFive = Math.random() > 0.65; // "5" sembolü ve nokta harmanı
                 this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
                 this.speedX = (Math.random() - 0.5) * 0.8;
                 this.speedY = (Math.random() - 0.5) * 0.8;
@@ -1346,7 +1348,6 @@
           measurementId: "G-V1JCFXPLCW"
         };
 
-        // Firebase Başlatma
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -1355,25 +1356,17 @@
         const listenersRef = db.ref('online_listeners');
         const listenerCountEl = document.getElementById('listener-count');
 
-        // Bağlantı durumunu takip et (.info/connected)
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
-                // Kullanıcı bağlandığında benzersiz bir oturum kimliği (node) oluştur
                 const myPresenceRef = listenersRef.push();
-
-                // Kullanıcı sekmeyi veya siteyi kapattığında veritabanından otomatik sil
                 myPresenceRef.onDisconnect().remove();
-
-                // Bağlı olduğunu doğrula
                 myPresenceRef.set(true);
             }
         });
 
-        // Veritabanındaki anlık dinleyici sayısını oku ve HTML'e yaz
         listenersRef.on('value', (snap) => {
             const count = snap.numChildren();
             if (listenerCountEl) {
-                // Dinleyici sıfır görünmesin diye varsayılan olarak minimum 1 veya gerçek sayıyı basar
                 listenerCountEl.innerText = count > 0 ? count : 1;
             }
         });
