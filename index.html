@@ -1398,7 +1398,7 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 this.isFive = Math.random() > 0.65;
-                this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
+                this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 10 + 13;
                 this.speedX = (Math.random() - 0.5) * 0.6;
                 this.speedY = (Math.random() - 0.5) * 0.6;
                 
@@ -1428,7 +1428,7 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
                 if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
             }
             draw() {
-                // 5'ler ve noktalar normal şekilde görünür.
+                // 5'ler korunur; eski noktalar örümcek sembolü olarak uçuşur.
                 // Bass'a bağlı büyüme/parlama kaldırıldı; hareket ve fade korunuyor.
                 const alpha = Math.max(0, this.opacity);
 
@@ -1441,9 +1441,10 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
                     ctx.font = `900 ${this.size}px 'Syne', sans-serif`;
                     ctx.fillText("5", this.x, this.y);
                 } else {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.font = `${this.size}px 'Segoe UI Symbol', 'Apple Symbols', sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('🕷︎', this.x, this.y);
                 }
 
                 ctx.restore();
