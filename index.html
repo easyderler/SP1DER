@@ -110,6 +110,31 @@
         }
 
         
+        /* Örümcek ağı PNG'lerinin dört kenarında yumuşak kaybolma.
+           Böylece kare PNG sınırı görünmez; ağ her tarafta transparanlaşarak biter. */
+        .photo-web-3d {
+            -webkit-mask-image: radial-gradient(
+                ellipse 82% 82% at 50% 50%,
+                #000 48%,
+                rgba(0,0,0,0.96) 57%,
+                rgba(0,0,0,0.72) 67%,
+                rgba(0,0,0,0.35) 78%,
+                transparent 94%
+            );
+            mask-image: radial-gradient(
+                ellipse 82% 82% at 50% 50%,
+                #000 48%,
+                rgba(0,0,0,0.96) 57%,
+                rgba(0,0,0,0.72) 67%,
+                rgba(0,0,0,0.35) 78%,
+                transparent 94%
+            );
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+        }
+
 .photo-web-3d {
             position:absolute;
             display:block;
@@ -133,6 +158,10 @@
             mask-size:100% 100%;
             image-rendering:auto;
             opacity:1;
+        }
+
+        .photo-web-3d.bass-hit {
+            filter: brightness(1.45) drop-shadow(0 0 18px rgba(255,255,255,.9)) !important;
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -867,9 +896,13 @@
                 const dy = Math.sin(t * 1.08) * item.moveY;
                 const dz = Math.sin(t * 0.72) * item.moveZ;
                 const rz = Math.sin(t * 0.62) * item.rotate;
+                const bassScale = 1;
                 const rx = item.rotX + Math.sin(t * 0.55) * 0.45;
                 const ry = item.rotY + Math.cos(t * 0.48) * 0.60;
 
+                // Dünya ile aynı bassScale: bass yükseldiğinde ağ da aynı anda,
+                // aynı oranda büyür. Bass yoksa efekt sıfırdır.
+                item.el.classList.toggle('bass-hit', currentBassPower > 0.60);
                 item.el.style.transform =
                     `translate3d(calc(-50% + ${dx.toFixed(2)}px), calc(-50% + ${dy.toFixed(2)}px), ${item.depth + dz}px) ` +
                     `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${(item.scale * bassScale).toFixed(4)})`;
@@ -1267,7 +1300,7 @@
         const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
         
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         globeContainer.appendChild(renderer.domElement);
 
         function resizeThreeJS() {
@@ -1304,7 +1337,6 @@
         });
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
-        const idleGlobeScale = new THREE.Vector3(1, 1, 1);
 
         const ringBarsCount = 80; 
         const ringBarsGroup = new THREE.Group();
@@ -1383,6 +1415,11 @@
         let lastTime = performance.now();
         const rootStyle = document.documentElement.style;
 
+        // TEK BASS KAYNAĞI:
+        // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
+        // kullanır. Böylece efektler birebir aynı anda ve aynı şiddette patlar.
+        let currentBassPower = 0;
+
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
 
@@ -1402,6 +1439,7 @@
                 bassAngle += 7.0 * deltaTime;
                 
                 const bassPower = Math.max(0, Math.pow(Math.sin(bassAngle), 5));
+                currentBassPower = bassPower;
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
@@ -1445,7 +1483,8 @@
             } else {
                 // Yayın başlamadıysa, durmuşsa veya ses kapalıysa BASS = 0.
                 // Böylece hiçbir arka plan öğesi patlamaz.
-                globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
+                currentBassPower = 0;
+                globeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
                 dirLight.intensity = 2.2;
 
                 rootStyle.setProperty('--bass-scale', '1');
@@ -1538,16 +1577,24 @@
                 if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
             }
             draw() {
+                // Dünya ile aynı bassPower / bassScale kullanılır.
+                // isPlayingState false ise currentBassPower zaten 0'dır.
+                const bassScale = 1 + currentBassPower * 0.04;
                 const bassAlpha = Math.max(0, this.opacity);
+                const bassGlow = currentBassPower * 18;
 
                 ctx.save();
                 ctx.fillStyle = currentAccentColor;
                 ctx.globalAlpha = bassAlpha;
 
                 if (this.isFive) {
-                    ctx.font = `900 ${this.size}px 'Syne', sans-serif`;
+                    ctx.font = `900 ${this.size * bassScale}px 'Syne', sans-serif`;
+                    ctx.shadowColor = currentAccentColor;
+                    ctx.shadowBlur = bassGlow;
                     ctx.fillText("5", this.x, this.y);
                 } else {
+                    ctx.shadowColor = currentAccentColor;
+                    ctx.shadowBlur = bassGlow;
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size * bassScale, 0, Math.PI * 2);
                     ctx.fill();
@@ -1557,7 +1604,7 @@
             }
         }
 
-        const particleCount = 32;
+        const particleCount = 50;
         for (let i = 0; i < particleCount; i++) particlesArray.push(new CyberParticle());
 
         function animateParticles() {
