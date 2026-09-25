@@ -572,6 +572,8 @@
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -1177,112 +1179,99 @@
 
         let ringMesh = null;
         let ringDepthMeshes = [];
+        let orbitTextGroup = null;
+        let orbitChromeMaterials = [];
+        let orbitLightA = null;
+        let orbitLightB = null;
 
         function createOrbitRingText() {
-            // Daha yüksek çözünürlük: özellikle mobilde büyük SP1DER yazısı keskin kalsın.
-            const canvas = document.createElement('canvas');
-            canvas.width = 1536;
-            canvas.height = 384;
-            const ctx = canvas.getContext('2d');
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.lineJoin = 'round';
-
-            // Siyah dış kontur yok. Chrome hissi tamamen metalik yüzey,
-            // ince ışık kırılmaları ve çok hafif gölge ile oluşturuluyor.
-            const drawChromeText = (text, y, font, halfHeight, glow) => {
-                ctx.font = font;
-
-                // Çok hafif derinlik: dış çizgi gibi görünmeyecek kadar yumuşak.
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(15,15,18,0.34)';
-                ctx.fillText(text, canvas.width / 2 + 2.2, y + 3.2);
-
-                // Çok katmanlı krom yüzey: parlak -> koyu metal -> parlak kırılma.
-                const chrome = ctx.createLinearGradient(0, y - halfHeight, 0, y + halfHeight);
-                chrome.addColorStop(0.00, '#ffffff');
-                chrome.addColorStop(0.10, '#e8edf2');
-                chrome.addColorStop(0.24, '#8e969f');
-                chrome.addColorStop(0.39, '#f8fafc');
-                chrome.addColorStop(0.49, '#ffffff');
-                chrome.addColorStop(0.53, '#777f88');
-                chrome.addColorStop(0.66, '#252a30');
-                chrome.addColorStop(0.79, '#aeb5bc');
-                chrome.addColorStop(0.91, '#f4f6f8');
-                chrome.addColorStop(1.00, '#737a82');
-
-                ctx.fillStyle = chrome;
-                ctx.shadowColor = `rgba(255,255,255,${glow})`;
-                ctx.shadowBlur = 9;
-                ctx.fillText(text, canvas.width / 2, y);
-
-                // Metal yüzeydeki ince ışık yansımaları. Bunlar kontur değil,
-                // yazının kendi yüzeyinde highlight olarak kalır.
-                ctx.shadowBlur = 0;
-                ctx.globalAlpha = 0.62;
-                ctx.fillStyle = 'rgba(255,255,255,0.30)';
-                ctx.fillText(text, canvas.width / 2, y - 1.15);
-                ctx.globalAlpha = 1;
-            };
-
-            // SP1DER belirgin biçimde büyütüldü; alt slogan da onunla birlikte
-            // büyüyor fakat hiyerarşide net biçimde küçük kalıyor.
-            drawChromeText('SP1DER', 128, '900 126px "Montserrat", sans-serif', 68, 0.34);
-            drawChromeText('7/24 YÜZDE YÜZ MÜZİK', 268, '800 43px "Space Grotesk", sans-serif', 30, 0.22);
-
-            const ringTex = new THREE.CanvasTexture(canvas);
-            ringTex.minFilter = THREE.LinearFilter;
-            ringTex.magFilter = THREE.LinearFilter;
-            ringTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-
-            // Biraz daha geniş/yüksek orbit yüzeyi: büyüyen yazı sıkışmadan dolaşır.
-            const ringGeo = new THREE.CylinderGeometry(baseRadius + 0.36, baseRadius + 0.36, 0.82, 72, 1, true);
-            const ringMat = new THREE.MeshBasicMaterial({
-                map: ringTex,
-                transparent: true,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                depthTest: true,
-                opacity: 0.98
-            });
-
-            // Gerçek hacim hissi: aynı yazı dokusunu çok ince yarıçap farklarıyla
-            // üst üste yerleştiriyoruz. Böylece orbit dönerken harflerin metalik
-            // yan yüzeyi/kalınlığı görünür; düz sticker hissi kaybolur.
-            ringDepthMeshes.forEach(m => scene.remove(m));
-            ringDepthMeshes = [];
-
-            const depthLayers = 7;
-            for (let i = depthLayers; i >= 1; i--) {
-                const t = i / depthLayers;
-                const depthGeo = new THREE.CylinderGeometry(
-                    baseRadius + 0.36 - i * 0.012,
-                    baseRadius + 0.36 - i * 0.012,
-                    0.82, 72, 1, true
-                );
-                const depthMat = new THREE.MeshBasicMaterial({
-                    map: ringTex,
-                    transparent: true,
-                    side: THREE.DoubleSide,
-                    depthWrite: false,
-                    depthTest: true,
-                    opacity: 0.18 + (1 - t) * 0.16,
-                    color: new THREE.Color(0.28 + (1 - t) * 0.24, 0.30 + (1 - t) * 0.24, 0.33 + (1 - t) * 0.24)
-                });
-                const depthMesh = new THREE.Mesh(depthGeo, depthMat);
-                depthMesh.rotation.z = 0.08;
-                depthMesh.renderOrder = 0;
-                ringDepthMeshes.push(depthMesh);
-                scene.add(depthMesh);
+            // V3'teki katmanlı 2D silindir tekniği kaldırıldı.
+            // Bu sürümde harflerin kendisi gerçek THREE.TextGeometry: ön kapak,
+            // arka kapak, bevel ve fiziksel yan yüzeyleri olan gerçek 3D mesh.
+            if (!THREE.FontLoader || !THREE.TextGeometry) {
+                console.warn('3D text modules yüklenemedi.');
+                return;
             }
 
-            ringMesh = new THREE.Mesh(ringGeo, ringMat);
-            ringMesh.rotation.z = 0.08;
-            ringMesh.renderOrder = 1;
-            // Depth test korunuyor: yazı ön tarafta görünür, arka tarafta dünyanın arkasına geçer.
-            scene.add(ringMesh);
+            if (orbitTextGroup) scene.remove(orbitTextGroup);
+            orbitTextGroup = new THREE.Group();
+            orbitTextGroup.rotation.z = 0.08;
+            scene.add(orbitTextGroup);
+
+            const fontLoader = new THREE.FontLoader();
+            fontLoader.load(
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/helvetiker_bold.typeface.json',
+                (font) => {
+                    const chromeFace = new THREE.MeshPhysicalMaterial({
+                        color: 0xdde3e8,
+                        metalness: 1.0,
+                        roughness: 0.16,
+                        clearcoat: 0.9,
+                        clearcoatRoughness: 0.12,
+                        reflectivity: 1.0,
+                        side: THREE.FrontSide,
+                        depthTest: true,
+                        depthWrite: true
+                    });
+
+                    // Extrusion/yan yüzey biraz daha koyu metal. Harf arkadan dönerken
+                    // artık düz bir texture değil, kalın metal gövde ve arka kapak görünür.
+                    const chromeSide = new THREE.MeshPhysicalMaterial({
+                        color: 0x69727b,
+                        metalness: 1.0,
+                        roughness: 0.24,
+                        clearcoat: 0.55,
+                        clearcoatRoughness: 0.2,
+                        reflectivity: 0.9,
+                        side: THREE.FrontSide,
+                        depthTest: true,
+                        depthWrite: true
+                    });
+                    orbitChromeMaterials = [chromeFace, chromeSide];
+
+                    const makeText = (text, size, depth, bevel, y) => {
+                        const geo = new THREE.TextGeometry(text, {
+                            font,
+                            size,
+                            height: depth,
+                            curveSegments: 8,
+                            bevelEnabled: true,
+                            bevelThickness: bevel,
+                            bevelSize: bevel * 0.72,
+                            bevelOffset: 0,
+                            bevelSegments: 4
+                        });
+                        geo.computeBoundingBox();
+                        const box = geo.boundingBox;
+                        const width = box.max.x - box.min.x;
+                        const height = box.max.y - box.min.y;
+                        geo.translate(-width / 2 - box.min.x, -height / 2 - box.min.y, -depth / 2);
+
+                        const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
+                        mesh.position.set(0, y, baseRadius + 0.34);
+                        mesh.castShadow = false;
+                        mesh.receiveShadow = false;
+                        mesh.renderOrder = 1;
+                        orbitTextGroup.add(mesh);
+                        return mesh;
+                    };
+
+                    // Ana yazı daha iri; slogan onun altında belirgin ama ikincil.
+                    makeText('SP1DER', 0.56, 0.115, 0.028, 0.19);
+                    makeText('7/24 YUZDE YUZ MUZIK', 0.145, 0.060, 0.014, -0.25);
+
+                    // Krom yüzeyin canlı görünmesi için iki küçük hareketli ışık.
+                    // Bunlar sahneyi patlatmaz; esas olarak metal yazının highlight'ını gezer.
+                    if (!orbitLightA) {
+                        orbitLightA = new THREE.PointLight(0xffffff, 2.2, 8, 2);
+                        orbitLightB = new THREE.PointLight(0xb9d8ff, 1.35, 7, 2);
+                        scene.add(orbitLightA);
+                        scene.add(orbitLightB);
+                    }
+                },
+                undefined,
+                (err) => console.warn('3D SP1DER fontu yüklenemedi:', err)
+            );
         }
 
         document.fonts.ready.then(() => { createOrbitRingText(); });
@@ -1312,11 +1301,28 @@ function animateGlobe(currentTime) {
             const ringSpeed = isPlayingState ? 0.75 : 0.22;
 
             globeMesh.rotation.y += globeSpeed * deltaTime;
-            if (ringMesh) {
-                ringMesh.rotation.y -= ringSpeed * deltaTime;
-                // Tüm hacim katmanları ana yüzeyle birebir senkron döner.
-                for (let i = 0; i < ringDepthMeshes.length; i++) {
-                    ringDepthMeshes[i].rotation.y = ringMesh.rotation.y;
+            if (orbitTextGroup) {
+                orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
+
+                // Canlı krom: iki ışık farklı hızlarda yazının çevresinde dolaşır.
+                // MeshPhysicalMaterial gerçek yüzey normallerine tepki verdiği için
+                // ön, bevel, yan ve arka yüzeylerin parlaması açıya göre doğal değişir.
+                const chromeT = currentTime * 0.001;
+                if (orbitLightA) {
+                    orbitLightA.position.set(
+                        Math.cos(chromeT * 1.15) * 3.4,
+                        1.35 + Math.sin(chromeT * 0.72) * 0.8,
+                        Math.sin(chromeT * 1.15) * 3.4
+                    );
+                    orbitLightA.intensity = 1.8 + (Math.sin(chromeT * 2.1) * 0.5 + 0.5) * 1.1;
+                }
+                if (orbitLightB) {
+                    orbitLightB.position.set(
+                        Math.cos(-chromeT * 0.82 + 2.2) * 3.0,
+                        -0.8 + Math.cos(chromeT * 0.61) * 0.7,
+                        Math.sin(-chromeT * 0.82 + 2.2) * 3.0
+                    );
+                    orbitLightB.intensity = 0.9 + (Math.cos(chromeT * 1.55) * 0.5 + 0.5) * 0.9;
                 }
             }
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
