@@ -103,6 +103,22 @@
             background: transparent;
         }
 
+        .photo-web-3d {
+            position:absolute;
+            display:block;
+            pointer-events:none;
+            user-select:none;
+            -webkit-user-drag:none;
+            object-fit:contain;
+            object-position:center;
+            transform-origin:center center;
+            transform-style:preserve-3d;
+            backface-visibility:visible;
+            will-change:transform;
+            mix-blend-mode:screen;
+            filter:brightness(1.08) contrast(1.18) saturate(0.78);
+        }
+
         #photo-webs-container canvas {
             display: block !important;
             position: absolute;
@@ -599,21 +615,17 @@
 
     <script>
         // ================================================================
-        // GERÇEK PNG ÖRÜMCEK AĞLARI — THREE.JS 3D
+        // GERÇEK FOTOĞRAF ÖRÜMCEK AĞLARI — CORS-SAFE 3D DOM
         // ================================================================
-        // Ağlar internetten PNG olarak yüklenir. Local asset gerekmez.
-        // Fotoğraf PNG'lerinin kendi arka planı olsa bile aşağıdaki shader,
-        // parlak/ince ağ dokusunu alpha'ya çevirerek yalnızca ağın görünmesini
-        // sağlar. Böylece ekranda dikdörtgen fotoğraf görünmez.
+        // HızlıResim Access-Control-Allow-Origin vermediği için bu görseller
+        // THREE.TextureLoader/WebGL texture olarak kullanılamaz.
+        // <img> etiketi ise CORS istemeden görseli gösterebilir.
+        // Bu nedenle gerçek JPG'leri DOM üzerinde 3D transform ile kullanıyoruz.
+        // Siyah fotoğraf zemini mix-blend-mode: screen ile siyah siteye karışır.
 
         const photoWebsContainer = document.getElementById('photo-webs-container');
 
-        // Kullanıcının verdiği gerçek Spider Web görselleri.
-        // JPG olmaları sorun değil: shader siyaha yakın arka planı transparanlaştırır.
-        // HızlıResim CORS göndermediği için görselleri CORS destekleyen
-        // wsrv.nl proxy üzerinden alıyoruz. Böylece Three.js texture olarak
-        // güvenli biçimde yüklenebiliyor.
-        const originalWebImages = [
+        const realWebImages = [
             "https://i.hizliresim.com/arcicjzl.jpg",
             "https://i.hizliresim.com/ry4pdmnx.jpg",
             "https://i.hizliresim.com/pqj1kmyr.jpg",
@@ -623,136 +635,131 @@
             "https://i.hizliresim.com/xokoau6e.jpg"
         ];
 
-        const realWebImages = originalWebImages.map(url =>
-            "https://wsrv.nl/?url=" + encodeURIComponent(url) +
-            "&output=png&q=100&maxage=30d"
-        );
+        // Mevcut ana animasyon döngüsü bu nesneleri çağırdığı için uyumluluk
+        // amaçlı bırakıldı. Gerçek ağlar aşağıdaki DOM 3D sistemiyle çizilir.
+        const webScene = {};
+        const webCamera = {};
+        const webRenderer = { render: function() {} };
 
-        const webScene = new THREE.Scene();
-        const webCamera = new THREE.PerspectiveCamera(52, 1, 0.1, 100);
-        webCamera.position.set(0, 0, 7);
+        let photoWebElements = [];
+        let webAnimationTime = 0;
 
-        const webRenderer = new THREE.WebGLRenderer({ alpha:true, antialias:true, powerPreference:"high-performance" });
-        webRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-        webRenderer.setClearColor(0x000000, 0);
-        webRenderer.domElement.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;';
-        photoWebsContainer.appendChild(webRenderer.domElement);
-
-        const webTextureLoader = new THREE.TextureLoader();
-        webTextureLoader.setCrossOrigin('anonymous');
-        const webGroup = new THREE.Group();
-        webScene.add(webGroup);
-
-        function resizeWebScene(){
-            const w=Math.max(1,photoWebsContainer.clientWidth||innerWidth), h=Math.max(1,photoWebsContainer.clientHeight||innerHeight);
-            webCamera.aspect=w/h; webCamera.updateProjectionMatrix(); webRenderer.setSize(w,h,false);
+        function shuffleArray(array) {
+            const result = [...array];
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
         }
-        function randomBetween(a,b){return a+Math.random()*(b-a);}
-        function shuffleArray(a){
-            const r=a.slice();
-            for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}
-            return r;
+
+        function randomBetween(a, b) {
+            return a + Math.random() * (b - a);
         }
-        function screenToWorld(xp,yp,z){
-            const nx=xp/50-1, ny=1-yp/50;
-            const d=Math.abs(webCamera.position.z-z), f=THREE.MathUtils.degToRad(webCamera.fov);
-            const h=2*Math.tan(f/2)*d, w=h*webCamera.aspect;
-            return {x:nx*w/2,y:ny*h/2,z};
-        }
-        function getWebSpawnZones(){
-            if(innerWidth<600)return[
-                {x:[1,29],y:[4,27]},{x:[71,99],y:[4,27]},
-                {x:[1,29],y:[68,96]},{x:[71,99],y:[68,96]}
-            ];
-            return[
-                {x:[-4,22],y:[2,25]},{x:[78,104],y:[2,25]},
-                {x:[-5,23],y:[72,103]},{x:[77,105],y:[72,103]},
-                {x:[-7,13],y:[36,63]},{x:[87,107],y:[36,63]}
+
+        function getWebSpawnZones() {
+            const mobile = window.innerWidth < 600;
+            return mobile ? [
+                {x:[2,24], y:[3,24]}, {x:[76,98], y:[3,24]},
+                {x:[2,24], y:[75,97]}, {x:[76,98], y:[75,97]},
+                {x:[0,17], y:[39,59]}, {x:[83,100], y:[39,59]}
+            ] : [
+                {x:[1,18], y:[2,24]}, {x:[82,99], y:[2,24]},
+                {x:[1,19], y:[75,98]}, {x:[81,99], y:[75,98]},
+                {x:[0,11], y:[36,61]}, {x:[89,100], y:[36,61]},
+                {x:[20,32], y:[2,17]}, {x:[68,80], y:[2,17]}
             ];
         }
-        function loadWebTexture(url){
-            return new Promise((resolve,reject)=>webTextureLoader.load(url,t=>{
-                t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;t.generateMipmaps=false;
-                resolve(t);
-            },undefined,reject));
-        }
-        function destroyWebObjects(){
-            while(webGroup.children.length){
-                const m=webGroup.children.pop();
-                if(m.material){if(m.material.uniforms&&m.material.uniforms.map)m.material.uniforms.map.value=null;m.material.dispose();}
-                if(m.geometry)m.geometry.dispose();
-            }
-        }
 
-        // JPG'nin siyah zeminini WebGL'de alpha'ya çeviriyoruz. Ağın kendisi
-        // hâlâ kullanıcının verdiği gerçek görsel texture'ıdır; kodla ağ çizilmiyor.
-        const webVertexShader=`
-            varying vec2 vUv;
-            void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}
-        `;
-        const webFragmentShader=`
-            uniform sampler2D map; uniform float opacity; varying vec2 vUv;
-            void main(){
-                vec4 tex=texture2D(map,vUv);
-                float lum=dot(tex.rgb,vec3(0.2126,0.7152,0.0722));
-                float alpha=smoothstep(0.025,0.20,lum);
-                if(alpha<0.01) discard;
-                vec3 c=tex.rgb;
-                gl_FragColor=vec4(c,alpha*opacity);
-            }
-        `;
-
-        async function generatePhotoWebs(){
-            destroyWebObjects(); resizeWebScene();
-            const zones=shuffleArray(getWebSpawnZones());
-            const count=Math.min(zones.length,innerWidth<600?4:6);
-            const order=shuffleArray([...Array(realWebImages.length).keys()]);
-            const jobs=[];
-            for(let i=0;i<count;i++){
-                const idx=order[i%order.length];
-                jobs.push(loadWebTexture(realWebImages[idx]).then(texture=>({texture,idx,zone:zones[i]})).catch(error=>({error,idx,zone:zones[i]})));
-            }
-            const results=await Promise.all(jobs);
-            let shown=0;
-            results.forEach(({texture,idx,zone,error})=>{
-                if(!texture){console.warn('Spider web yüklenemedi:',realWebImages[idx],error);return;}
-                const img=texture.image, aspect=img&&img.height?img.width/img.height:1, mobile=innerWidth<600;
-                const h=randomBetween(mobile?1.35:1.55,mobile?2.15:2.75), w=h*aspect;
-                const material=new THREE.ShaderMaterial({
-                    uniforms:{map:{value:texture},opacity:{value:randomBetween(0.72,0.96)}},
-                    vertexShader:webVertexShader,fragmentShader:webFragmentShader,
-                    transparent:true,depthWrite:false,depthTest:false,side:THREE.DoubleSide
-                });
-                const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),material);
-                const z=randomBetween(0.8,3.0),p=screenToWorld(randomBetween(zone.x[0],zone.x[1]),randomBetween(zone.y[0],zone.y[1]),z);
-                mesh.position.set(p.x,p.y,z);
-                mesh.rotation.z=THREE.MathUtils.degToRad(randomBetween(-28,28));
-                mesh.rotation.x=THREE.MathUtils.degToRad(randomBetween(-8,8));
-                mesh.rotation.y=THREE.MathUtils.degToRad(randomBetween(-12,12));
-                mesh.scale.setScalar(THREE.MathUtils.clamp(1.12-z*0.06,0.88,1.08));
-                mesh.userData={baseX:p.x,baseY:p.y,baseZ:z,rz:mesh.rotation.z,rx:mesh.rotation.x,ry:mesh.rotation.y,phase:Math.random()*Math.PI*2,speed:randomBetween(.035,.075),rxA:randomBetween(.008,.018),ryA:randomBetween(.006,.014),rotA:randomBetween(.002,.006),rx:mesh.rotation.x,ry:mesh.rotation.y};
-                webGroup.add(mesh); shown++;
+        function clearPhotoWebs() {
+            photoWebElements.forEach(item => {
+                if (item.el && item.el.parentNode) item.el.parentNode.removeChild(item.el);
             });
-            console.log('Spider webs:',shown);
-            if(!shown)console.error('Spider webs: proxy üzerinden hiçbir görsel yüklenemedi.');
+            photoWebElements = [];
         }
-        let webAnimationTime=0;
-        function animatePhotoWebs(dt){
-            webAnimationTime+=dt;
-            for(const m of webGroup.children){
-                const d=m.userData,t=webAnimationTime*d.speed+d.phase;
-                m.position.x=d.baseX+Math.cos(t)*d.rxA;
-                m.position.y=d.baseY+Math.sin(t)*d.ryA;
-                m.position.z=d.baseZ+Math.sin(t*.7)*.004;
-                m.rotation.z=d.rz+Math.sin(t*.9)*d.rotA;
-                m.rotation.x=d.rx+Math.cos(t*.65)*d.rotA*.35;
-                m.rotation.y=d.ry+Math.sin(t*.55)*d.rotA*.30;
+
+        function createWebElement(src, zone, index) {
+            const img = document.createElement('img');
+            img.className = 'photo-web-3d';
+            img.src = src;
+            img.alt = '';
+            img.decoding = 'async';
+            img.loading = 'eager';
+            img.draggable = false;
+            img.setAttribute('aria-hidden', 'true');
+
+            const item = {
+                el: img,
+                left: randomBetween(zone.x[0], zone.x[1]),
+                top: randomBetween(zone.y[0], zone.y[1]),
+                depth: randomBetween(-70, 80),
+                width: window.innerWidth < 600 ? randomBetween(15, 25) : randomBetween(12, 22),
+                rotX: randomBetween(-5, 5),
+                rotY: randomBetween(-8, 8),
+                rotZ: randomBetween(-32, 32),
+                scale: randomBetween(0.88, 1.12),
+                phase: Math.random() * Math.PI * 2,
+                speed: randomBetween(0.07, 0.13),
+                moveX: randomBetween(0.05, 0.14),
+                moveY: randomBetween(0.04, 0.10),
+                moveZ: randomBetween(1, 3.5),
+                rotate: randomBetween(0.08, 0.24)
+            };
+
+            img.style.left = item.left + 'vw';
+            img.style.top = item.top + 'vh';
+            img.style.width = item.width + 'vw';
+            img.style.height = 'auto';
+            img.style.opacity = randomBetween(0.55, 0.88).toFixed(3);
+            img.style.zIndex = String(3 + index);
+            img.style.visibility = 'visible';
+
+            img.addEventListener('error', () => {
+                console.warn('Spider web görseli yüklenemedi:', src);
+                if (img.parentNode) img.parentNode.removeChild(img);
+            }, {once:true});
+
+            return item;
+        }
+
+        function generatePhotoWebs() {
+            clearPhotoWebs();
+
+            const zones = shuffleArray(getWebSpawnZones());
+            const sources = shuffleArray(realWebImages);
+            const count = Math.min(window.innerWidth < 600 ? 4 : 6, zones.length, sources.length);
+
+            for (let i = 0; i < count; i++) {
+                const item = createWebElement(sources[i], zones[i], i);
+                photoWebsContainer.appendChild(item.el);
+                photoWebElements.push(item);
             }
+
+            console.log('Spider webs:', photoWebElements.length, '(direct HızlıResim DOM 3D)');
         }
-        resizeWebScene();
+
+        function animatePhotoWebs(deltaTime) {
+            webAnimationTime += deltaTime;
+
+            photoWebElements.forEach(item => {
+                const t = webAnimationTime * item.speed + item.phase;
+
+                // Sürekli yukarı/aşağı sürüklenme yok.
+                // Ağ yalnızca başlangıç noktasının çevresinde çok hafif sallanır.
+                const dx = Math.cos(t) * item.moveX;
+                const dy = Math.sin(t) * item.moveY;
+                const dz = Math.sin(t * 0.75) * item.moveZ;
+                const rz = Math.sin(t * 0.65) * item.rotate;
+                const rx = item.rotX + Math.sin(t * 0.48) * 0.55;
+                const ry = item.rotY + Math.cos(t * 0.55) * 0.7;
+
+                item.el.style.transform =
+                    `translate3d(calc(-50% + ${dx}vw), calc(-50% + ${dy}vh), ${item.depth + dz}px) ` +
+                    `rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${item.rotZ + rz}deg) scale(${item.scale})`;
+            });
+        }
+
         generatePhotoWebs();
-        window.addEventListener('load',resizeWebScene);
-        window.addEventListener('resize',resizeWebScene);
 
         // Arka Plan "5" Yazıları Süslemeleri
         const gothicWords = ["5"];
