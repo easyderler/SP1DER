@@ -1312,7 +1312,7 @@
         const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
         
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
         globeContainer.appendChild(renderer.domElement);
 
         function resizeThreeJS() {
@@ -1350,9 +1350,13 @@
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
 
-        const ringBarsCount = 80; 
+        const ringBarsCount = 80;
         const ringBarsGroup = new THREE.Group();
         const ringBarMeshes = [];
+        // Açılar ve trigonometrik değerler bir kez hesaplanır; her frame yeniden Math.sin/cos yapılmaz.
+        const ringBarAngles = new Float32Array(ringBarsCount);
+        const ringBarCos = new Float32Array(ringBarsCount);
+        const ringBarSin = new Float32Array(ringBarsCount);
 
         const barHeight = 0.45;
         const barGeo = new THREE.BoxGeometry(0.035, barHeight, 0.035);
@@ -1363,8 +1367,11 @@
             const bar = new THREE.Mesh(barGeo, barMat);
             
             const angle = (i / ringBarsCount) * Math.PI * 2;
+            ringBarAngles[i] = angle;
+            ringBarCos[i] = Math.cos(angle);
+            ringBarSin[i] = Math.sin(angle);
             const radius = baseRadius + 0.01;
-            bar.position.set(Math.cos(angle) * radius, Math.sin(angle) * radius, 0);
+            bar.position.set(ringBarCos[i] * radius, ringBarSin[i] * radius, 0);
             bar.rotation.z = angle - Math.PI / 2;
             
             ringBarsGroup.add(bar);
@@ -1427,6 +1434,7 @@
         let lastTime = performance.now();
         const rootStyle = document.documentElement.style;
         const idleGlobeScale = new THREE.Vector3(1, 1, 1);
+        let lastGlitchUpdate = 0;
 
         // TEK BASS KAYNAĞI:
         // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
@@ -1470,8 +1478,12 @@ const bassScale = 1 + bassPower * 0.04;
                 }
 
                 if (bassPower > 0.65) {
-                    rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
-                    rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 8).toFixed(1) + 'px');
+                    // Glitch konumu her frame değil, yaklaşık 12.5 kez/sn güncellenir.
+                    if (currentTime - lastGlitchUpdate > 80) {
+                        lastGlitchUpdate = currentTime;
+                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 8).toFixed(1) + 'px');
+                    }
                     mainWrapper.classList.add('wrapper-glitch');
                 } else {
                     mainWrapper.classList.remove('wrapper-glitch');
@@ -1483,8 +1495,7 @@ const bassScale = 1 + bassPower * 0.04;
                     const scaleY = 0.25 + rnd * 1.1 * (bassPower + 0.2);
                     
                     const currentRadius = (baseRadius * bassScale) + 0.01;
-                    const angle = (idx / ringBarsCount) * Math.PI * 2;
-                    bar.position.set(Math.cos(angle) * currentRadius, Math.sin(angle) * currentRadius, 0);
+                    bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
 
                     bar.scale.set(1, scaleY, 1);
                     bar.material.opacity = 0.6 + rnd * 0.4;
@@ -1508,8 +1519,7 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
                 for (let idx = 0; idx < ringBarsCount; idx++) {
                     const bar = ringBarMeshes[idx];
                     const currentRadius = baseRadius + 0.01;
-                    const angle = (idx / ringBarsCount) * Math.PI * 2;
-                    bar.position.set(Math.cos(angle) * currentRadius, Math.sin(angle) * currentRadius, 0);
+                    bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
 
                     bar.scale.set(1, 0.25, 1);
                     bar.material.opacity = 0.35;
