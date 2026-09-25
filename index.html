@@ -47,6 +47,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            perspective: 1000px;
         }
 
         body::before {
@@ -94,15 +95,17 @@
             z-index: 3;
             pointer-events: none;
             overflow: hidden;
+            transform-style: preserve-3d;
         }
 
         .real-web-img {
             position: absolute;
             pointer-events: none;
             object-fit: contain;
-            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.45)) contrast(1.25) brightness(1.1);
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.6)) contrast(1.3) brightness(1.2);
             will-change: transform, opacity;
             transition: opacity 1.5s ease-in-out;
+            transform-style: preserve-3d;
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -591,61 +594,63 @@
     </div>
 
     <script>
-        // GERÇEK, 3D DETAYLI VE YÜKSEK ÇÖZÜNÜRLÜKLÜ PNG ÖRÜMCEK AĞLARI
+        // GERÇEKÇİ, 3D DETAYLI SVG & FOTOĞRAF ÖRÜMCEK AĞLARI DATA-URI (KIRILMA VEYA YÜKLENMEME RİSKİ SIFIR)
+        const svgWeb1 = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' fill='none' stroke='white' stroke-width='1.2' opacity='0.85'><path d='M250 250 L50 50 M250 250 L450 50 M250 250 L450 450 M250 250 L50 450 M250 250 L250 20 M250 250 L480 250 M250 250 L250 480 M250 250 L20 250'/><path d='M210 210 Q250 200 290 210 Q300 250 290 290 Q250 300 210 290 Q200 250 210 210 Z'/><path d='M170 170 Q250 150 330 170 Q350 250 330 330 Q250 350 170 330 Q150 250 170 170 Z'/><path d='M120 120 Q250 90 380 120 Q410 250 380 380 Q250 410 120 380 Q90 250 120 120 Z'/><path d='M70 70 Q250 30 430 70 Q470 250 430 430 Q250 470 70 430 Q30 250 70 70 Z'/></svg>";
+        const svgWeb2 = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500' fill='none' stroke='white' stroke-width='1.5' opacity='0.75'><path d='M0 0 L500 500 M500 0 L0 500 M250 0 L250 500 M0 250 L500 250'/><path d='M100 100 Q250 130 400 100 Q370 250 400 400 Q250 370 100 400 Q130 250 100 100 Z'/><path d='M180 180 Q250 200 320 180 Q300 250 320 320 Q250 300 180 320 Q200 250 180 180 Z'/></svg>";
+
         const realWebImages = [
+            svgWeb1,
+            svgWeb2,
             "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Spider_web.png/600px-Spider_web.png",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Spiders_web.png/600px-Spiders_web.png",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Spider_web_isolated.png/600px-Spider_web_isolated.png",
-            "https://raw.githubusercontent.com/sammydow/assets/main/spiderweb1.png",
-            "https://raw.githubusercontent.com/sammydow/assets/main/spiderweb2.png"
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Spider_web_isolated.png/600px-Spider_web_isolated.png"
         ];
 
         function generatePhotoWebs() {
             const container = document.getElementById('photo-webs-container');
             container.innerHTML = '';
 
-            // Ekran üzerinde kesinlikle üst üste binmeyi engelleyen koordinat alanları (Bölgeler)
             const zones = [
-                { top: [-5, 8], left: [-5, 12] },     // Sol Üst Köşe
-                { top: [-5, 8], left: [72, 90] },     // Sağ Üst Köşe
-                { top: [72, 88], left: [-5, 12] },    // Sol Alt Köşe
-                { top: [72, 88], left: [72, 90] },    // Sağ Alt Köşe
+                { top: [-5, 8], left: [-5, 12] },     // Sol Üst
+                { top: [-5, 8], left: [72, 90] },     // Sağ Üst
+                { top: [72, 88], left: [-5, 12] },    // Sol Alt
+                { top: [72, 88], left: [72, 90] },    // Sağ Alt
                 { top: [34, 50], left: [-8, -1] },    // Sol Orta
                 { top: [34, 50], left: [86, 95] }     // Sağ Orta
             ];
 
-            // Bölgeleri rastgele sırala
             const shuffledZones = zones.sort(() => 0.5 - Math.random());
-            const webCount = 5; // Sahnedeki ağ sayısı
-
-            // Görselleri rastgele karıştır
-            const shuffledImages = [...realWebImages].sort(() => 0.5 - Math.random());
+            const webCount = 6;
 
             for (let i = 0; i < webCount; i++) {
-                const zone = shuffledZones[i];
+                const zone = shuffledZones[i % shuffledZones.length];
                 const img = document.createElement('img');
                 
-                const selectedSrc = shuffledImages[i % shuffledImages.length];
+                const selectedSrc = realWebImages[i % realWebImages.length];
                 img.src = selectedSrc;
                 img.className = 'real-web-img';
 
-                // Kırık görsel olursa çalışması garanti yedek görsel seçeneği
+                // Görsel açılmazsa güvenli SVG yedek
                 img.onerror = function() {
-                    this.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Spider_web.png/600px-Spider_web.png";
+                    this.src = svgWeb1;
                 };
 
                 const topPos = Math.random() * (zone.top[1] - zone.top[0]) + zone.top[0];
                 const leftPos = Math.random() * (zone.left[1] - zone.left[0]) + zone.left[0];
 
-                const size = Math.floor(Math.random() * 90 + 270); // 270px - 360px fotogerçekçi ebat
+                const size = Math.floor(Math.random() * 100 + 280); 
                 const rotation = Math.floor(Math.random() * 360);
-                const opacity = (Math.random() * 0.25 + 0.45).toFixed(2); // Şeffaflık Dengesi
+                const opacity = (Math.random() * 0.25 + 0.45).toFixed(2);
+                
+                // 3D derinlik açıları
+                const rotX = Math.floor(Math.random() * 30 - 15);
+                const rotY = Math.floor(Math.random() * 30 - 15);
+                const translateZ = Math.floor(Math.random() * 100 - 50);
 
                 img.style.top = topPos + 'vh';
                 img.style.left = leftPos + 'vw';
                 img.style.width = size + 'px';
                 img.style.height = size + 'px';
-                img.style.transform = `rotate(${rotation}deg)`;
+                img.style.transform = `translateZ(${translateZ}px) rotateX(${rotX}deg) rotateY(${rotY}deg) rotate(${rotation}deg)`;
                 img.style.opacity = opacity;
 
                 container.appendChild(img);
