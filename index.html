@@ -657,24 +657,26 @@
             return a + Math.random() * (b - a);
         }
 
-        // Dünya ve ana içerik alanından uzak, kenarlara dağılmış bölgeler.
-        // Bölgeler birbirinden ayrı olduğu için ağlar aynı noktaya doğmaz.
+        // Örümcek ağlarını sayfaya dengeli dağıt.
+        // Konumlar "merkez noktası" olarak tutuluyor; böylece CSS'deki
+        // translate(-50%, -50%) ile gerçek görsel alanı doğru hesaplanıyor.
         function getWebSpawnZones() {
             const mobile = window.innerWidth < 600;
-            // Büyük ağlar için bölgeler birbirinden bilinçli olarak ayrılır.
-            // Son konum yine çarpışma kontrolünden geçirilir.
+
+            // Her ağ için geniş bir bölge. Ağlar yalnızca sol kenara
+            // sıkışmaz; ekranın tamamına dengeli biçimde yayılır.
             return mobile ? [
-                {x:[-10, 4],  y:[-8, 14]},
-                {x:[84, 98],   y:[-8, 14]},
-                {x:[-10, 4],  y:[72, 96]},
-                {x:[84, 98],   y:[72, 96]},
-                {x:[-12, -2], y:[34, 54]}
+                {x:[8, 30],  y:[10, 30]},
+                {x:[70, 92], y:[10, 30]},
+                {x:[8, 30],  y:[68, 90]},
+                {x:[70, 92], y:[68, 90]},
+                {x:[38, 62], y:[38, 62]}
             ] : [
-                {x:[-12, 2], y:[-8, 13]},
-                {x:[84, 98], y:[-8, 13]},
-                {x:[-12, 2], y:[76, 98]},
-                {x:[84, 98], y:[76, 98]},
-                {x:[-14, -4], y:[35, 57]}
+                {x:[8, 30],  y:[8, 28]},
+                {x:[70, 92], y:[8, 28]},
+                {x:[8, 30],  y:[72, 92]},
+                {x:[70, 92], y:[72, 92]},
+                {x:[38, 62], y:[40, 60]}
             ];
         }
 
@@ -686,15 +688,16 @@
         }
 
         function webRect(item, extraX = 0, extraY = 0) {
-            // Render boyutu yaklaşık olarak vw üzerinden hesaplanır.
-            // Yükseklik bilinmediği için muhafazakâr bir oran kullanıyoruz.
+            // left/top artık görselin merkezi. Bu nedenle çarpışma alanı
+            // merkezin iki yanına bölünerek hesaplanıyor.
             const width = item.width;
             const height = width * 0.72;
+
             return {
-                left: item.left + extraX,
-                top: item.top + extraY,
-                right: item.left + extraX + width,
-                bottom: item.top + extraY + height
+                left: item.left + extraX - width / 2,
+                top: item.top + extraY - height / 2,
+                right: item.left + extraX + width / 2,
+                bottom: item.top + extraY + height / 2
             };
         }
 
@@ -707,12 +710,19 @@
             );
         }
 
-        function placeWebWithoutOverlap(item, placed) {
+        function placeWebWithoutOverlap(item, placed, index) {
             const mobile = window.innerWidth < 600;
             const zones = getWebSpawnZones();
 
-            for (let attempt = 0; attempt < 120; attempt++) {
-                const zone = zones[Math.floor(Math.random() * zones.length)];
+            // Önce kendi bölgesinde çok sayıda farklı aday dene.
+            // Böylece her ağ mümkün olduğunca farklı bir alana yerleşir.
+            const preferredZone = zones[index % zones.length];
+
+            for (let attempt = 0; attempt < 180; attempt++) {
+                const zone = attempt < 90
+                    ? preferredZone
+                    : zones[Math.floor(Math.random() * zones.length)];
+
                 const candidate = {
                     left: randomBetween(zone.x[0], zone.x[1]),
                     top: randomBetween(zone.y[0], zone.y[1])
@@ -722,25 +732,41 @@
                 item.top = candidate.top;
 
                 const current = webRect(item);
-                if (!placed.some(other => rectsOverlap(current, webRect(other), mobile ? 2.5 : 3.5))) {
+
+                if (!placed.some(other =>
+                    rectsOverlap(current, webRect(other), mobile ? 2 : 4)
+                )) {
                     return true;
                 }
             }
 
-            // Çok büyük ağlarda son çare: kenar yuvalarını sırayla kullan.
+            // Çok büyük ağlarda bile aynı noktaya düşmemesi için
+            // son çare olarak ekranın beş ayrı merkezini kullan.
             const fallback = mobile
                 ? [
-                    [-12, -8], [82, -8], [-12, 74], [82, 74], [-15, 34]
+                    [19, 20],
+                    [81, 20],
+                    [19, 80],
+                    [81, 80],
+                    [50, 50]
                 ]
                 : [
-                    [-14, -8], [82, -8], [-14, 78], [82, 78], [-16, 36]
+                    [19, 18],
+                    [81, 18],
+                    [19, 82],
+                    [81, 82],
+                    [50, 50]
                 ];
 
             for (const [left, top] of fallback) {
                 item.left = left;
                 item.top = top;
+
                 const current = webRect(item);
-                if (!placed.some(other => rectsOverlap(current, webRect(other), 2))) {
+
+                if (!placed.some(other =>
+                    rectsOverlap(current, webRect(other), mobile ? 1.5 : 3)
+                )) {
                     return true;
                 }
             }
@@ -766,22 +792,24 @@
                 left: 0,
                 top: 0,
                 depth: randomBetween(-80, 90),
-                width: mobile ? randomBetween(40, 58) : randomBetween(34, 52),
+
+                // Ağları önceki halden belirgin biçimde daha büyük yap.
+                width: mobile ? randomBetween(48, 62) : randomBetween(42, 58),
+
                 rotX: randomBetween(-4, 4),
                 rotY: randomBetween(-7, 7),
                 rotZ: randomBetween(-28, 28),
-                scale: randomBetween(0.88, 1.12),
+                scale: randomBetween(0.92, 1.08),
 
-                // Her ağ kendi merkezinin çevresinde çok hafif hareket eder.
-                // Sürekli bir yöne gitmez; başlangıç konumunu terk etmez.
                 phase: Math.random() * Math.PI * 2,
                 speed: randomBetween(0.75, 1.15),
-                moveX: randomBetween(1.8, 4.0),
-                moveY: randomBetween(1.4, 3.2),
+                moveX: randomBetween(1.5, 3.2),
+                moveY: randomBetween(1.2, 2.8),
                 moveZ: randomBetween(1.0, 3.0),
                 rotate: randomBetween(0.18, 0.45)
             };
 
+            // left/top ağın merkezidir.
             img.style.left = item.left + 'vw';
             img.style.top = item.top + 'vh';
             img.style.width = item.width + 'vw';
@@ -816,7 +844,7 @@
                 const item = createWebElement(sources[i], null, i);
 
                 // Büyük ağlar için gerçek bir 2D çarpışma kontrolü.
-                placeWebWithoutOverlap(item, placed);
+                placeWebWithoutOverlap(item, placed, i);
 
                 photoWebsContainer.appendChild(item.el);
                 photoWebElements.push(item);
