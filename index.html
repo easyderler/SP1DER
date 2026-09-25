@@ -1183,11 +1183,12 @@
         let orbitChromeMaterials = [];
         let orbitLightA = null;
         let orbitLightB = null;
+        let orbitRimLight = null;
 
         function createOrbitRingText() {
-            // V3'teki katmanlı 2D silindir tekniği kaldırıldı.
-            // Bu sürümde harflerin kendisi gerçek THREE.TextGeometry: ön kapak,
-            // arka kapak, bevel ve fiziksel yan yüzeyleri olan gerçek 3D mesh.
+            // Gerçek 3D + gerçekten kavisli yazı:
+            // Her harf ayrı TextGeometry olarak üretilir ve silindirik bir yay üzerinde
+            // konumlandırılır. Böylece metin düz bir tabela gibi değil, dünyanın formunu sarar.
             if (!THREE.FontLoader || !THREE.TextGeometry) {
                 console.warn('3D text modules yüklenemedi.');
                 return;
@@ -1195,7 +1196,7 @@
 
             if (orbitTextGroup) scene.remove(orbitTextGroup);
             orbitTextGroup = new THREE.Group();
-            orbitTextGroup.rotation.x = -0.30; // yörüngeyi kameraya göre yatır: ekranda oval görünür
+            orbitTextGroup.rotation.x = -0.30;
             orbitTextGroup.rotation.z = 0.08;
             scene.add(orbitTextGroup);
 
@@ -1203,75 +1204,139 @@
             fontLoader.load(
                 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/helvetiker_bold.typeface.json',
                 (font) => {
+                    // Krom yüzey: açık gümüş taban + koyu yan yüzey. Işık hareket ettikçe
+                    // clearcoat/specular yansımaları yüzeyde canlı bir chrome geçişi oluşturur.
                     const chromeFace = new THREE.MeshPhysicalMaterial({
-                        color: 0xf2f5f7,
-                        metalness: 0.88,
-                        roughness: 0.22,
+                        color: 0xe8edf1,
+                        metalness: 1.0,
+                        roughness: 0.14,
                         clearcoat: 1.0,
-                        clearcoatRoughness: 0.10,
+                        clearcoatRoughness: 0.055,
                         reflectivity: 1.0,
-                        emissive: 0x24282c,
-                        emissiveIntensity: 0.34,
-                        side: THREE.FrontSide,
+                        emissive: 0x171a1d,
+                        emissiveIntensity: 0.18,
+                        side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
                     });
 
-                    // Extrusion/yan yüzey biraz daha koyu metal. Harf arkadan dönerken
-                    // artık düz bir texture değil, kalın metal gövde ve arka kapak görünür.
                     const chromeSide = new THREE.MeshPhysicalMaterial({
-                        color: 0xaeb7bf,
-                        metalness: 0.92,
-                        roughness: 0.28,
-                        clearcoat: 0.72,
-                        clearcoatRoughness: 0.16,
+                        color: 0x737d86,
+                        metalness: 1.0,
+                        roughness: 0.20,
+                        clearcoat: 0.92,
+                        clearcoatRoughness: 0.09,
                         reflectivity: 1.0,
-                        emissive: 0x171a1d,
-                        emissiveIntensity: 0.24,
-                        side: THREE.FrontSide,
+                        emissive: 0x0b0d0f,
+                        emissiveIntensity: 0.12,
+                        side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
                     });
                     orbitChromeMaterials = [chromeFace, chromeSide];
 
-                    const makeText = (text, size, depth, bevel, y) => {
-                        const geo = new THREE.TextGeometry(text, {
-                            font,
-                            size,
-                            height: depth,
-                            curveSegments: 8,
-                            bevelEnabled: true,
-                            bevelThickness: bevel,
-                            bevelSize: bevel * 0.72,
-                            bevelOffset: 0,
-                            bevelSegments: 4
-                        });
-                        geo.computeBoundingBox();
-                        const box = geo.boundingBox;
-                        const width = box.max.x - box.min.x;
-                        const height = box.max.y - box.min.y;
-                        geo.translate(-width / 2 - box.min.x, -height / 2 - box.min.y, -depth / 2);
+                    // Harfleri tek tek bir yay üzerine dizer. radius küçüldükçe kavis artar.
+                    const makeCurvedText = (text, size, depth, bevel, y, radius, totalArc, tracking, xScale=0.84) => {
+                        const holder = new THREE.Group();
+                        holder.position.y = y;
+                        orbitTextGroup.add(holder);
 
-                        const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
-                        mesh.position.set(0, y, baseRadius + 0.34);
-                        mesh.castShadow = false;
-                        mesh.receiveShadow = false;
-                        mesh.renderOrder = 1;
-                        orbitTextGroup.add(mesh);
-                        return mesh;
+                        const chars = [...text];
+                        const widths = [];
+                        let totalWidth = 0;
+
+                        for (const ch of chars) {
+                            if (ch === ' ') {
+                                const w = size * 0.42;
+                                widths.push(w);
+                                totalWidth += w + tracking;
+                                continue;
+                            }
+                            const temp = new THREE.TextGeometry(ch, {
+                                font, size, height: depth,
+                                curveSegments: 10,
+                                bevelEnabled: true,
+                                bevelThickness: bevel,
+                                bevelSize: bevel * 0.78,
+                                bevelOffset: 0,
+                                bevelSegments: 5
+                            });
+                            temp.computeBoundingBox();
+                            const b = temp.boundingBox;
+                            const w = (b.max.x - b.min.x) * xScale;
+                            widths.push(w);
+                            totalWidth += w + tracking;
+                            temp.dispose();
+                        }
+                        totalWidth -= tracking;
+
+                        let cursor = -totalWidth / 2;
+                        for (let i = 0; i < chars.length; i++) {
+                            const ch = chars[i];
+                            const w = widths[i];
+                            const center = cursor + w / 2;
+                            cursor += w + tracking;
+                            if (ch === ' ') continue;
+
+                            // Metnin toplam genişliğini belirtilen yay açısına map et.
+                            const normalized = totalWidth > 0 ? center / totalWidth : 0;
+                            const theta = normalized * totalArc;
+
+                            const geo = new THREE.TextGeometry(ch, {
+                                font, size, height: depth,
+                                curveSegments: 10,
+                                bevelEnabled: true,
+                                bevelThickness: bevel,
+                                bevelSize: bevel * 0.78,
+                                bevelOffset: 0,
+                                bevelSegments: 5
+                            });
+                            geo.computeBoundingBox();
+                            const box = geo.boundingBox;
+                            const gw = box.max.x - box.min.x;
+                            const gh = box.max.y - box.min.y;
+                            geo.translate(-gw/2 - box.min.x, -gh/2 - box.min.y, -depth/2);
+                            geo.scale(xScale, 1, 1);
+
+                            // Hafif sağa yatık/condensed form daha trap-logo hissi verir.
+                            const pos = geo.attributes.position;
+                            for (let p = 0; p < pos.count; p++) {
+                                pos.setX(p, pos.getX(p) + pos.getY(p) * 0.085);
+                            }
+                            pos.needsUpdate = true;
+                            geo.computeVertexNormals();
+
+                            const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
+                            // Dünya yüzeyini saran gerçek kavis.
+                            mesh.position.x = Math.sin(theta) * radius;
+                            mesh.position.z = Math.cos(theta) * radius;
+                            // Harfin önü her noktada yörüngenin dışına bakar.
+                            mesh.rotation.y = theta;
+                            mesh.renderOrder = 1;
+                            mesh.layers.set(1); // krom ışıkları yalnızca yazıyı etkiler
+                            holder.add(mesh);
+                        }
+                        return holder;
                     };
 
-                    // Ana yazı daha iri; slogan onun altında belirgin ama ikincil.
-                    makeText('SP1DER', 0.56, 0.115, 0.028, 0.19);
-                    makeText('7/24 YUZDE YUZ MUZIK', 0.145, 0.060, 0.014, -0.25);
+                    // SP1DER belirgin şekilde kavisli; alt slogan aynı yayı takip eder ama küçük kalır.
+                    makeCurvedText('SP1DER', 0.57, 0.125, 0.030, 0.19, baseRadius + 0.37, 1.30, 0.020, 0.80);
+                    makeCurvedText('7/24 YUZDE YUZ MUZIK', 0.147, 0.064, 0.014, -0.255, baseRadius + 0.37, 1.48, 0.008, 0.86);
 
-                    // Krom highlight için noktasal ışık yerine yönlü ışıklar kullanılır.
-                    // Böylece dünyanın üzerinde gezen parlak ışık noktaları oluşmaz.
+                    // Görünür ışık mesh/küreleri YOK. Bu DirectionalLight'lar sadece layer 1'deki
+                    // 3D yazıyı aydınlatır; dünya layer 0'da kaldığı için üzerinde parlak gezen
+                    // üç ışık lekesi/küresi oluşmaz.
                     if (!orbitLightA) {
-                        orbitLightA = new THREE.DirectionalLight(0xffffff, 1.75);
-                        orbitLightB = new THREE.DirectionalLight(0xdde8f2, 1.05);
+                        orbitLightA = new THREE.DirectionalLight(0xffffff, 2.05);
+                        orbitLightB = new THREE.DirectionalLight(0xb9c7d3, 1.30);
+                        orbitRimLight = new THREE.DirectionalLight(0xffffff, 0.85);
+                        orbitLightA.layers.set(1);
+                        orbitLightB.layers.set(1);
+                        orbitRimLight.layers.set(1);
                         scene.add(orbitLightA);
                         scene.add(orbitLightB);
+                        scene.add(orbitRimLight);
+                        camera.layers.enable(1);
                     }
                 },
                 undefined,
@@ -1316,18 +1381,26 @@ function animateGlobe(currentTime) {
                 if (orbitLightA) {
                     orbitLightA.position.set(
                         Math.cos(chromeT * 0.72) * 5.0,
-                        3.2 + Math.sin(chromeT * 0.48) * 1.4,
-                        4.5 + Math.sin(chromeT * 0.72) * 2.0
+                        3.4 + Math.sin(chromeT * 0.48) * 1.5,
+                        4.8 + Math.sin(chromeT * 0.72) * 2.1
                     );
-                    orbitLightA.intensity = 1.45 + (Math.sin(chromeT * 1.35) * 0.5 + 0.5) * 0.65;
+                    orbitLightA.intensity = 1.65 + (Math.sin(chromeT * 1.35) * 0.5 + 0.5) * 0.80;
                 }
                 if (orbitLightB) {
                     orbitLightB.position.set(
-                        -4.0 + Math.cos(chromeT * 0.54) * 1.8,
-                        -2.2 + Math.cos(chromeT * 0.43) * 1.2,
-                        3.5 + Math.sin(chromeT * 0.54) * 1.5
+                        -4.2 + Math.cos(chromeT * 0.54) * 1.9,
+                        -2.4 + Math.cos(chromeT * 0.43) * 1.3,
+                        3.8 + Math.sin(chromeT * 0.54) * 1.6
                     );
-                    orbitLightB.intensity = 0.75 + (Math.cos(chromeT * 1.05) * 0.5 + 0.5) * 0.55;
+                    orbitLightB.intensity = 0.95 + (Math.cos(chromeT * 1.05) * 0.5 + 0.5) * 0.65;
+                }
+                if (orbitRimLight) {
+                    orbitRimLight.position.set(
+                        Math.sin(chromeT * 0.38) * 3.0,
+                        4.5,
+                        -5.0 + Math.cos(chromeT * 0.38) * 1.2
+                    );
+                    orbitRimLight.intensity = 0.65 + (Math.sin(chromeT * 0.82) * 0.5 + 0.5) * 0.45;
                 }
             }
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
