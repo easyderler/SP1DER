@@ -545,7 +545,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
@@ -1133,11 +1132,11 @@
         let orbitChromeMaterials = [];
 
         function createOrbitRingText() {
-            // READABLE TRAP / PUNK FONT: Oswald Bold
-            // Daha sert ve condensed bir afiş karakteri verir ama blackletter gibi harfleri bozmaz.
-            // Latin Extended desteği sayesinde Ü / İ / Ğ / Ş / Ö / Ç korunur.
-            if (!window.opentype || !THREE.ExtrudeGeometry) {
-                console.warn('3D gothic font modülleri yüklenemedi.');
+            // Gerçek 3D + gerçekten kavisli yazı:
+            // Her harf ayrı TextGeometry olarak üretilir ve silindirik bir yay üzerinde
+            // konumlandırılır. Böylece metin düz bir tabela gibi değil, dünyanın formunu sarar.
+            if (!THREE.FontLoader || !THREE.TextGeometry) {
+                console.warn('3D text modules yüklenemedi.');
                 return;
             }
 
@@ -1147,147 +1146,137 @@
             orbitTextGroup.rotation.z = 0.03;
             scene.add(orbitTextGroup);
 
-            const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/ofl/newrocker/NewRocker-Regular.ttf';
-
-            opentype.load(fontUrl, (err, font) => {
-                if (err || !font) {
-                    console.warn('New Rocker fontu yüklenemedi:', err);
-                    return;
-                }
-
-                const chromeFace = new THREE.MeshPhysicalMaterial({
-                    color: 0xf4f7f8,
-                    metalness: 0.72,
-                    roughness: 0.20,
-                    clearcoat: 1.0,
-                    clearcoatRoughness: 0.055,
-                    reflectivity: 1.0,
-                    emissive: 0x252b30,
-                    emissiveIntensity: 0.10,
-                    side: THREE.DoubleSide,
-                    depthTest: true,
-                    depthWrite: true
-                });
-
-                const chromeSide = new THREE.MeshPhysicalMaterial({
-                    color: 0xaab2b8,
-                    metalness: 0.76,
-                    roughness: 0.24,
-                    clearcoat: 0.92,
-                    clearcoatRoughness: 0.09,
-                    reflectivity: 1.0,
-                    emissive: 0x171b1e,
-                    emissiveIntensity: 0.07,
-                    side: THREE.DoubleSide,
-                    depthTest: true,
-                    depthWrite: true
-                });
-                orbitChromeMaterials = [chromeFace, chromeSide];
-
-                // OpenType harf yolunu Three.js Shape'lerine çevirir.
-                const glyphGeometry = (ch, size, depth, bevel, xScale) => {
-                    const glyph = font.charToGlyph(ch);
-                    const units = font.unitsPerEm || 1000;
-                    const scale = size / units;
-                    const path = glyph.getPath(0, 0, units);
-                    const shapePath = new THREE.ShapePath();
-
-                    for (const cmd of path.commands) {
-                        const x = (cmd.x || 0) * scale;
-                        const y = -(cmd.y || 0) * scale;
-                        if (cmd.type === 'M') shapePath.moveTo(x, y);
-                        else if (cmd.type === 'L') shapePath.lineTo(x, y);
-                        else if (cmd.type === 'Q') {
-                            shapePath.quadraticCurveTo(
-                                (cmd.x1 || 0) * scale, -(cmd.y1 || 0) * scale,
-                                x, y
-                            );
-                        } else if (cmd.type === 'C') {
-                            shapePath.bezierCurveTo(
-                                (cmd.x1 || 0) * scale, -(cmd.y1 || 0) * scale,
-                                (cmd.x2 || 0) * scale, -(cmd.y2 || 0) * scale,
-                                x, y
-                            );
-                        }
-                    }
-
-                    const shapes = shapePath.toShapes(true);
-                    if (!shapes.length) return null;
-
-                    const geo = new THREE.ExtrudeGeometry(shapes, {
-                        depth,
-                        bevelEnabled: true,
-                        bevelThickness: bevel,
-                        bevelSize: bevel * 0.78,
-                        bevelOffset: 0,
-                        bevelSegments: 3,
-                        curveSegments: 8,
-                        steps: 1
+            const fontLoader = new THREE.FontLoader();
+            fontLoader.load(
+                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/droid/droid_sans_bold.typeface.json',
+                (font) => {
+                    // Krom yüzey: açık gümüş taban + koyu yan yüzey. Işık hareket ettikçe
+                    // clearcoat/specular yansımaları yüzeyde canlı bir chrome geçişi oluşturur.
+                    const chromeFace = new THREE.MeshPhysicalMaterial({
+                        color: 0xf4f7f8,
+                        metalness: 0.72,
+                        roughness: 0.20,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.055,
+                        reflectivity: 1.0,
+                        emissive: 0x252b30,
+                        emissiveIntensity: 0.10,
+                        side: THREE.DoubleSide,
+                        depthTest: true,
+                        depthWrite: true
                     });
 
-                    geo.computeBoundingBox();
-                    const box = geo.boundingBox;
-                    const gw = box.max.x - box.min.x;
-                    const gh = box.max.y - box.min.y;
-                    geo.translate(-gw / 2 - box.min.x, -gh / 2 - box.min.y, -depth / 2);
-                    geo.scale(xScale, 1, 1);
+                    const chromeSide = new THREE.MeshPhysicalMaterial({
+                        color: 0xaab2b8,
+                        metalness: 0.76,
+                        roughness: 0.24,
+                        clearcoat: 0.92,
+                        clearcoatRoughness: 0.09,
+                        reflectivity: 1.0,
+                        emissive: 0x171b1e,
+                        emissiveIntensity: 0.07,
+                        side: THREE.DoubleSide,
+                        depthTest: true,
+                        depthWrite: true
+                    });
+                    orbitChromeMaterials = [chromeFace, chromeSide];
 
-                    // Hafif sağa yatık form: gothic karakteri korurken trap/punk logo hissi.
-                    const pos = geo.attributes.position;
-                    for (let p = 0; p < pos.count; p++) {
-                        pos.setX(p, pos.getX(p) + pos.getY(p) * 0.055);
-                    }
-                    pos.needsUpdate = true;
-                    geo.computeVertexNormals();
-                    return geo;
-                };
+                    // Harfleri tek tek bir yay üzerine dizer. radius küçüldükçe kavis artar.
+                    const makeCurvedText = (text, size, depth, bevel, y, radius, totalArc, tracking, xScale=0.84) => {
+                        const holder = new THREE.Group();
+                        holder.position.y = y;
+                        orbitTextGroup.add(holder);
 
-                const glyphWidth = (ch, size, xScale) => {
-                    if (ch === ' ') return size * 0.36;
-                    const glyph = font.charToGlyph(ch);
-                    return ((glyph.advanceWidth || font.unitsPerEm * 0.5) / font.unitsPerEm) * size * xScale;
-                };
+                        const chars = [...text];
+                        const widths = [];
+                        let totalWidth = 0;
 
-                const makeCurvedText = (text, size, depth, bevel, y, radius, totalArc, tracking, xScale=0.84) => {
-                    const holder = new THREE.Group();
-                    holder.position.y = y;
-                    orbitTextGroup.add(holder);
+                        for (const ch of chars) {
+                            if (ch === ' ') {
+                                const w = size * 0.42;
+                                widths.push(w);
+                                totalWidth += w + tracking;
+                                continue;
+                            }
+                            const temp = new THREE.TextGeometry(ch, {
+                                font, size, height: depth,
+                                curveSegments: 6,
+                                bevelEnabled: true,
+                                bevelThickness: bevel,
+                                bevelSize: bevel * 0.78,
+                                bevelOffset: 0,
+                                bevelSegments: 3
+                            });
+                            temp.computeBoundingBox();
+                            const b = temp.boundingBox;
+                            const w = (b.max.x - b.min.x) * xScale;
+                            widths.push(w);
+                            totalWidth += w + tracking;
+                            temp.dispose();
+                        }
+                        totalWidth -= tracking;
 
-                    const chars = [...text];
-                    const widths = chars.map(ch => glyphWidth(ch, size, xScale));
-                    let totalWidth = widths.reduce((a, w) => a + w, 0) + tracking * Math.max(0, chars.length - 1);
-                    let cursor = -totalWidth / 2;
+                        let cursor = -totalWidth / 2;
+                        for (let i = 0; i < chars.length; i++) {
+                            const ch = chars[i];
+                            const w = widths[i];
+                            const center = cursor + w / 2;
+                            cursor += w + tracking;
+                            if (ch === ' ') continue;
 
-                    for (let i = 0; i < chars.length; i++) {
-                        const ch = chars[i];
-                        const w = widths[i];
-                        const center = cursor + w / 2;
-                        cursor += w + tracking;
-                        if (ch === ' ') continue;
+                            // Metnin toplam genişliğini belirtilen yay açısına map et.
+                            const normalized = totalWidth > 0 ? center / totalWidth : 0;
+                            const theta = normalized * totalArc;
 
-                        const normalized = totalWidth > 0 ? center / totalWidth : 0;
-                        const theta = normalized * totalArc;
-                        const geo = glyphGeometry(ch, size, depth, bevel, xScale);
-                        if (!geo) continue;
+                            const geo = new THREE.TextGeometry(ch, {
+                                font, size, height: depth,
+                                curveSegments: 6,
+                                bevelEnabled: true,
+                                bevelThickness: bevel,
+                                bevelSize: bevel * 0.78,
+                                bevelOffset: 0,
+                                bevelSegments: 3
+                            });
+                            geo.computeBoundingBox();
+                            const box = geo.boundingBox;
+                            const gw = box.max.x - box.min.x;
+                            const gh = box.max.y - box.min.y;
+                            geo.translate(-gw/2 - box.min.x, -gh/2 - box.min.y, -depth/2);
+                            geo.scale(xScale, 1, 1);
 
-                        const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
-                        mesh.position.x = Math.sin(theta) * radius;
-                        mesh.position.z = Math.cos(theta) * radius;
-                        mesh.rotation.y = theta;
-                        mesh.renderOrder = 1;
-                        mesh.layers.set(1);
-                        holder.add(mesh);
-                    }
-                    return holder;
-                };
+                            // Hafif sağa yatık/condensed form daha trap-logo hissi verir.
+                            const pos = geo.attributes.position;
+                            for (let p = 0; p < pos.count; p++) {
+                                pos.setX(p, pos.getX(p) + pos.getY(p) * 0.14);
+                            }
+                            pos.needsUpdate = true;
+                            geo.computeVertexNormals();
 
-                // New Rocker: okunabilir modern blackletter / tattoo / punk karakteri.
-                // Türkçe slogan için fontun Latin Extended glifleri kullanılır.
-                makeCurvedText('SP1DER', 0.62, 0.140, 0.026, 0.12, baseRadius + 0.20, 1.18, 0.020, 0.88);
-                makeCurvedText('7/24 YÜZDE YÜZ MÜZİK', 0.150, 0.064, 0.010, -0.315, baseRadius + 0.20, 1.36, 0.009, 0.86);
+                            const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
+                            // Dünya yüzeyini saran gerçek kavis.
+                            mesh.position.x = Math.sin(theta) * radius;
+                            mesh.position.z = Math.cos(theta) * radius;
+                            // Harfin önü her noktada yörüngenin dışına bakar.
+                            mesh.rotation.y = theta;
+                            mesh.renderOrder = 1;
+                            mesh.layers.set(1); // krom ışıkları yalnızca yazıyı etkiler
+                            holder.add(mesh);
+                        }
+                        return holder;
+                    };
 
-                camera.layers.enable(1);
-            });
+                    // SP1DER belirgin şekilde kavisli; alt slogan aynı yayı takip eder ama küçük kalır.
+                    makeCurvedText('SP1DER', 0.59, 0.135, 0.032, 0.12, baseRadius + 0.20, 1.30, 0.018, 0.72);
+                    makeCurvedText('7/24 YÜZDE YÜZ MÜZİK', 0.150, 0.068, 0.015, -0.315, baseRadius + 0.20, 1.48, 0.007, 0.78);
+
+                    // Ekstra hareketli sahne ışığı kullanılmıyor. Böylece dünya üzerinde dolaşan
+                    // parlak yuvarlak/specular lekeler oluşmaz. Kromun canlılığı materyalin kendi
+                    // metalik ton geçişiyle animasyon sırasında verilir.
+                    camera.layers.enable(1);
+                },
+                undefined,
+                (err) => console.warn('3D SP1DER fontu yüklenemedi:', err)
+            );
         }
 
         document.fonts.ready.then(() => { createOrbitRingText(); });
