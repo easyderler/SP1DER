@@ -133,7 +133,7 @@
             -webkit-mask-size:100% 100%;
             mask-size:100% 100%;
             image-rendering:auto;
-            opacity:var(--web-bass-opacity, 1);
+            opacity:1;
         }
 
         .photo-web-3d.bass-hit {
@@ -781,10 +781,13 @@
                 const dy = Math.sin(t * 1.08) * item.moveY;
                 const dz = Math.sin(t * 0.72) * item.moveZ;
                 const rz = Math.sin(t * 0.62) * item.rotate;
-                const bassScale = 1 + webBassPulse * 0.045;
+                const bassScale = 1 + currentBassPower * 0.04;
                 const rx = item.rotX + Math.sin(t * 0.55) * 0.45;
                 const ry = item.rotY + Math.cos(t * 0.48) * 0.60;
 
+                // Dünya ile aynı bassScale: bass yükseldiğinde ağ da aynı anda,
+                // aynı oranda büyür. Bass yoksa efekt sıfırdır.
+                item.el.classList.toggle('bass-hit', currentBassPower > 0.60);
                 item.el.style.transform =
                     `translate3d(calc(-50% + ${dx.toFixed(2)}px), calc(-50% + ${dy.toFixed(2)}px), ${item.depth + dz}px) ` +
                     `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) rotateZ(${(item.rotZ + rz).toFixed(2)}deg) scale(${(item.scale * bassScale).toFixed(4)})`;
@@ -1297,27 +1300,10 @@
         let lastTime = performance.now();
         const rootStyle = document.documentElement.style;
 
-        let webBassPulse = 0;
-        let lastBassHit = 0;
-
-        function triggerWebBassHit(power) {
-            if (power < 0.62) return;
-            const now = performance.now();
-            if (now - lastBassHit < 85) return;
-            lastBassHit = now;
-
-            photoWebElements.forEach((item, i) => {
-                const el = item.el;
-                el.classList.add('bass-hit');
-                el.style.setProperty('--web-bass-opacity', '1');
-                clearTimeout(item.bassTimer);
-                item.bassTimer = setTimeout(() => {
-                    el.classList.remove('bass-hit');
-                }, 90 + i * 8);
-            });
-
-            webBassPulse = Math.min(1, power);
-        }
+        // TEK BASS KAYNAĞI:
+        // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
+        // kullanır. Böylece efektler birebir aynı anda ve aynı şiddette patlar.
+        let currentBassPower = 0;
 
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
@@ -1338,7 +1324,7 @@
                 bassAngle += 7.0 * deltaTime;
                 
                 const bassPower = Math.max(0, Math.pow(Math.sin(bassAngle), 5));
-                triggerWebBassHit(bassPower);
+                currentBassPower = bassPower;
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
@@ -1380,6 +1366,9 @@
                 }
 
             } else {
+                // Yayın başlamadıysa, durmuşsa veya ses kapalıysa BASS = 0.
+                // Böylece hiçbir arka plan öğesi patlamaz.
+                currentBassPower = 0;
                 globeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
                 dirLight.intensity = 2.2;
 
@@ -1404,7 +1393,6 @@
                 }
             }
 
-            webBassPulse *= Math.pow(0.06, deltaTime);
             animatePhotoWebs(deltaTime);
             renderer.render(scene, camera);
         }
@@ -1471,16 +1459,30 @@
                 if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
             }
             draw() {
+                // Dünya ile aynı bassPower / bassScale kullanılır.
+                // isPlayingState false ise currentBassPower zaten 0'dır.
+                const bassScale = 1 + currentBassPower * 0.04;
+                const bassAlpha = Math.max(0, this.opacity);
+                const bassGlow = currentBassPower * 18;
+
+                ctx.save();
                 ctx.fillStyle = currentAccentColor;
-                ctx.globalAlpha = Math.max(0, this.opacity);
+                ctx.globalAlpha = bassAlpha;
+
                 if (this.isFive) {
-                    ctx.font = `900 ${this.size}px 'Syne', sans-serif`;
+                    ctx.font = `900 ${this.size * bassScale}px 'Syne', sans-serif`;
+                    ctx.shadowColor = currentAccentColor;
+                    ctx.shadowBlur = bassGlow;
                     ctx.fillText("5", this.x, this.y);
                 } else {
+                    ctx.shadowColor = currentAccentColor;
+                    ctx.shadowBlur = bassGlow;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.arc(this.x, this.y, this.size * bassScale, 0, Math.PI * 2);
                     ctx.fill();
                 }
+
+                ctx.restore();
             }
         }
 
