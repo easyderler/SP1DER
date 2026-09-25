@@ -730,6 +730,8 @@
 
                 item.left = candidate.left;
                 item.top = candidate.top;
+                item.el.style.left = item.left + 'vw';
+                item.el.style.top = item.top + 'vh';
 
                 const current = webRect(item);
 
@@ -761,6 +763,8 @@
             for (const [left, top] of fallback) {
                 item.left = left;
                 item.top = top;
+                item.el.style.left = item.left + 'vw';
+                item.el.style.top = item.top + 'vh';
 
                 const current = webRect(item);
 
