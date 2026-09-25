@@ -102,17 +102,7 @@
             overflow: visible;
         }
 
-        /* Örümcek ağları artık CSS <img> değil: Three.js ile gerçek PNG fotoğrafları
-           3D uzayda plane texture olarak gösteriliyor. Böylece dünya ile aynı WebGL
-           render mantığını kullanıyorlar. */
-        #photo-webs-container {
-            background: transparent;
-        }
-
-        
-        /* PNG'lerin kenarlarını/köşelerini çok yumuşak biçimde yok et.
-           Merkez tamamen görünür kalır; dört kenara ve özellikle köşelere
-           yaklaştıkça alpha kademeli olarak sıfıra iner. */
+        /* Ağların 3D dönüşü kapsayıcının perspektifini kullanır. */
         #photo-webs-container {
             perspective: 1500px;
             perspective-origin: 50% 50%;
@@ -135,43 +125,22 @@
             image-rendering: auto;
             opacity: 1;
 
-            /* PNG kenar/köşe yumuşatması: merkezden dışarı doğru uzun ve
-               sürekli bir alpha geçişi. Kenar çizgisi oluşmasını önlemek için
-               tamamen opaktan tamamen şeffafa geniş bir feather alanı kullanılır. */
-            -webkit-mask-image: radial-gradient(ellipse 78% 76% at 50% 50%,
-                #000 0%,
-                #000 38%,
-                rgba(0,0,0,.99) 48%,
-                rgba(0,0,0,.94) 58%,
-                rgba(0,0,0,.82) 67%,
-                rgba(0,0,0,.62) 75%,
-                rgba(0,0,0,.40) 82%,
-                rgba(0,0,0,.20) 89%,
-                rgba(0,0,0,.07) 96%,
-                transparent 100%);
-            mask-image: radial-gradient(ellipse 78% 76% at 50% 50%,
-                #000 0%,
-                #000 38%,
-                rgba(0,0,0,.99) 48%,
-                rgba(0,0,0,.94) 58%,
-                rgba(0,0,0,.82) 67%,
-                rgba(0,0,0,.62) 75%,
-                rgba(0,0,0,.40) 82%,
-                rgba(0,0,0,.20) 89%,
-                rgba(0,0,0,.07) 96%,
-                transparent 100%);
+            /* Maskenin yarıçapı kenara kadar uzanır; PNG'nin dört kenarında
+               alpha sıfırdır. Köşeler daha erken kaybolur. */
+            -webkit-mask-image: radial-gradient(ellipse 50% 50% at center,
+                #000 8%, rgba(0,0,0,.8) 28%, rgba(0,0,0,.38) 50%,
+                rgba(0,0,0,.09) 76%, transparent 100%);
+            mask-image: radial-gradient(ellipse 50% 50% at center,
+                #000 8%, rgba(0,0,0,.8) 28%, rgba(0,0,0,.38) 50%,
+                rgba(0,0,0,.09) 76%, transparent 100%);
             -webkit-mask-repeat: no-repeat;
             mask-repeat: no-repeat;
             -webkit-mask-position: center;
             mask-position: center;
-            -webkit-mask-size: 112% 112%;
-            mask-size: 112% 112%;
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
             -webkit-mask-mode: alpha;
             mask-mode: alpha;
-        }
-
-        .photo-web-3d.bass-hit {
-            filter: brightness(1.45) drop-shadow(0 0 18px rgba(255,255,255,.9)) !important;
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -680,33 +649,14 @@
         let photoWebElements = [];
         let webAnimationTime = 0;
 
-        function shuffleArray(array) {
-            const result = [...array];
-            for (let i = result.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [result[i], result[j]] = [result[j], result[i]];
-            }
-            return result;
-        }
-
         function randomBetween(a, b) {
             return a + Math.random() * (b - a);
         }
 
-        // Örümcek ağlarını sayfaya dengeli dağıt.
-        // Konumlar "merkez noktası" olarak tutuluyor; böylece CSS'deki
-        // translate(-50%, -50%) ile gerçek görsel alanı doğru hesaplanıyor.
-        function getWebSpawnZones() {
-            // Ağlar her zaman sabit 5 bölgeye spawn olur:
-            // 1) sol üst  2) sağ üst  3) sol alt  4) sağ alt  5) merkez
-            return [
-                { x: [18, 18], y: [18, 18] },
-                { x: [82, 82], y: [18, 18] },
-                { x: [18, 18], y: [82, 82] },
-                { x: [82, 82], y: [82, 82] },
-                { x: [50, 50], y: [50, 50] }
-            ];
-        }
+        // Ağların sabit merkezleri: sol üst, sağ üst, sol alt, sağ alt, orta.
+        const webPositions = [
+            [18, 18], [82, 18], [18, 82], [82, 82], [50, 50]
+        ];
 
         function clearPhotoWebs() {
             photoWebElements.forEach(item => {
@@ -715,48 +665,7 @@
             photoWebElements = [];
         }
 
-        function webRect(item, extraX = 0, extraY = 0) {
-            // left/top artık görselin merkezi. Bu nedenle çarpışma alanı
-            // merkezin iki yanına bölünerek hesaplanıyor.
-            const width = item.width;
-            const height = width * 0.72;
-
-            return {
-                left: item.left + extraX - width / 2,
-                top: item.top + extraY - height / 2,
-                right: item.left + extraX + width / 2,
-                bottom: item.top + extraY + height / 2
-            };
-        }
-
-        function rectsOverlap(a, b, padding = 3) {
-            return !(
-                a.right + padding <= b.left ||
-                a.left - padding >= b.right ||
-                a.bottom + padding <= b.top ||
-                a.top - padding >= b.bottom
-            );
-        }
-
-        function placeWebWithoutOverlap(item, placed, index) {
-            const zones = getWebSpawnZones();
-            const zone = zones[index % zones.length];
-
-            // Her ağın merkezi doğrudan kendi sabit bölgesine yerleşir.
-            // Ağlar hareket ederken spawn noktaları değişmez.
-            item.left = zone.x[0];
-            item.top = zone.y[0];
-
-            item.el.style.left = item.left + 'vw';
-            item.el.style.top = item.top + 'vh';
-
-            // Sabit bölgeler birbirinden ayrıldığı için başlangıçta üst üste binmez.
-            return !placed.some(other =>
-                rectsOverlap(webRect(item), webRect(other), 0)
-            );
-        }
-
-        function createWebElement(src, zone, index) {
+        function createWebElement(src, index) {
             const img = document.createElement('img');
             img.className = 'photo-web-3d';
             img.src = src;
@@ -771,8 +680,8 @@
 
             const item = {
                 el: img,
-                left: 0,
-                top: 0,
+                left: webPositions[index][0],
+                top: webPositions[index][1],
                 depth: randomBetween(-80, 90),
 
                 // Ağları önceki halden belirgin biçimde daha büyük yap.
@@ -801,13 +710,8 @@
             img.style.zIndex = String(3 + index);
             img.style.visibility = 'visible';
 
-            img.addEventListener('load', () => {
-                item.loaded = true;
-            }, {once:true});
-
             img.addEventListener('error', () => {
                 console.warn('Spider web PNG yüklenemedi:', src);
-                item.loaded = false;
                 if (img.parentNode) img.parentNode.removeChild(img);
             }, {once:true});
 
@@ -817,23 +721,12 @@
         function generatePhotoWebs() {
             clearPhotoWebs();
 
-            const sources = shuffleArray(realWebImages);
-            const mobile = window.innerWidth < 600;
-            const count = Math.min(mobile ? 4 : 5, sources.length);
-            const placed = [];
-
-            for (let i = 0; i < count; i++) {
-                const item = createWebElement(sources[i], null, i);
-
-                // Büyük ağlar için gerçek bir 2D çarpışma kontrolü.
-                placeWebWithoutOverlap(item, placed, i);
+            for (let i = 0; i < realWebImages.length; i++) {
+                const item = createWebElement(realWebImages[i], i);
 
                 photoWebsContainer.appendChild(item.el);
                 photoWebElements.push(item);
-                placed.push(item);
             }
-
-            console.log('Spider webs:', photoWebElements.length, '(collision-free placement)');
         }
 
         function animatePhotoWebs(deltaTime) {
