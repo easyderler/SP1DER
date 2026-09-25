@@ -178,18 +178,19 @@
         }
 
         .wrapper-shake {
-            animation: trapBassShake 0.07s ease-in-out infinite alternate;
+            animation: trapBassShake 0.055s cubic-bezier(.2,.8,.2,1) infinite alternate;
         }
 
         .wrapper-glitch {
             filter: drop-shadow(-6px 0 0px rgba(255, 0, 50, 0.9)) drop-shadow(6px 0 0px rgba(0, 240, 255, 0.9)) !important;
-            transform: translate(var(--glitch-x), var(--glitch-y)) scale(1.02) !important;
+            transform: translate(var(--glitch-x), var(--glitch-y)) scale(1.035) !important;
         }
 
         @keyframes trapBassShake {
             0% { transform: scale(1) translate(0, 0); }
-            50% { transform: scale(1.008) translate(-1.5px, 1.5px); }
-            100% { transform: scale(0.992) translate(1.5px, -1.5px); }
+            35% { transform: scale(1.012) translate(-2.4px, 1.5px); }
+            70% { transform: scale(0.994) translate(2.1px, -1.7px); }
+            100% { transform: scale(1.006) translate(-1.2px, 2.2px); }
         }
 
         .logo-container {
@@ -1359,7 +1360,7 @@
         let lastBarUpdate = 0;
         let smoothedBass = 0;
         let bassKick = 0;
-        const bassEase = 10.0;
+        const bassEase = 18.0;
 
         // TEK BASS KAYNAĞI:
         // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
@@ -1417,24 +1418,24 @@ function animateGlobe(currentTime) {
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
                 
-                const rawBass = Math.max(0, Math.pow(Math.sin(bassAngle), 7));
+                const rawBass = Math.max(0, Math.pow(Math.sin(bassAngle), 10));
                 // Sert aç/kapa yerine hızlı attack + yumuşak decay: kick daha tok, görüntü daha akıcı.
                 const follow = 1 - Math.exp(-bassEase * deltaTime);
                 smoothedBass += (rawBass - smoothedBass) * follow;
-                if (rawBass > 0.78 && bassKick < 0.32) bassKick = 1;
-                bassKick = Math.max(0, bassKick - deltaTime * 7.2);
-                const bassPower = Math.min(1, smoothedBass * 0.72 + bassKick * 0.52);
+                if (rawBass > 0.72 && bassKick < 0.28) bassKick = 1;
+                bassKick = Math.max(0, bassKick - deltaTime * 5.4);
+                const bassPower = Math.min(1, smoothedBass * 0.88 + bassKick * 0.72);
                 // Daha sert kick: dünya vuruş anında belirgin biçimde nefes alır.
-                const bassScale = 1 + bassPower * 0.052 + bassKick * 0.018; 
+                const bassScale = 1 + bassPower * 0.095 + bassKick * 0.035; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
-                dirLight.intensity = 0.88 + bassPower * 0.34 + bassKick * 0.12;
+                dirLight.intensity = 0.92 + bassPower * 0.62 + bassKick * 0.28;
 
-                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.017 + bassKick * 0.006).toFixed(3));
-                rootStyle.setProperty('--bass-glow-scale', (1 + bassPower * 0.22 + bassKick * 0.10).toFixed(3));
-                rootStyle.setProperty('--bass-opacity', (0.42 + bassPower * 0.34 + bassKick * 0.08).toFixed(2));
+                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.034 + bassKick * 0.014).toFixed(3));
+                rootStyle.setProperty('--bass-glow-scale', (1 + bassPower * 0.42 + bassKick * 0.20).toFixed(3));
+                rootStyle.setProperty('--bass-opacity', (0.40 + bassPower * 0.46 + bassKick * 0.12).toFixed(2));
 
-                if (bassPower > 0.6) {
+                if (bassPower > 0.46) {
                     badgeLiveEl.classList.add('badge-bass-pulse');
                     badgeListenerEl.classList.add('badge-bass-pulse');
                     volumeBoxEl.classList.add('badge-bass-pulse');
@@ -1444,12 +1445,12 @@ function animateGlobe(currentTime) {
                     volumeBoxEl.classList.remove('badge-bass-pulse');
                 }
 
-                if (bassPower > 0.76 && bassKick > 0.14) {
+                if (bassPower > 0.68 && bassKick > 0.10) {
                     // Glitch konumu her frame değil, yaklaşık 12.5 kez/sn güncellenir.
                     if (currentTime - lastGlitchUpdate > 130) {
                         lastGlitchUpdate = currentTime;
-                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 10).toFixed(1) + 'px');
-                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 6).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 10).toFixed(1) + 'px');
                     }
                     mainWrapper.classList.add('wrapper-glitch');
                 } else {
@@ -1463,10 +1464,10 @@ function animateGlobe(currentTime) {
                     for (let idx = 0; idx < ringBarsCount; idx++) {
                         const bar = ringBarMeshes[idx];
                         const rnd = Math.sin(bassAngle * 2.7 + idx * 0.82) * 0.5 + 0.5;
-                        const scaleY = 0.24 + rnd * 1.55 * (bassPower + 0.22) + bassKick * (0.32 + rnd * 0.48);
+                        const scaleY = 0.22 + rnd * 2.35 * (bassPower + 0.28) + bassKick * (0.58 + rnd * 0.82);
                         bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
                         bar.scale.y = scaleY;
-                        bar.material.opacity = Math.min(1, 0.42 + rnd * 0.32 + bassPower * 0.22 + bassKick * 0.14);
+                        bar.material.opacity = Math.min(1, 0.40 + rnd * 0.34 + bassPower * 0.34 + bassKick * 0.22);
                     }
                 }
 
