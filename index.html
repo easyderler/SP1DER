@@ -124,8 +124,8 @@
             filter:none;
             perspective:1200px;
             /* PNG'nin kare kenarını yumuşat: kenarlarda alpha'ya doğru fade. */
-            -webkit-mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, rgba(0,0,0,.92) 66%, rgba(0,0,0,.42) 82%, transparent 100%);
-            mask-image: radial-gradient(ellipse 72% 72% at 50% 50%, #000 52%, rgba(0,0,0,.92) 66%, rgba(0,0,0,.42) 82%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 68% 68% at 50% 50%, #000 38%, rgba(0,0,0,.96) 52%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.24) 84%, transparent 100%);
+            mask-image: radial-gradient(ellipse 68% 68% at 50% 50%, #000 38%, rgba(0,0,0,.96) 52%, rgba(0,0,0,.72) 68%, rgba(0,0,0,.24) 84%, transparent 100%);
             -webkit-mask-repeat:no-repeat;
             mask-repeat:no-repeat;
             -webkit-mask-size:100% 100%;
@@ -661,21 +661,20 @@
         // Bölgeler birbirinden ayrı olduğu için ağlar aynı noktaya doğmaz.
         function getWebSpawnZones() {
             const mobile = window.innerWidth < 600;
+            // Büyük ağlar için bölgeler birbirinden bilinçli olarak ayrılır.
+            // Son konum yine çarpışma kontrolünden geçirilir.
             return mobile ? [
-                {x:[-10,20], y:[-6,28]},
-                {x:[80,110], y:[-6,28]},
-                {x:[-10,20], y:[72,110]},
-                {x:[80,110], y:[72,110]},
-                {x:[-14,16], y:[32,68]}
+                {x:[-10, 4],  y:[-8, 14]},
+                {x:[84, 98],   y:[-8, 14]},
+                {x:[-10, 4],  y:[72, 96]},
+                {x:[84, 98],   y:[72, 96]},
+                {x:[-12, -2], y:[34, 54]}
             ] : [
-                {x:[-12,22], y:[-7,30]},
-                {x:[78,112], y:[-7,30]},
-                {x:[-12,22], y:[70,112]},
-                {x:[78,112], y:[70,112]},
-                {x:[-16,18], y:[30,70]},
-                {x:[82,116], y:[30,70]},
-                {x:[10,34], y:[-7,22]},
-                {x:[66,90], y:[-7,22]}
+                {x:[-12, 2], y:[-8, 13]},
+                {x:[84, 98], y:[-8, 13]},
+                {x:[-12, 2], y:[76, 98]},
+                {x:[84, 98], y:[76, 98]},
+                {x:[-14, -4], y:[35, 57]}
             ];
         }
 
@@ -684,6 +683,69 @@
                 if (item.el && item.el.parentNode) item.el.parentNode.removeChild(item.el);
             });
             photoWebElements = [];
+        }
+
+        function webRect(item, extraX = 0, extraY = 0) {
+            // Render boyutu yaklaşık olarak vw üzerinden hesaplanır.
+            // Yükseklik bilinmediği için muhafazakâr bir oran kullanıyoruz.
+            const width = item.width;
+            const height = width * 0.72;
+            return {
+                left: item.left + extraX,
+                top: item.top + extraY,
+                right: item.left + extraX + width,
+                bottom: item.top + extraY + height
+            };
+        }
+
+        function rectsOverlap(a, b, padding = 3) {
+            return !(
+                a.right + padding <= b.left ||
+                a.left - padding >= b.right ||
+                a.bottom + padding <= b.top ||
+                a.top - padding >= b.bottom
+            );
+        }
+
+        function placeWebWithoutOverlap(item, placed) {
+            const mobile = window.innerWidth < 600;
+            const zones = getWebSpawnZones();
+
+            for (let attempt = 0; attempt < 120; attempt++) {
+                const zone = zones[Math.floor(Math.random() * zones.length)];
+                const candidate = {
+                    left: randomBetween(zone.x[0], zone.x[1]),
+                    top: randomBetween(zone.y[0], zone.y[1])
+                };
+
+                item.left = candidate.left;
+                item.top = candidate.top;
+
+                const current = webRect(item);
+                if (!placed.some(other => rectsOverlap(current, webRect(other), mobile ? 2.5 : 3.5))) {
+                    return true;
+                }
+            }
+
+            // Çok büyük ağlarda son çare: kenar yuvalarını sırayla kullan.
+            const fallback = mobile
+                ? [
+                    [-12, -8], [82, -8], [-12, 74], [82, 74], [-15, 34]
+                ]
+                : [
+                    [-14, -8], [82, -8], [-14, 78], [82, 78], [-16, 36]
+                ];
+
+            for (const [left, top] of fallback) {
+                item.left = left;
+                item.top = top;
+                const current = webRect(item);
+                if (!placed.some(other => rectsOverlap(current, webRect(other), 2))) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         function createWebElement(src, zone, index) {
@@ -701,8 +763,8 @@
 
             const item = {
                 el: img,
-                left: randomBetween(zone.x[0], zone.x[1]),
-                top: randomBetween(zone.y[0], zone.y[1]),
+                left: 0,
+                top: 0,
                 depth: randomBetween(-80, 90),
                 width: mobile ? randomBetween(40, 58) : randomBetween(34, 52),
                 rotX: randomBetween(-4, 4),
@@ -745,18 +807,23 @@
         function generatePhotoWebs() {
             clearPhotoWebs();
 
-            const zones = shuffleArray(getWebSpawnZones());
             const sources = shuffleArray(realWebImages);
             const mobile = window.innerWidth < 600;
-            const count = Math.min(mobile ? 4 : 5, zones.length, sources.length);
+            const count = Math.min(mobile ? 4 : 5, sources.length);
+            const placed = [];
 
             for (let i = 0; i < count; i++) {
-                const item = createWebElement(sources[i], zones[i], i);
+                const item = createWebElement(sources[i], null, i);
+
+                // Büyük ağlar için gerçek bir 2D çarpışma kontrolü.
+                placeWebWithoutOverlap(item, placed);
+
                 photoWebsContainer.appendChild(item.el);
                 photoWebElements.push(item);
+                placed.push(item);
             }
 
-            console.log('Spider webs:', photoWebElements.length, '(5 direct transparent PNGs)');
+            console.log('Spider webs:', photoWebElements.length, '(collision-free placement)');
         }
 
         function animatePhotoWebs(deltaTime) {
