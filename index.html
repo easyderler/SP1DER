@@ -100,7 +100,7 @@
             position: absolute;
             pointer-events: none;
             object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.4));
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3)) contrast(1.1);
             will-change: transform, opacity;
             transition: opacity 1.5s ease-in-out;
         }
@@ -591,45 +591,51 @@
     </div>
 
     <script>
-        // GARANTİLİ ŞEFFAF SVG ÖRÜMCEK AĞLARI (Data URI - Resim sunucusu gerektirmez, kırılmaz)
-        const svgWebs = [
-            // Köşe Örümcek Ağı Deseni 1
-            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgba(255,255,255,0.7)' stroke-width='1.2'><path d='M0 0 L200 200 M0 0 L100 200 M0 0 L200 100 M0 0 L0 200 M0 0 L200 0'/><path d='M 30 0 Q 30 30 0 30'/><path d='M 60 0 Q 60 60 0 60'/><path d='M 100 0 Q 100 100 0 100'/><path d='M 150 0 Q 150 150 0 150'/><path d='M 200 0 Q 200 200 0 200'/></svg>",
-            // Dairesel Örümcek Ağı Deseni 2
-            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='1'><line x1='100' y1='0' x2='100' y2='200'/><line x1='0' y1='100' x2='200' y2='100'/><line x1='29' y1='29' x2='171' y2='171'/><line x1='171' y1='29' x2='29' y2='171'/><polygon points='100,80 114,86 120,100 114,114 100,120 86,114 80,100 86,86'/><polygon points='100,60 128,72 140,100 128,128 100,140 72,128 60,100 72,72'/><polygon points='100,30 149,51 170,100 149,149 100,170 51,149 30,100 51,51'/><polygon points='100,5 167,33 195,100 167,167 100,195 33,167 5,100 33,33'/></svg>",
-            // Köşe Örümcek Ağı Deseni 3
-            "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none' stroke='rgba(255,255,255,0.8)' stroke-width='1.2'><line x1='200' y1='0' x2='0' y2='200'/><line x1='200' y1='0' x2='0' y2='100'/><line x1='200' y1='0' x2='100' y2='200'/><path d='M 170 0 Q 170 30 200 30'/><path d='M 140 0 Q 140 60 200 60'/><path d='M 100 0 Q 100 100 200 100'/><path d='M 50 0 Q 50 150 200 150'/><path d='M 0 0 Q 0 200 200 200'/></svg>"
+        // GERÇEK FOTOĞRAFLARDAN ŞEFFAF PNG ÖRÜMCEK AĞLARI
+        const realWebImages = [
+            "https://pngimg.com/uploads/spider_web/spider_web_PNG11.png",
+            "https://pngimg.com/uploads/spider_web/spider_web_PNG23.png",
+            "https://pngimg.com/uploads/spider_web/spider_web_PNG35.png",
+            "https://pngimg.com/uploads/spider_web/spider_web_PNG42.png",
+            "https://pngimg.com/uploads/spider_web/spider_web_PNG50.png",
+            "https://pngimg.com/uploads/spider_web/spider_web_PNG55.png"
         ];
 
         function generatePhotoWebs() {
             const container = document.getElementById('photo-webs-container');
             container.innerHTML = '';
 
+            // Ekran bölgeleri (Üst üste binmeyi önlemek için ayrı koordinat pencereleri)
             const zones = [
-                { top: [-2, 10], left: [-2, 15] },     // Sol Üst
-                { top: [-2, 10], left: [70, 85] },    // Sağ Üst
-                { top: [72, 85], left: [-2, 15] },    // Sol Alt
-                { top: [72, 85], left: [70, 85] },    // Sağ Alt
-                { top: [35, 55], left: [-5, 5] },      // Sol Orta Kenar
-                { top: [35, 55], left: [80, 90] }     // Sağ Orta Kenar
+                { top: [-5, 12], left: [-5, 15] },    // Sol Üst Köşe
+                { top: [-5, 12], left: [68, 88] },    // Sağ Üst Köşe
+                { top: [68, 85], left: [-5, 15] },    // Sol Alt Köşe
+                { top: [68, 85], left: [68, 88] },    // Sağ Alt Köşe
+                { top: [30, 50], left: [-8, 2] },     // Sol Orta
+                { top: [30, 50], left: [82, 92] }     // Sağ Orta
             ];
 
+            // Bölgeleri karıştır
             const shuffledZones = zones.sort(() => 0.5 - Math.random());
-            const webCount = 5;
+            const webCount = 5; 
+
+            // Görselleri de karıştır
+            const shuffledImages = [...realWebImages].sort(() => 0.5 - Math.random());
 
             for (let i = 0; i < webCount; i++) {
                 const zone = shuffledZones[i];
                 const img = document.createElement('img');
                 
-                img.src = svgWebs[i % svgWebs.length];
+                // Her bir örümcek ağı birbirinden farklı fotoğraf kullanacak
+                img.src = shuffledImages[i % shuffledImages.length];
                 img.className = 'real-web-img';
 
                 const topPos = Math.random() * (zone.top[1] - zone.top[0]) + zone.top[0];
                 const leftPos = Math.random() * (zone.left[1] - zone.left[0]) + zone.left[0];
 
-                const size = Math.floor(Math.random() * 100 + 200); // 200px - 300px arası
+                const size = Math.floor(Math.random() * 120 + 240); // 240px - 360px arası fotogerçekçi boyut
                 const rotation = Math.floor(Math.random() * 360);
-                const opacity = (Math.random() * 0.35 + 0.45).toFixed(2);
+                const opacity = (Math.random() * 0.35 + 0.40).toFixed(2); // Şeffaflık Dengesi
 
                 img.style.top = topPos + 'vh';
                 img.style.left = leftPos + 'vw';
