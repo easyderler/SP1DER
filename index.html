@@ -17,10 +17,10 @@
         }
 
         :root {
-            --accent-color: #ffffff;
-            --glow-color: rgba(255, 255, 255, 0.55);
-            --bg-glow: rgba(180, 220, 255, 0.1);
-            --border-glow: rgba(255, 255, 255, 0.35);
+            --accent-color: #39ff14;
+            --glow-color: rgba(57, 255, 20, 0.55);
+            --bg-glow: rgba(0, 255, 50, 0.12);
+            --border-glow: rgba(57, 255, 20, 0.35);
             --bass-scale: 1;
             --bass-glow-scale: 1;
             --bass-opacity: 0.55;
@@ -84,18 +84,58 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Gerçekçi Örümcek Ağları Tuvali (Canvas) */
-        #spider-web-canvas {
+        /* Dinamik & Rastgele Konumlanan Gerçekçi Örümcek Ağları */
+        #random-webs-container {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 6;
+            width: 100vw;
+            height: 100vh;
+            z-index: 3;
             pointer-events: none;
-            opacity: 0.85;
-            filter: drop-shadow(0 0 3px var(--glow-color));
-            transition: filter 0.3s ease;
+            overflow: hidden;
+        }
+
+        .random-spider-web {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.25;
+            transition: transform 0.1s ease, filter 0.3s ease;
+            filter: drop-shadow(0 0 6px var(--accent-color));
+            will-change: transform;
+        }
+
+        /* Salınan Canlı Örümcek */
+        .hanging-spider-container {
+            position: fixed;
+            top: 0;
+            right: 15%;
+            z-index: 40;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: spiderSwing 6s ease-in-out infinite alternate;
+        }
+
+        .spider-thread {
+            width: 1px;
+            height: 120px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.8), var(--accent-color));
+            box-shadow: 0 0 5px var(--accent-color);
+        }
+
+        .spider-body {
+            width: 32px;
+            height: 32px;
+            color: var(--accent-color);
+            filter: drop-shadow(0 0 8px var(--accent-color));
+            transform-origin: top center;
+        }
+
+        @keyframes spiderSwing {
+            0% { transform: rotate(-5deg) translateY(-10px); }
+            100% { transform: rotate(5deg) translateY(15px); }
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -248,6 +288,16 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.08);
             white-space: nowrap;
             transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            position: relative;
+        }
+
+        .badge::after {
+            content: "🕷";
+            position: absolute;
+            right: -6px;
+            top: -6px;
+            font-size: 10px;
+            opacity: 0.7;
         }
 
         .theme-selector {
@@ -277,8 +327,8 @@
             transform: scale(0.6);
         }
 
-        .theme-ice { background: #ffffff; box-shadow: 0 0 14px #fff; }
         .theme-slime { background: #39ff14; box-shadow: 0 0 14px #39ff14; }
+        .theme-ice { background: #ffffff; box-shadow: 0 0 14px #fff; }
         .theme-opium { background: #ff0000; box-shadow: 0 0 14px #ff0000; }
         .theme-purple { background: #a855f7; box-shadow: 0 0 14px #a855f7; }
         .theme-gold { background: #ffd700; box-shadow: 0 0 14px #ffd700; }
@@ -551,8 +601,16 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Gerçekçi ve Algoritmik Örümcek Ağı Canvas Katmanı -->
-    <canvas id="spider-web-canvas"></canvas>
+    <!-- Dinamik Rastgele Yerleştirilen Örümcek Ağları Kapsayıcısı -->
+    <div id="random-webs-container"></div>
+
+    <!-- Canlı Sallanan Örümcek -->
+    <div class="hanging-spider-container">
+        <div class="spider-thread"></div>
+        <svg class="spider-body" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12,2A2,2 0 0,0 10,4C10,4.74 10.4,5.39 11,5.73V7.12C8.84,7.56 7.22,9.3 7.03,11.5H5C4.45,11.5 4,11.95 4,12.5C4,13.05 4.45,13.5 5,13.5H7.03C7.22,15.7 8.84,17.44 11,17.88V19.27C10.4,19.61 10,20.26 10,21A2,2 0 0,0 12,23A2,2 0 0,0 14,21C14,20.26 13.6,19.61 13,19.27V17.88C15.16,17.44 16.78,15.7 16.97,13.5H19C19.55,13.5 20,13.05 20,12.5C20,11.95 19.55,11.5 19,11.5H16.97C16.78,9.3 15.16,7.56 13,7.12V5.73C13.6,5.39 14,4.74 14,4A2,2 0 0,0 12,2M12,9A3.5,3.5 0 0,1 15.5,12.5A3.5,3.5 0 0,1 12,16A3.5,3.5 0 0,1 8.5,12.5A3.5,3.5 0 0,1 12,9Z"/>
+        </svg>
+    </div>
 
     <!-- Arkaplan Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
@@ -574,8 +632,8 @@
                 <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
             </div>
             <div class="theme-selector" id="theme-selector-box">
-                <div class="theme-btn theme-ice" onclick="setRadioTheme('ICE')" title="ICE White"></div>
                 <div class="theme-btn theme-slime" onclick="setRadioTheme('SLIME')" title="SLIME Green"></div>
+                <div class="theme-btn theme-ice" onclick="setRadioTheme('ICE')" title="ICE White"></div>
                 <div class="theme-btn theme-opium" onclick="setRadioTheme('OPIUM')" title="OPIUM Red"></div>
                 <div class="theme-btn theme-purple" onclick="setRadioTheme('PURPLE')" title="LEAN Purple"></div>
                 <div class="theme-btn theme-gold" onclick="setRadioTheme('GOLD')" title="CHAMPAGNE Gold"></div>
@@ -619,135 +677,46 @@
     </div>
 
     <script>
-        // GERÇEKÇİ RASTGELE ÖRÜMCEK AĞI SİMÜLASYONU (HTML5 Canvas)
-        const webCanvas = document.getElementById('spider-web-canvas');
-        const webCtx = webCanvas.getContext('2d');
+        // Rastgele Gerçekçi Örümcek Ağlarını Oluşturma
+        function generateRandomWebs() {
+            const container = document.getElementById('random-webs-container');
+            container.innerHTML = '';
 
-        function generateRealisticWebs() {
-            webCanvas.width = window.innerWidth;
-            webCanvas.height = window.innerHeight;
-            webCtx.clearRect(0, 0, webCanvas.width, webCanvas.height);
+            const webSvgContent = `
+                <path d="M0,0 L200,200 M0,0 L80,200 M0,0 L200,80 M0,0 L35,200 M0,0 L200,35 M0,0 L135,200 M0,0 L200,135 M0,0 L200,0 M0,0 L0,200" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
+                <path d="M15,0 Q13,13 0,15 M30,0 Q26,26 0,30 M48,0 Q41,41 0,48 M70,0 Q60,60 0,70 M95,0 Q80,80 0,95 M125,0 Q105,105 0,125 M160,0 Q135,135 0,160 M200,0 Q170,170 0,200" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
+                <path d="M10,0 Q18,18 0,10 M22,0 Q35,35 0,22 M38,0 Q55,55 0,38 M58,0 Q82,82 0,58 M82,0 Q115,115 0,82 M110,0 Q150,150 0,110 M142,0 Q185,185 0,142" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>
+            `;
 
-            const isMobile = window.innerWidth < 600;
-            const size = isMobile ? Math.min(window.innerWidth, window.innerHeight) * 0.45 : Math.min(window.innerWidth, window.innerHeight) * 0.38;
+            const webCount = window.innerWidth < 600 ? 4 : 6;
 
-            // 4 Köşe Konumu: [X, Y, Başlangıç Açısı, Bitiş Açısı]
-            const corners = [
-                { x: 0, y: 0, startAngle: 0, endAngle: Math.PI / 2 },                           // Sol Üst
-                { x: webCanvas.width, y: 0, startAngle: Math.PI / 2, endAngle: Math.PI },        // Sağ Üst
-                { x: 0, y: webCanvas.height, startAngle: -Math.PI / 2, endAngle: 0 },            // Sol Alt
-                { x: webCanvas.width, y: webCanvas.height, startAngle: Math.PI, endAngle: Math.PI * 1.5 } // Sağ Alt
-            ];
+            for (let i = 0; i < webCount; i++) {
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'random-spider-web');
+                svg.setAttribute('viewBox', '0 0 200 200');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+                svg.innerHTML = webSvgContent;
 
-            corners.forEach(corner => {
-                drawRealisticSpiderWeb(corner.x, corner.y, size, corner.startAngle, corner.endAngle);
-            });
-        }
+                const top = Math.random() * 80;
+                const left = Math.random() * 80;
+                const size = Math.floor(Math.random() * 120 + 180);
+                const rotX = Math.random() > 0.5 ? 1 : -1;
+                const rotY = Math.random() > 0.5 ? 1 : -1;
+                const opacity = (Math.random() * 0.2 + 0.15).toFixed(2);
 
-        function drawRealisticSpiderWeb(originX, originY, maxRadius, startAngle, endAngle) {
-            // Rastgele Destek Işını Sayısı (8 ile 14 arası)
-            const numRays = Math.floor(Math.random() * 6) + 9;
-            const angleStep = (endAngle - startAngle) / (numRays - 1);
-            
-            const rayAngles = [];
-            const rayPoints = [];
+                svg.style.top = top + '%';
+                svg.style.left = left + '%';
+                svg.style.width = size + 'px';
+                svg.style.height = size + 'px';
+                svg.style.transform = `scale(${rotX}, ${rotY}) rotate(${Math.floor(Math.random() * 360)}deg)`;
+                svg.style.opacity = opacity;
 
-            // 1. Destek İplerini Çiz ve Açıları Rastgele Tweak Et
-            for (let i = 0; i < numRays; i++) {
-                // Hafif rastgele sapma ekle (Daha doğal görünüm)
-                let angle = startAngle + i * angleStep;
-                if (i > 0 && i < numRays - 1) {
-                    angle += (Math.random() - 0.5) * angleStep * 0.35;
-                }
-                rayAngles.push(angle);
-
-                // Ana ip uzunluğu
-                const len = maxRadius * (0.75 + Math.random() * 0.3);
-                const endX = originX + Math.cos(angle) * len;
-                const endY = originY + Math.sin(angle) * len;
-
-                rayPoints.push({ x: endX, y: endY, length: len });
-
-                // Ana Işın Çizimi
-                webCtx.beginPath();
-                webCtx.moveTo(originX, originY);
-                webCtx.lineTo(endX, endY);
-                webCtx.strokeStyle = 'rgba(255, 255, 255, ' + (0.25 + Math.random() * 0.2) + ')';
-                webCtx.lineWidth = 0.65 + Math.random() * 0.4;
-                webCtx.stroke();
-            }
-
-            // 2. Sarkık Dairesel Halkalar (Spiral Yapı)
-            const numRings = Math.floor(Math.random() * 5) + 8;
-            const ringSpacing = maxRadius / (numRings + 1);
-
-            for (let r = 1; r <= numRings; r++) {
-                const ringBaseRadius = r * ringSpacing;
-                
-                webCtx.beginPath();
-                let firstPoint = true;
-
-                for (let i = 0; i < numRays; i++) {
-                    const angle = rayAngles[i];
-                    // Gerçekçi sarkma katsayısı (Yerçekimi ve iplik esnemesi)
-                    const sagFactor = (0.08 + Math.random() * 0.12) * ringBaseRadius;
-                    
-                    // Geçerli noktanın ana merkezden uzaklığı
-                    const currentR = ringBaseRadius + (Math.random() - 0.5) * 4;
-                    const pointX = originX + Math.cos(angle) * currentR;
-                    const pointY = originY + Math.sin(angle) * currentR;
-
-                    if (firstPoint) {
-                        webCtx.moveTo(pointX, pointY);
-                        firstPoint = false;
-                    } else {
-                        // Bir önceki nokta ile mevcut nokta arasına sarkık kavis çiz (Quadratic Curve)
-                        const prevAngle = rayAngles[i - 1];
-                        const prevR = ringBaseRadius + (Math.random() - 0.5) * 4;
-                        const prevX = originX + Math.cos(prevAngle) * prevR;
-                        const prevY = originY + Math.sin(prevAngle) * prevR;
-
-                        const midAngle = (prevAngle + angle) / 2;
-                        // Sarkma açısı kontrol noktası
-                        const controlR = currentR - sagFactor;
-                        const controlX = originX + Math.cos(midAngle) * controlR;
-                        const controlY = originY + Math.sin(midAngle) * controlR;
-
-                        webCtx.quadraticCurveTo(controlX, controlY, pointX, pointY);
-                    }
-
-                    // Rastgele Ağ Düğümleri / Su Damlacığı Efekti
-                    if (Math.random() > 0.78) {
-                        webCtx.save();
-                        webCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                        webCtx.beginPath();
-                        webCtx.arc(pointX, pointY, 0.8 + Math.random() * 1.2, 0, Math.PI * 2);
-                        webCtx.fill();
-                        webCtx.restore();
-                    }
-                }
-
-                webCtx.strokeStyle = 'rgba(255, 255, 255, ' + (0.15 + (r / numRings) * 0.25) + ')';
-                webCtx.lineWidth = 0.45 + Math.random() * 0.3;
-                webCtx.stroke();
-            }
-
-            // 3. Rastgele Dağınık / Kopuk Telli Çizgiler (Doğallık Katmak İçin)
-            const extraThreads = Math.floor(Math.random() * 4) + 3;
-            for (let t = 0; t < extraThreads; t++) {
-                const r1 = Math.random() * maxRadius * 0.8;
-                const r2 = r1 + Math.random() * 40;
-                const a1 = startAngle + Math.random() * (endAngle - startAngle);
-                const a2 = a1 + (Math.random() - 0.5) * 0.5;
-
-                webCtx.beginPath();
-                webCtx.moveTo(originX + Math.cos(a1) * r1, originY + Math.sin(a1) * r1);
-                webCtx.lineTo(originX + Math.cos(a2) * r2, originY + Math.sin(a2) * r2);
-                webCtx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-                webCtx.lineWidth = 0.35;
-                webCtx.stroke();
+                container.appendChild(svg);
             }
         }
+
+        generateRandomWebs();
 
         // Sadece "5" Karakteri İçeren Arka Plan Yazıları
         const gothicWords = ["5"];
@@ -793,10 +762,10 @@
 
         generateRandomGothicBg();
 
-        let currentAccentColor = '#ffffff';
+        let currentAccentColor = '#39ff14';
         const THEMES = {
-            ICE: { accent: '#ffffff', glow: 'rgba(255, 255, 255, 0.55)', bgGlow: 'rgba(180, 220, 255, 0.1)', borderGlow: 'rgba(255, 255, 255, 0.35)' },
             SLIME: { accent: '#39ff14', glow: 'rgba(57, 255, 20, 0.6)', bgGlow: 'rgba(0, 255, 50, 0.12)', borderGlow: 'rgba(57, 255, 20, 0.4)' },
+            ICE: { accent: '#ffffff', glow: 'rgba(255, 255, 255, 0.55)', bgGlow: 'rgba(180, 220, 255, 0.1)', borderGlow: 'rgba(255, 255, 255, 0.35)' },
             OPIUM: { accent: '#ff0000', glow: 'rgba(255, 0, 0, 0.65)', bgGlow: 'rgba(255, 0, 0, 0.12)', borderGlow: 'rgba(255, 0, 0, 0.4)' },
             PURPLE: { accent: '#a855f7', glow: 'rgba(168, 85, 247, 0.65)', bgGlow: 'rgba(168, 85, 247, 0.12)', borderGlow: 'rgba(168, 85, 247, 0.4)' },
             GOLD: { accent: '#ffd700', glow: 'rgba(255, 215, 0, 0.65)', bgGlow: 'rgba(255, 215, 0, 0.12)', borderGlow: 'rgba(255, 215, 0, 0.4)' }
@@ -814,6 +783,10 @@
             if (ringBarMeshes) {
                 const hexColor = parseInt(t.accent.replace('#', '0x'));
                 ringBarMeshes.forEach(b => b.material.color.setHex(hexColor));
+            }
+            if (webGlobeMesh) {
+                const hexColor = parseInt(t.accent.replace('#', '0x'));
+                webGlobeMesh.material.color.setHex(hexColor);
             }
         }
 
@@ -1149,7 +1122,7 @@
             updateAudioVisualState();
         });
 
-        // 3D Three.JS Kurulumu (Birebir Gerçekçi Dünya)
+        // 3D Three.JS Kurulumu
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
@@ -1194,6 +1167,17 @@
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
 
+        // 3D Dünya Etrafında Örümcek Ağı Katmanı (Orb-Web Grid Mesh)
+        const webGeo = new THREE.SphereGeometry(baseRadius + 0.05, 16, 12);
+        const webMat = new THREE.MeshBasicMaterial({
+            color: 0x39ff14,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.3
+        });
+        const webGlobeMesh = new THREE.Mesh(webGeo, webMat);
+        scene.add(webGlobeMesh);
+
         const ringBarsCount = 80; 
         const ringBarsGroup = new THREE.Group();
         const ringBarMeshes = [];
@@ -1203,7 +1187,7 @@
         barGeo.translate(0, barHeight / 2, 0); 
 
         for (let i = 0; i < ringBarsCount; i++) {
-            const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
+            const barMat = new THREE.MeshBasicMaterial({ color: 0x39ff14, transparent: true, opacity: 0.85 });
             const bar = new THREE.Mesh(barGeo, barMat);
             
             const angle = (i / ringBarsCount) * Math.PI * 2;
@@ -1284,6 +1268,7 @@
             const ringSpeed = isPlayingState ? 0.75 : 0.22;
 
             globeMesh.rotation.y += globeSpeed * deltaTime;
+            webGlobeMesh.rotation.y -= (globeSpeed * 1.2) * deltaTime;
             if (ringMesh) ringMesh.rotation.y -= ringSpeed * deltaTime;
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
@@ -1293,6 +1278,7 @@
                 const bassPower = Math.pow(Math.sin(bassAngle), 5);
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
+                webGlobeMesh.scale.set(bassScale * 1.03, bassScale * 1.03, bassScale * 1.03);
 
                 dirLight.intensity = 2.5 + bassPower * 3.0;
 
@@ -1335,6 +1321,7 @@
 
             } else {
                 globeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
+                webGlobeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
                 dirLight.intensity = 2.2;
 
                 rootStyle.setProperty('--bass-scale', '1');
@@ -1361,7 +1348,7 @@
             renderer.render(scene, camera);
         }
 
-        // Parçacık Tuvali (Noktalar & "5" Karakterleri)
+        // Parçacık Tuvali (Örümcek Ağı Çizgileri & "5" Karakterleri)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particlesArray = [];
@@ -1374,7 +1361,7 @@
             canvas.height = window.innerHeight;
             resizeThreeJS();
             generateRandomGothicBg();
-            generateRealisticWebs(); // Örümcek ağlarını ekran boyutuna göre yeniden üret
+            generateRandomWebs();
             
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
@@ -1392,7 +1379,7 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.isFive = Math.random() > 0.65; // "5" sembolü ve nokta harmanı
+                this.isFive = Math.random() > 0.65;
                 this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
                 this.speedX = (Math.random() - 0.5) * 0.8;
                 this.speedY = (Math.random() - 0.5) * 0.8;
@@ -1422,8 +1409,29 @@
             }
         }
 
-        const particleCount = 55;
+        const particleCount = 50;
         for (let i = 0; i < particleCount; i++) particlesArray.push(new CyberParticle());
+
+        function connectParticles() {
+            let maxDistance = 120;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let dx = particlesArray[a].x - particlesArray[b].x;
+                    let dy = particlesArray[a].y - particlesArray[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < maxDistance) {
+                        ctx.strokeStyle = currentAccentColor;
+                        ctx.globalAlpha = (1 - distance / maxDistance) * 0.2;
+                        ctx.lineWidth = 0.6;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1431,6 +1439,7 @@
                 particlesArray[i].update();
                 particlesArray[i].draw();
             }
+            connectParticles();
             ctx.globalAlpha = 1.0;
             requestAnimationFrame(animateParticles);
         }
