@@ -91,7 +91,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 3;
+            z-index: 6;
             pointer-events: none;
             overflow: hidden;
         }
@@ -104,9 +104,11 @@
         }
 
         #photo-webs-container canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
+            display: block !important;
+            position: absolute;
+            inset: 0;
+            width: 100% !important;
+            height: 100% !important;
             outline: none;
         }
 
@@ -612,11 +614,13 @@
         // kaynak otomatik denenir. Wikimedia kaynakları CORS destekli olduğu için
         // Three.TextureLoader ile doğrudan yüklenebilir.
         const realWebImages = [
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Spider_web.png/600px-Spider_web.png",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Spiders_web.png/600px-Spiders_web.png",
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Spider_web_isolated.png/600px-Spider_web_isolated.png",
-            "https://raw.githubusercontent.com/sammydow/assets/main/spiderweb1.png",
-            "https://raw.githubusercontent.com/sammydow/assets/main/spiderweb2.png"
+            // Gerçek fotoğraflar — Wikimedia Commons doğrudan dosya URL'leri.
+            // Siyah/koyu arka planlı olanlar AdditiveBlending ile arka plana doğal
+            // şekilde karışır; ağın kendisi gerçek fotoğraf texture'ıdır.
+            "https://upload.wikimedia.org/wikipedia/commons/f/f0/SpiderWeb.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/b/bd/Spider-Web.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/a/a2/Spiderweb.jpg",
+            "https://upload.wikimedia.org/wikipedia/commons/8/8c/A_red_spider_on_a_messy_spiderweb.png"
         ];
 
         // Aynı görseli aynı sahnede arka arkaya kullanmamak için son seçimleri tut.
@@ -624,7 +628,7 @@
 
         const webScene = new THREE.Scene();
         const webCamera = new THREE.PerspectiveCamera(52, 1, 0.1, 100);
-        webCamera.position.set(0, 0, 8);
+        webCamera.position.set(0, 0, 7);
 
         const webRenderer = new THREE.WebGLRenderer({
             alpha: true,
@@ -832,22 +836,26 @@
 
                 // Gerçek fotoğrafı 3D düzlem üzerinde farklı ölçeklerde kullan.
                 const worldHeight = randomBetween(
-                    window.innerWidth < 600 ? 1.15 : 1.35,
-                    window.innerWidth < 600 ? 1.85 : 2.55
+                    window.innerWidth < 600 ? 1.45 : 1.65,
+                    window.innerWidth < 600 ? 2.25 : 3.05
                 );
 
                 const worldWidth = worldHeight * aspect;
 
                 const geometry = new THREE.PlaneGeometry(worldWidth, worldHeight, 1, 1);
 
+                // Fotoğrafın kendisini texture olarak kullanıyoruz. Additive blending
+                // sayesinde koyu/siyah fotoğraf zemini saydam gibi davranır ve özellikle
+                // parlak gerçek örümcek ağı telleri arka planda belirginleşir.
                 const material = new THREE.MeshBasicMaterial({
                     map: texture,
                     transparent: true,
-                    opacity: randomBetween(0.34, 0.62),
+                    opacity: randomBetween(0.52, 0.82),
                     side: THREE.DoubleSide,
                     depthWrite: false,
-                    depthTest: true,
-                    alphaTest: 0.015
+                    depthTest: false,
+                    blending: THREE.AdditiveBlending,
+                    toneMapped: false
                 });
 
                 const mesh = new THREE.Mesh(geometry, material);
@@ -857,7 +865,7 @@
                 // değil, gerçek bir 3D sahne içinde dağılmış görünür.
                 const xPercent = randomBetween(zone.x[0], zone.x[1]);
                 const yPercent = randomBetween(zone.y[0], zone.y[1]);
-                const z = randomBetween(-1.2, 1.8);
+                const z = randomBetween(0.8, 3.2);
 
                 const pos = screenToWorld(xPercent, yPercent, z);
                 mesh.position.set(pos.x, pos.y, z);
@@ -887,6 +895,12 @@
             });
 
             lastWebTextureIndices = currentIndices;
+
+            if (currentIndices.length === 0) {
+                console.error("Örümcek ağları: hiçbir gerçek fotoğraf texture'ı yüklenemedi.");
+            } else {
+                console.log(`Örümcek ağları hazır: ${currentIndices.length} gerçek 3D fotoğraf texture'ı.`);
+            }
         }
 
         // Ağların çok hafif hareketi: gerçek fotoğraf bozulmaz, yalnızca 3D
