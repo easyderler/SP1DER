@@ -13,7 +13,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Montserrat:wght@700;900&family=Permanent+Marker&family=Pirata+One&family=Rubik+Glitch&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -141,48 +141,6 @@
             mask-size: 100% 100%;
             -webkit-mask-mode: alpha;
             mask-mode: alpha;
-        }
-
-        /* Arkaplan "5" Yazı Kapsayıcısı */
-        #gothic-bg-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .random-gothic-text {
-            position: absolute;
-            color: rgba(255, 255, 255, 0.04);
-            pointer-events: none;
-            white-space: nowrap;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.06);
-            will-change: transform, opacity;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            user-select: none;
-            opacity: 0;
-            animation: softFadeText 8s ease-in-out infinite alternate;
-        }
-
-        @keyframes softFadeText {
-            0% { opacity: 0; transform: scale(0.9) rotate(var(--rot)); }
-            50% { opacity: var(--max-op); transform: scale(1.05) rotate(var(--rot)); }
-            100% { opacity: 0; transform: scale(0.95) rotate(var(--rot)); }
-        }
-
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
         }
 
         .ambient-glow {
@@ -571,10 +529,6 @@
     <!-- Örümcek Ağları Kapsayıcısı -->
     <div id="photo-webs-container"></div>
 
-    <!-- Arkaplan Kapsayıcısı -->
-    <div id="gothic-bg-container"></div>
-
-    <canvas id="bg-canvas"></canvas>
     <div class="ambient-glow"></div>
 
     <div class="main-wrapper" id="main-wrapper">
@@ -754,56 +708,6 @@
         }
 
         generatePhotoWebs();
-
-        // Arka Plan "5" Yazıları Süslemeleri
-        const gothicWords = ["5"];
-
-        function generateRandomGothicBg() {
-            const container = document.getElementById('gothic-bg-container');
-            container.innerHTML = '';
-            
-            const count = window.innerWidth < 600 ? 14 : 24;
-
-            for (let i = 0; i < count; i++) {
-                const el = document.createElement('div');
-                el.className = 'random-gothic-text';
-                
-                const word = gothicWords[0];
-                el.innerText = word;
-
-                const top = Math.random() * 92; 
-                const left = Math.random() * 85 - 5; 
-                const fontSize = (Math.random() * 8 + 6).toFixed(1) + 'vw'; 
-                const rotation = Math.floor(Math.random() * 50 - 25); 
-                const maxOpacity = (Math.random() * 0.06 + 0.035).toFixed(3); 
-                const animDelay = (Math.random() * 5).toFixed(1) + 's';
-                const animDuration = (Math.random() * 4 + 6).toFixed(1) + 's';
-
-                const fontChoices = [
-                    "'Rubik Glitch', display",
-                    "'UnifrakturMaguntia', serif", 
-                    "'Pirata One', cursive",
-                    "'Permanent Marker', cursive",
-                    "'Dela Gothic One', sans-serif"
-                ];
-                const chosenFont = fontChoices[Math.floor(Math.random() * fontChoices.length)];
-
-                el.style.top = top + '%';
-                el.style.left = left + '%';
-                el.style.fontSize = fontSize;
-                el.style.fontFamily = chosenFont;
-                el.style.setProperty('--max-op', maxOpacity);
-                el.style.setProperty('--rot', `${rotation}deg`);
-                el.style.animationDelay = animDelay;
-                el.style.animationDuration = animDuration;
-
-                container.appendChild(el);
-            }
-        }
-
-        generateRandomGothicBg();
-
-        const currentAccentColor = '#ffffff';
 
         let player = null;
         let isPlayerReady = false;
@@ -1362,29 +1266,9 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
             renderer.render(scene, camera);
         }
 
-        // Parçacık Tuvali
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particlesArray = [];
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
         function handleResize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
             resizeThreeJS();
-            generateRandomGothicBg();
             generatePhotoWebs();
-            
-            if (particlesArray.length > 0) {
-                particlesArray.forEach(p => {
-                    if (p.x > canvas.width || p.y > canvas.height) {
-                        p.x = Math.random() * canvas.width;
-                        p.y = Math.random() * canvas.height;
-                    }
-                });
-            }
         }
         let resizeTimer = null;
         window.addEventListener('resize', () => {
@@ -1392,82 +1276,9 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
             resizeTimer = setTimeout(handleResize, 120);
         });
 
-        class CyberParticle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.isFive = Math.random() > 0.65;
-                this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 10 + 13;
-                this.speedX = (Math.random() - 0.5) * 0.6;
-                this.speedY = (Math.random() - 0.5) * 0.6;
-                
-                this.opacity = 0;
-                this.maxOpacity = Math.random() * 0.5 + 0.25;
-                this.fadeIn = true;
-                this.fadeSpeed = Math.random() * 0.008 + 0.003;
-            }
-            update() {
-                const speedMult = isPlayingState ? 1.8 : 0.8;
-                this.x += this.speedX * speedMult;
-                this.y += this.speedY * speedMult;
-
-                if (this.fadeIn) {
-                    this.opacity += this.fadeSpeed;
-                    if (this.opacity >= this.maxOpacity) {
-                        this.opacity = this.maxOpacity;
-                        this.fadeIn = false;
-                    }
-                } else {
-                    this.opacity -= this.fadeSpeed;
-                    if (this.opacity <= 0) {
-                        this.reset();
-                    }
-                }
-
-                if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
-            }
-            draw() {
-                // 5'ler korunur; eski noktalar örümcek sembolü olarak uçuşur.
-                // Bass'a bağlı büyüme/parlama kaldırıldı; hareket ve fade korunuyor.
-                const alpha = Math.max(0, this.opacity);
-
-                ctx.save();
-                ctx.fillStyle = currentAccentColor;
-                ctx.globalAlpha = alpha;
-                ctx.shadowBlur = 0;
-
-                if (this.isFive) {
-                    ctx.font = `900 ${this.size}px 'Syne', sans-serif`;
-                    ctx.fillText("5", this.x, this.y);
-                } else {
-                    ctx.font = `${this.size}px 'Segoe UI Symbol', 'Apple Symbols', sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('🕷︎', this.x, this.y);
-                }
-
-                ctx.restore();
-            }
-        }
-
-        const particleCount = 50;
-        for (let i = 0; i < particleCount; i++) particlesArray.push(new CyberParticle());
-
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particleCount; i++) {
-                particlesArray[i].update();
-                particlesArray[i].draw();
-            }
-            ctx.globalAlpha = 1.0;
-            requestAnimationFrame(animateParticles);
-        }
-
         // Başlat
         resizeThreeJS();
         requestAnimationFrame(animateGlobe);
-        animateParticles();
 
         // FIREBASE CANLI DİNLEYİCİ SİSTEMİ
         const firebaseConfig = {
