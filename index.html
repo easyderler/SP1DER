@@ -17,10 +17,10 @@
         }
 
         :root {
-            --accent-color: #39ff14;
-            --glow-color: rgba(57, 255, 20, 0.55);
-            --bg-glow: rgba(0, 255, 50, 0.12);
-            --border-glow: rgba(57, 255, 20, 0.35);
+            --accent-color: #ffffff;
+            --glow-color: rgba(255, 255, 255, 0.55);
+            --bg-glow: rgba(180, 220, 255, 0.1);
+            --border-glow: rgba(255, 255, 255, 0.35);
             --bass-scale: 1;
             --bass-glow-scale: 1;
             --bass-opacity: 0.55;
@@ -84,58 +84,17 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Dinamik & Rastgele Konumlanan Gerçekçi Örümcek Ağları */
-        #random-webs-container {
+        /* Gerçekçi Örümcek Ağları Tuvali */
+        #web-canvas {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             z-index: 3;
             pointer-events: none;
-            overflow: hidden;
-        }
-
-        .random-spider-web {
-            position: absolute;
-            pointer-events: none;
-            opacity: 0.25;
-            transition: transform 0.1s ease, filter 0.3s ease;
-            filter: drop-shadow(0 0 6px var(--accent-color));
-            will-change: transform;
-        }
-
-        /* Salınan Canlı Örümcek */
-        .hanging-spider-container {
-            position: fixed;
-            top: 0;
-            right: 15%;
-            z-index: 40;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: spiderSwing 6s ease-in-out infinite alternate;
-        }
-
-        .spider-thread {
-            width: 1px;
-            height: 120px;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.8), var(--accent-color));
-            box-shadow: 0 0 5px var(--accent-color);
-        }
-
-        .spider-body {
-            width: 32px;
-            height: 32px;
-            color: var(--accent-color);
-            filter: drop-shadow(0 0 8px var(--accent-color));
-            transform-origin: top center;
-        }
-
-        @keyframes spiderSwing {
-            0% { transform: rotate(-5deg) translateY(-10px); }
-            100% { transform: rotate(5deg) translateY(15px); }
+            opacity: 0.75;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -288,50 +247,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.08);
             white-space: nowrap;
             transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-            position: relative;
         }
-
-        .badge::after {
-            content: "🕷";
-            position: absolute;
-            right: -6px;
-            top: -6px;
-            font-size: 10px;
-            opacity: 0.7;
-        }
-
-        .theme-selector {
-            display: flex;
-            gap: 6px;
-            background: rgba(10, 10, 10, 0.85);
-            border: 1px solid var(--border-glow);
-            padding: 6px 10px;
-            border-radius: 40px;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .theme-btn {
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            cursor: pointer;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
-            position: relative;
-        }
-
-        .theme-btn:active {
-            transform: scale(0.6);
-        }
-
-        .theme-slime { background: #39ff14; box-shadow: 0 0 14px #39ff14; }
-        .theme-ice { background: #ffffff; box-shadow: 0 0 14px #fff; }
-        .theme-opium { background: #ff0000; box-shadow: 0 0 14px #ff0000; }
-        .theme-purple { background: #a855f7; box-shadow: 0 0 14px #a855f7; }
-        .theme-gold { background: #ffd700; box-shadow: 0 0 14px #ffd700; }
 
         .live-dot {
             width: 7px;
@@ -411,8 +327,6 @@
         @media (max-width: 480px) {
             .status-bar { gap: 6px; }
             .badge { padding: 5px 9px; font-size: 8px; letter-spacing: 1px; }
-            .theme-selector { padding: 5px 8px; gap: 4px; }
-            .theme-btn { width: 13px; height: 13px; }
             .volume-control-box { padding: 5px 9px; }
             .volume-slider { width: 38px; }
         }
@@ -601,16 +515,8 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Dinamik Rastgele Yerleştirilen Örümcek Ağları Kapsayıcısı -->
-    <div id="random-webs-container"></div>
-
-    <!-- Canlı Sallanan Örümcek -->
-    <div class="hanging-spider-container">
-        <div class="spider-thread"></div>
-        <svg class="spider-body" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12,2A2,2 0 0,0 10,4C10,4.74 10.4,5.39 11,5.73V7.12C8.84,7.56 7.22,9.3 7.03,11.5H5C4.45,11.5 4,11.95 4,12.5C4,13.05 4.45,13.5 5,13.5H7.03C7.22,15.7 8.84,17.44 11,17.88V19.27C10.4,19.61 10,20.26 10,21A2,2 0 0,0 12,23A2,2 0 0,0 14,21C14,20.26 13.6,19.61 13,19.27V17.88C15.16,17.44 16.78,15.7 16.97,13.5H19C19.55,13.5 20,13.05 20,12.5C20,11.95 19.55,11.5 19,11.5H16.97C16.78,9.3 15.16,7.56 13,7.12V5.73C13.6,5.39 14,4.74 14,4A2,2 0 0,0 12,2M12,9A3.5,3.5 0 0,1 15.5,12.5A3.5,3.5 0 0,1 12,16A3.5,3.5 0 0,1 8.5,12.5A3.5,3.5 0 0,1 12,9Z"/>
-        </svg>
-    </div>
+    <!-- Dinamik Gerçekçi Örümcek Ağı Tuvali -->
+    <canvas id="web-canvas"></canvas>
 
     <!-- Arkaplan Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
@@ -630,13 +536,6 @@
             </div>
             <div class="badge" id="badge-listener">
                 <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
-            </div>
-            <div class="theme-selector" id="theme-selector-box">
-                <div class="theme-btn theme-slime" onclick="setRadioTheme('SLIME')" title="SLIME Green"></div>
-                <div class="theme-btn theme-ice" onclick="setRadioTheme('ICE')" title="ICE White"></div>
-                <div class="theme-btn theme-opium" onclick="setRadioTheme('OPIUM')" title="OPIUM Red"></div>
-                <div class="theme-btn theme-purple" onclick="setRadioTheme('PURPLE')" title="LEAN Purple"></div>
-                <div class="theme-btn theme-gold" onclick="setRadioTheme('GOLD')" title="CHAMPAGNE Gold"></div>
             </div>
             <div class="volume-control-box disabled" id="volume-box">
                 <button class="volume-btn" id="mute-btn" disabled>🔊</button>
@@ -677,47 +576,6 @@
     </div>
 
     <script>
-        // Rastgele Gerçekçi Örümcek Ağlarını Oluşturma
-        function generateRandomWebs() {
-            const container = document.getElementById('random-webs-container');
-            container.innerHTML = '';
-
-            const webSvgContent = `
-                <path d="M0,0 L200,200 M0,0 L80,200 M0,0 L200,80 M0,0 L35,200 M0,0 L200,35 M0,0 L135,200 M0,0 L200,135 M0,0 L200,0 M0,0 L0,200" stroke="rgba(255,255,255,0.45)" stroke-width="0.6"/>
-                <path d="M15,0 Q13,13 0,15 M30,0 Q26,26 0,30 M48,0 Q41,41 0,48 M70,0 Q60,60 0,70 M95,0 Q80,80 0,95 M125,0 Q105,105 0,125 M160,0 Q135,135 0,160 M200,0 Q170,170 0,200" stroke="rgba(255,255,255,0.6)" stroke-width="0.7"/>
-                <path d="M10,0 Q18,18 0,10 M22,0 Q35,35 0,22 M38,0 Q55,55 0,38 M58,0 Q82,82 0,58 M82,0 Q115,115 0,82 M110,0 Q150,150 0,110 M142,0 Q185,185 0,142" stroke="rgba(255,255,255,0.3)" stroke-width="0.4"/>
-            `;
-
-            const webCount = window.innerWidth < 600 ? 4 : 6;
-
-            for (let i = 0; i < webCount; i++) {
-                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.setAttribute('class', 'random-spider-web');
-                svg.setAttribute('viewBox', '0 0 200 200');
-                svg.setAttribute('fill', 'none');
-                svg.setAttribute('stroke', 'currentColor');
-                svg.innerHTML = webSvgContent;
-
-                const top = Math.random() * 80;
-                const left = Math.random() * 80;
-                const size = Math.floor(Math.random() * 120 + 180);
-                const rotX = Math.random() > 0.5 ? 1 : -1;
-                const rotY = Math.random() > 0.5 ? 1 : -1;
-                const opacity = (Math.random() * 0.2 + 0.15).toFixed(2);
-
-                svg.style.top = top + '%';
-                svg.style.left = left + '%';
-                svg.style.width = size + 'px';
-                svg.style.height = size + 'px';
-                svg.style.transform = `scale(${rotX}, ${rotY}) rotate(${Math.floor(Math.random() * 360)}deg)`;
-                svg.style.opacity = opacity;
-
-                container.appendChild(svg);
-            }
-        }
-
-        generateRandomWebs();
-
         // Sadece "5" Karakteri İçeren Arka Plan Yazıları
         const gothicWords = ["5"];
 
@@ -762,33 +620,7 @@
 
         generateRandomGothicBg();
 
-        let currentAccentColor = '#39ff14';
-        const THEMES = {
-            SLIME: { accent: '#39ff14', glow: 'rgba(57, 255, 20, 0.6)', bgGlow: 'rgba(0, 255, 50, 0.12)', borderGlow: 'rgba(57, 255, 20, 0.4)' },
-            ICE: { accent: '#ffffff', glow: 'rgba(255, 255, 255, 0.55)', bgGlow: 'rgba(180, 220, 255, 0.1)', borderGlow: 'rgba(255, 255, 255, 0.35)' },
-            OPIUM: { accent: '#ff0000', glow: 'rgba(255, 0, 0, 0.65)', bgGlow: 'rgba(255, 0, 0, 0.12)', borderGlow: 'rgba(255, 0, 0, 0.4)' },
-            PURPLE: { accent: '#a855f7', glow: 'rgba(168, 85, 247, 0.65)', bgGlow: 'rgba(168, 85, 247, 0.12)', borderGlow: 'rgba(168, 85, 247, 0.4)' },
-            GOLD: { accent: '#ffd700', glow: 'rgba(255, 215, 0, 0.65)', bgGlow: 'rgba(255, 215, 0, 0.12)', borderGlow: 'rgba(255, 215, 0, 0.4)' }
-        };
-
-        function setRadioTheme(mode) {
-            const t = THEMES[mode];
-            currentAccentColor = t.accent;
-            const rootStyle = document.documentElement.style;
-            rootStyle.setProperty('--accent-color', t.accent);
-            rootStyle.setProperty('--glow-color', t.glow);
-            rootStyle.setProperty('--bg-glow', t.bgGlow);
-            rootStyle.setProperty('--border-glow', t.borderGlow);
-
-            if (ringBarMeshes) {
-                const hexColor = parseInt(t.accent.replace('#', '0x'));
-                ringBarMeshes.forEach(b => b.material.color.setHex(hexColor));
-            }
-            if (webGlobeMesh) {
-                const hexColor = parseInt(t.accent.replace('#', '0x'));
-                webGlobeMesh.material.color.setHex(hexColor);
-            }
-        }
+        const currentAccentColor = '#ffffff';
 
         let player = null;
         let isPlayerReady = false;
@@ -1122,7 +954,7 @@
             updateAudioVisualState();
         });
 
-        // 3D Three.JS Kurulumu
+        // 3D Three.JS Kurulumu (Dünya + 3D Örümcek)
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
@@ -1167,16 +999,59 @@
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
 
-        // 3D Dünya Etrafında Örümcek Ağı Katmanı (Orb-Web Grid Mesh)
-        const webGeo = new THREE.SphereGeometry(baseRadius + 0.05, 16, 12);
-        const webMat = new THREE.MeshBasicMaterial({
-            color: 0x39ff14,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.3
-        });
-        const webGlobeMesh = new THREE.Mesh(webGeo, webMat);
-        scene.add(webGlobeMesh);
+        // --- 3D ÖRÜMCEK MODELİ VE İPİ ---
+        const spiderGroup = new THREE.Group();
+        
+        // Örümcek Gövdesi
+        const bodyGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        const spiderMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 });
+        const bodyMesh = new THREE.Mesh(bodyGeo, spiderMat);
+        spiderGroup.add(bodyMesh);
+
+        // Örümcek Başı
+        const headGeo = new THREE.SphereGeometry(0.07, 16, 16);
+        const headMesh = new THREE.Mesh(headGeo, spiderMat);
+        headMesh.position.set(0, -0.1, 0.05);
+        spiderGroup.add(headMesh);
+
+        // Kırmızı Örümcek Gözleri
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const eyeGeo = new THREE.SphereGeometry(0.015, 8, 8);
+        const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
+        const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
+        eye1.position.set(-0.025, -0.13, 0.1);
+        eye2.position.set(0.025, -0.13, 0.1);
+        spiderGroup.add(eye1);
+        spiderGroup.add(eye2);
+
+        // Örümcek Bacakları
+        const spiderLegs = [];
+        for (let i = 0; i < 8; i++) {
+            const side = i % 2 === 0 ? 1 : -1;
+            const legIdx = Math.floor(i / 2);
+            
+            const legCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(side * 0.15, (legIdx - 1.5) * 0.05 + 0.08, 0.1),
+                new THREE.Vector3(side * 0.28, (legIdx - 1.5) * 0.08 - 0.05, 0)
+            ]);
+            
+            const legGeo = new THREE.TubeGeometry(legCurve, 8, 0.012, 6, false);
+            const legMesh = new THREE.Mesh(legGeo, spiderMat);
+            spiderGroup.add(legMesh);
+            spiderLegs.push(legMesh);
+        }
+
+        // Örümceğin İpi
+        const threadGeo = new THREE.CylinderGeometry(0.002, 0.002, 3, 4);
+        const threadMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
+        const threadMesh = new THREE.Mesh(threadGeo, threadMat);
+        threadMesh.position.set(0, 1.5, 0);
+        spiderGroup.add(threadMesh);
+
+        spiderGroup.position.set(0, 1.6, 0.4);
+        spiderGroup.scale.set(1.2, 1.2, 1.2);
+        scene.add(spiderGroup);
 
         const ringBarsCount = 80; 
         const ringBarsGroup = new THREE.Group();
@@ -1187,7 +1062,7 @@
         barGeo.translate(0, barHeight / 2, 0); 
 
         for (let i = 0; i < ringBarsCount; i++) {
-            const barMat = new THREE.MeshBasicMaterial({ color: 0x39ff14, transparent: true, opacity: 0.85 });
+            const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
             const bar = new THREE.Mesh(barGeo, barMat);
             
             const angle = (i / ringBarsCount) * Math.PI * 2;
@@ -1250,7 +1125,6 @@
         let bassAngle = 0;
         const badgeLiveEl = document.getElementById('badge-live');
         const badgeListenerEl = document.getElementById('badge-listener');
-        const themeSelectorEl = document.getElementById('theme-selector-box');
         const volumeBoxEl = document.getElementById('volume-box');
 
         let lastTime = performance.now();
@@ -1268,9 +1142,12 @@
             const ringSpeed = isPlayingState ? 0.75 : 0.22;
 
             globeMesh.rotation.y += globeSpeed * deltaTime;
-            webGlobeMesh.rotation.y -= (globeSpeed * 1.2) * deltaTime;
             if (ringMesh) ringMesh.rotation.y -= ringSpeed * deltaTime;
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
+
+            // Örümcek Sallanma ve Ritim Animasyonu
+            spiderGroup.position.y = 1.55 + Math.sin(currentTime * 0.002) * 0.08;
+            spiderGroup.rotation.z = Math.sin(currentTime * 0.0015) * 0.12;
 
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
@@ -1278,7 +1155,8 @@
                 const bassPower = Math.pow(Math.sin(bassAngle), 5);
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
-                webGlobeMesh.scale.set(bassScale * 1.03, bassScale * 1.03, bassScale * 1.03);
+
+                spiderGroup.position.y += bassPower * 0.05;
 
                 dirLight.intensity = 2.5 + bassPower * 3.0;
 
@@ -1289,12 +1167,10 @@
                 if (bassPower > 0.6) {
                     badgeLiveEl.classList.add('badge-bass-pulse');
                     badgeListenerEl.classList.add('badge-bass-pulse');
-                    themeSelectorEl.classList.add('badge-bass-pulse');
                     volumeBoxEl.classList.add('badge-bass-pulse');
                 } else {
                     badgeLiveEl.classList.remove('badge-bass-pulse');
                     badgeListenerEl.classList.remove('badge-bass-pulse');
-                    themeSelectorEl.classList.remove('badge-bass-pulse');
                     volumeBoxEl.classList.remove('badge-bass-pulse');
                 }
 
@@ -1321,7 +1197,6 @@
 
             } else {
                 globeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
-                webGlobeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
                 dirLight.intensity = 2.2;
 
                 rootStyle.setProperty('--bass-scale', '1');
@@ -1331,7 +1206,6 @@
                 mainWrapper.classList.remove('wrapper-glitch');
                 badgeLiveEl.classList.remove('badge-bass-pulse');
                 badgeListenerEl.classList.remove('badge-bass-pulse');
-                themeSelectorEl.classList.remove('badge-bass-pulse');
                 volumeBoxEl.classList.remove('badge-bass-pulse');
 
                 for (let idx = 0; idx < ringBarsCount; idx++) {
@@ -1348,7 +1222,100 @@
             renderer.render(scene, camera);
         }
 
-        // Parçacık Tuvali (Örümcek Ağı Çizgileri & "5" Karakterleri)
+        // --- RASTGELE GERÇEKÇİ ÖRÜMCEK AĞLARI ÇİZİMİ ---
+        const webCanvas = document.getElementById('web-canvas');
+        const webCtx = webCanvas.getContext('2d');
+        let generatedWebs = [];
+
+        function generateRealisticWebs() {
+            webCanvas.width = window.innerWidth;
+            webCanvas.height = window.innerHeight;
+            generatedWebs = [];
+
+            // Ekranın köşelerine ve rastgele bölgelerine 5 ila 8 adet örümcek ağı üret
+            const count = Math.floor(Math.random() * 3) + 5;
+
+            // Köşeler garanti olsun
+            const anchors = [
+                { x: 0, y: 0 },
+                { x: webCanvas.width, y: 0 },
+                { x: 0, y: webCanvas.height },
+                { x: webCanvas.width, y: webCanvas.height }
+            ];
+
+            for (let i = 0; i < count; i++) {
+                let origin = anchors[i] || { 
+                    x: Math.random() * webCanvas.width, 
+                    y: Math.random() * webCanvas.height 
+                };
+
+                generatedWebs.push({
+                    x: origin.x,
+                    y: origin.y,
+                    radius: Math.random() * 180 + 150,
+                    rays: Math.floor(Math.random() * 5) + 10,
+                    rings: Math.floor(Math.random() * 4) + 7,
+                    startAngle: Math.random() * Math.PI * 2,
+                    opacity: Math.random() * 0.35 + 0.25
+                });
+            }
+        }
+
+        function drawRealisticWebs() {
+            webCtx.clearRect(0, 0, webCanvas.width, webCanvas.height);
+
+            generatedWebs.forEach(web => {
+                webCtx.save();
+                webCtx.translate(web.x, web.y);
+                
+                webCtx.strokeStyle = "rgba(255, 255, 255, " + web.opacity + ")";
+                webCtx.lineWidth = 0.7;
+
+                const angleStep = (Math.PI * 2) / web.rays;
+
+                // Ana Destek İpleri
+                for (let i = 0; i < web.rays; i++) {
+                    const angle = web.startAngle + i * angleStep;
+                    const endX = Math.cos(angle) * web.radius;
+                    const endY = Math.sin(angle) * web.radius;
+
+                    webCtx.beginPath();
+                    webCtx.moveTo(0, 0);
+                    webCtx.lineTo(endX, endY);
+                    webCtx.stroke();
+                }
+
+                // Sarkık İç İpeksi Halka Spiralleri (Gerçek Örümcek Ağı Eğrileri)
+                for (let r = 1; r <= web.rings; r++) {
+                    const rDist = (web.radius / web.rings) * r;
+                    
+                    webCtx.beginPath();
+                    for (let i = 0; i < web.rays; i++) {
+                        const a1 = web.startAngle + i * angleStep;
+                        const a2 = web.startAngle + (i + 1) * angleStep;
+
+                        const p1x = Math.cos(a1) * rDist;
+                        const p1y = Math.sin(a1) * rDist;
+                        const p2x = Math.cos(a2) * rDist;
+                        const p2y = Math.sin(a2) * rDist;
+
+                        // Merkez sarkma hesabı (Gerçekçi ağ yerçekimi etkisi)
+                        const midAngle = (a1 + a2) / 2;
+                        const sag = rDist * 0.82; 
+                        const cX = Math.cos(midAngle) * sag;
+                        const cY = Math.sin(midAngle) * sag;
+
+                        if (i === 0) webCtx.moveTo(p1x, p1y);
+                        webCtx.quadraticCurveTo(cX, cY, p2x, p2y);
+                    }
+                    webCtx.stroke();
+                }
+
+                webCtx.restore();
+            });
+        }
+
+        // Parçacık Tuvali (Noktalar & "5" Karakterleri)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let particlesArray = [];
@@ -1361,7 +1328,8 @@
             canvas.height = window.innerHeight;
             resizeThreeJS();
             generateRandomGothicBg();
-            generateRandomWebs();
+            generateRealisticWebs();
+            drawRealisticWebs();
             
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
@@ -1379,7 +1347,7 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.isFive = Math.random() > 0.65;
+                this.isFive = Math.random() > 0.65; // "5" sembolü ve nokta harmanı
                 this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
                 this.speedX = (Math.random() - 0.5) * 0.8;
                 this.speedY = (Math.random() - 0.5) * 0.8;
@@ -1409,29 +1377,8 @@
             }
         }
 
-        const particleCount = 50;
+        const particleCount = 55;
         for (let i = 0; i < particleCount; i++) particlesArray.push(new CyberParticle());
-
-        function connectParticles() {
-            let maxDistance = 120;
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let dx = particlesArray[a].x - particlesArray[b].x;
-                    let dy = particlesArray[a].y - particlesArray[b].y;
-                    let distance = Math.sqrt(dx * dx + dy * dy);
-
-                    if (distance < maxDistance) {
-                        ctx.strokeStyle = currentAccentColor;
-                        ctx.globalAlpha = (1 - distance / maxDistance) * 0.2;
-                        ctx.lineWidth = 0.6;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
 
         function animateParticles() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1439,7 +1386,6 @@
                 particlesArray[i].update();
                 particlesArray[i].draw();
             }
-            connectParticles();
             ctx.globalAlpha = 1.0;
             requestAnimationFrame(animateParticles);
         }
