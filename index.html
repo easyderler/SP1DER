@@ -153,7 +153,8 @@
             z-index: 4;
             pointer-events: none;
             will-change: transform, opacity;
-            filter: blur(70px);
+            filter: blur(58px);
+            contain: strict;
             transform: translate(-50%, -50%) scale(var(--bass-glow-scale));
             opacity: var(--bass-opacity);
         }
@@ -257,7 +258,7 @@
             text-transform: uppercase;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.08);
             white-space: nowrap;
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
         }
 
         .live-dot {
@@ -285,7 +286,7 @@
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
             pointer-events: auto;
         }
 
@@ -1103,7 +1104,10 @@
         const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
         
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        // Adaptif render çözünürlüğü: masaüstünde net, mobilde gereksiz GPU yükü yok.
+        const preferredPixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth <= 600 ? 1.0 : 1.15);
+        let adaptivePixelRatio = preferredPixelRatio;
+        renderer.setPixelRatio(adaptivePixelRatio);
         globeContainer.appendChild(renderer.domElement);
 
         function resizeThreeJS() {
@@ -1141,7 +1145,7 @@
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
 
-        const ringBarsCount = 80;
+        const ringBarsCount = 56;
         const ringBarsGroup = new THREE.Group();
         const ringBarMeshes = [];
         // Açılar ve trigonometrik değerler bir kez hesaplanır; her frame yeniden Math.sin/cos yapılmaz.
@@ -1259,12 +1263,12 @@
                             }
                             const temp = new THREE.TextGeometry(ch, {
                                 font, size, height: depth,
-                                curveSegments: 10,
+                                curveSegments: 6,
                                 bevelEnabled: true,
                                 bevelThickness: bevel,
                                 bevelSize: bevel * 0.78,
                                 bevelOffset: 0,
-                                bevelSegments: 5
+                                bevelSegments: 3
                             });
                             temp.computeBoundingBox();
                             const b = temp.boundingBox;
@@ -1289,12 +1293,12 @@
 
                             const geo = new THREE.TextGeometry(ch, {
                                 font, size, height: depth,
-                                curveSegments: 10,
+                                curveSegments: 6,
                                 bevelEnabled: true,
                                 bevelThickness: bevel,
                                 bevelSize: bevel * 0.78,
                                 bevelOffset: 0,
-                                bevelSegments: 5
+                                bevelSegments: 3
                             });
                             geo.computeBoundingBox();
                             const box = geo.boundingBox;
@@ -1349,12 +1353,37 @@
         const rootStyle = document.documentElement.style;
         const idleGlobeScale = new THREE.Vector3(1, 1, 1);
         let lastGlitchUpdate = 0;
+        // FPS dengeleyici: efekt kalitesini korurken zayıf cihazlarda render yükünü otomatik düşürür.
+        let perfSampleStart = performance.now();
+        let perfFrames = 0;
+        let lastBarUpdate = 0;
+        let smoothedBass = 0;
+        let bassKick = 0;
+        const bassEase = 10.0;
 
         // TEK BASS KAYNAĞI:
         // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
         // kullanır. Böylece efektler birebir aynı anda ve aynı şiddette patlar.
 function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
+            if (document.hidden) { lastTime = currentTime; return; }
+
+            perfFrames++;
+            if (currentTime - perfSampleStart >= 2000) {
+                const fps = perfFrames * 1000 / (currentTime - perfSampleStart);
+                // Uzun süre 48 FPS altına düşerse WebGL çözünürlüğünü biraz azalt.
+                if (fps < 48 && adaptivePixelRatio > 0.82) {
+                    adaptivePixelRatio = Math.max(0.82, adaptivePixelRatio - 0.08);
+                    renderer.setPixelRatio(adaptivePixelRatio);
+                    resizeThreeJS();
+                } else if (fps > 57 && adaptivePixelRatio < preferredPixelRatio) {
+                    adaptivePixelRatio = Math.min(preferredPixelRatio, adaptivePixelRatio + 0.04);
+                    renderer.setPixelRatio(adaptivePixelRatio);
+                    resizeThreeJS();
+                }
+                perfFrames = 0;
+                perfSampleStart = currentTime;
+            }
 
             const deltaTime = (currentTime - lastTime) / 1000; 
             lastTime = currentTime;
@@ -1388,15 +1417,21 @@ function animateGlobe(currentTime) {
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
                 
-                const bassPower = Math.max(0, Math.pow(Math.sin(bassAngle), 5));
-const bassScale = 1 + bassPower * 0.04; 
+                const rawBass = Math.max(0, Math.pow(Math.sin(bassAngle), 7));
+                // Sert aç/kapa yerine hızlı attack + yumuşak decay: kick daha tok, görüntü daha akıcı.
+                const follow = 1 - Math.exp(-bassEase * deltaTime);
+                smoothedBass += (rawBass - smoothedBass) * follow;
+                if (rawBass > 0.78 && bassKick < 0.32) bassKick = 1;
+                bassKick = Math.max(0, bassKick - deltaTime * 5.5);
+                const bassPower = Math.min(1, smoothedBass * 0.82 + bassKick * 0.28);
+const bassScale = 1 + bassPower * 0.028; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
 
                 dirLight.intensity = 0.88 + bassPower * 0.20;
 
-                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.012).toFixed(3));
-                rootStyle.setProperty('--bass-glow-scale', (1 + Math.sin(bassAngle) * 0.16).toFixed(3));
-                rootStyle.setProperty('--bass-opacity', (0.55 + bassPower * 0.4).toFixed(2));
+                rootStyle.setProperty('--bass-scale', (1 + bassPower * 0.009).toFixed(3));
+                rootStyle.setProperty('--bass-glow-scale', (1 + bassPower * 0.12 + bassKick * 0.045).toFixed(3));
+                rootStyle.setProperty('--bass-opacity', (0.42 + bassPower * 0.24).toFixed(2));
 
                 if (bassPower > 0.6) {
                     badgeLiveEl.classList.add('badge-bass-pulse');
@@ -1408,32 +1443,36 @@ const bassScale = 1 + bassPower * 0.04;
                     volumeBoxEl.classList.remove('badge-bass-pulse');
                 }
 
-                if (bassPower > 0.65) {
+                if (bassPower > 0.82 && bassKick > 0.18) {
                     // Glitch konumu her frame değil, yaklaşık 12.5 kez/sn güncellenir.
-                    if (currentTime - lastGlitchUpdate > 80) {
+                    if (currentTime - lastGlitchUpdate > 130) {
                         lastGlitchUpdate = currentTime;
-                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 16).toFixed(1) + 'px');
-                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 8).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-x', ((Math.random() - 0.5) * 7).toFixed(1) + 'px');
+                        rootStyle.setProperty('--glitch-y', ((Math.random() - 0.5) * 4).toFixed(1) + 'px');
                     }
                     mainWrapper.classList.add('wrapper-glitch');
                 } else {
                     mainWrapper.classList.remove('wrapper-glitch');
                 }
 
-                for (let idx = 0; idx < ringBarsCount; idx++) {
-                    const bar = ringBarMeshes[idx];
-                    const rnd = Math.sin(bassAngle * 3 + idx) * 0.5 + 0.5;
-                    const scaleY = 0.25 + rnd * 1.1 * (bassPower + 0.2);
-                    
+                // Spektrum halkası 30 FPS güncellenir; dünya/yazı 60 FPS akmaya devam eder.
+                if (currentTime - lastBarUpdate >= 33) {
+                    lastBarUpdate = currentTime;
                     const currentRadius = (baseRadius * bassScale) + 0.01;
-                    bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
-
-                    bar.scale.set(1, scaleY, 1);
-                    bar.material.opacity = 0.6 + rnd * 0.4;
+                    for (let idx = 0; idx < ringBarsCount; idx++) {
+                        const bar = ringBarMeshes[idx];
+                        const rnd = Math.sin(bassAngle * 2.7 + idx * 0.82) * 0.5 + 0.5;
+                        const scaleY = 0.30 + rnd * 0.86 * (bassPower + 0.24);
+                        bar.position.set(ringBarCos[idx] * currentRadius, ringBarSin[idx] * currentRadius, 0);
+                        bar.scale.y = scaleY;
+                        bar.material.opacity = 0.48 + rnd * 0.36 + bassPower * 0.08;
+                    }
                 }
 
             } else {
                 // Yayın başlamadıysa, durmuşsa veya ses kapalıysa BASS = 0.
+                smoothedBass *= Math.max(0, 1 - deltaTime * 8);
+                bassKick = 0;
                 // Böylece hiçbir arka plan öğesi patlamaz.
 globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
                 dirLight.intensity = 0.48;
@@ -1461,9 +1500,15 @@ globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
             renderer.render(scene, camera);
         }
 
+        let lastWebMobileMode = window.innerWidth < 600;
         function handleResize() {
             resizeThreeJS();
-            generatePhotoWebs();
+            const mobileMode = window.innerWidth < 600;
+            // Ağları yalnızca mobil/desktop breakpoint değişince yeniden üret.
+            if (mobileMode !== lastWebMobileMode) {
+                lastWebMobileMode = mobileMode;
+                generatePhotoWebs();
+            }
         }
         let resizeTimer = null;
         window.addEventListener('resize', () => {
