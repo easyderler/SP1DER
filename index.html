@@ -1111,35 +1111,6 @@
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
 
-        const ringBarsCount = 56;
-        const ringBarsGroup = new THREE.Group();
-        const ringBarMeshes = [];
-        // Açılar ve trigonometrik değerler bir kez hesaplanır; her frame yeniden Math.sin/cos yapılmaz.
-        const ringBarAngles = new Float32Array(ringBarsCount);
-        const ringBarCos = new Float32Array(ringBarsCount);
-        const ringBarSin = new Float32Array(ringBarsCount);
-
-        const barHeight = 0.45;
-        const barGeo = new THREE.BoxGeometry(0.035, barHeight, 0.035);
-        barGeo.translate(0, barHeight / 2, 0); 
-
-        for (let i = 0; i < ringBarsCount; i++) {
-            const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85 });
-            const bar = new THREE.Mesh(barGeo, barMat);
-            
-            const angle = (i / ringBarsCount) * Math.PI * 2;
-            ringBarAngles[i] = angle;
-            ringBarCos[i] = Math.cos(angle);
-            ringBarSin[i] = Math.sin(angle);
-            const radius = baseRadius + 0.01;
-            bar.position.set(ringBarCos[i] * radius, ringBarSin[i] * radius, 0);
-            bar.rotation.z = angle - Math.PI / 2;
-            
-            ringBarsGroup.add(bar);
-            ringBarMeshes.push(bar);
-        }
-        scene.add(ringBarsGroup);
-
         const ambientLight = new THREE.AmbientLight(0xffffff, 1.12);
         scene.add(ambientLight);
 
@@ -1359,37 +1330,6 @@
                     side.emissive.setRGB(0.045, 0.050, 0.056);
                     side.emissiveIntensity = 0.11;
                 }
-            }
-
-            ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
-
-            // Canlı yayın sırasında çizgiler temiz halka formunu korurken hafifçe nefes alır.
-            // Komşu çizgiler birbirine yakın hareket eder; rastgele/equalizer gibi şekilsiz görünmez.
-            const ringTime = currentTime * 0.001;
-            const idleBarScale = 0.25;
-            const playingBaseScale = 0.58;
-            const targetBarOpacity = isPlayingState ? 0.72 : 0.35;
-            for (let idx = 0; idx < ringBarsCount; idx++) {
-                const bar = ringBarMeshes[idx];
-                bar.position.set(
-                    ringBarCos[idx] * (baseRadius + 0.01),
-                    ringBarSin[idx] * (baseRadius + 0.01),
-                    0
-                );
-
-                // Yumuşak iki dalga üst üste biner: maksimum fark küçük tutulduğu için
-                // halka hâlâ düzenli görünür, sadece canlı yayın sırasında hafif yükselip alçalır.
-                const waveA = Math.sin(ringTime * 2.15 + ringBarAngles[idx] * 3.0);
-                const waveB = Math.sin(ringTime * 1.35 - ringBarAngles[idx] * 2.0) * 0.35;
-                const gentleWave = (waveA + waveB) / 1.35;
-                const targetBarScale = isPlayingState
-                    ? playingBaseScale + gentleWave * 0.105
-                    : idleBarScale;
-
-                bar.scale.y += (targetBarScale - bar.scale.y) * Math.min(1, deltaTime * 5.2);
-                bar.scale.x = 1;
-                bar.scale.z = 1;
-                bar.material.opacity += (targetBarOpacity - bar.material.opacity) * Math.min(1, deltaTime * 5.2);
             }
 
             animatePhotoWebs(deltaTime);
