@@ -1195,6 +1195,7 @@
 
             if (orbitTextGroup) scene.remove(orbitTextGroup);
             orbitTextGroup = new THREE.Group();
+            orbitTextGroup.rotation.x = -0.30; // yörüngeyi kameraya göre yatır: ekranda oval görünür
             orbitTextGroup.rotation.z = 0.08;
             scene.add(orbitTextGroup);
 
@@ -1203,12 +1204,14 @@
                 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/helvetiker_bold.typeface.json',
                 (font) => {
                     const chromeFace = new THREE.MeshPhysicalMaterial({
-                        color: 0xdde3e8,
-                        metalness: 1.0,
-                        roughness: 0.16,
-                        clearcoat: 0.9,
-                        clearcoatRoughness: 0.12,
+                        color: 0xf2f5f7,
+                        metalness: 0.88,
+                        roughness: 0.22,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.10,
                         reflectivity: 1.0,
+                        emissive: 0x24282c,
+                        emissiveIntensity: 0.34,
                         side: THREE.FrontSide,
                         depthTest: true,
                         depthWrite: true
@@ -1217,12 +1220,14 @@
                     // Extrusion/yan yüzey biraz daha koyu metal. Harf arkadan dönerken
                     // artık düz bir texture değil, kalın metal gövde ve arka kapak görünür.
                     const chromeSide = new THREE.MeshPhysicalMaterial({
-                        color: 0x69727b,
-                        metalness: 1.0,
-                        roughness: 0.24,
-                        clearcoat: 0.55,
-                        clearcoatRoughness: 0.2,
-                        reflectivity: 0.9,
+                        color: 0xaeb7bf,
+                        metalness: 0.92,
+                        roughness: 0.28,
+                        clearcoat: 0.72,
+                        clearcoatRoughness: 0.16,
+                        reflectivity: 1.0,
+                        emissive: 0x171a1d,
+                        emissiveIntensity: 0.24,
                         side: THREE.FrontSide,
                         depthTest: true,
                         depthWrite: true
@@ -1260,11 +1265,11 @@
                     makeText('SP1DER', 0.56, 0.115, 0.028, 0.19);
                     makeText('7/24 YUZDE YUZ MUZIK', 0.145, 0.060, 0.014, -0.25);
 
-                    // Krom yüzeyin canlı görünmesi için iki küçük hareketli ışık.
-                    // Bunlar sahneyi patlatmaz; esas olarak metal yazının highlight'ını gezer.
+                    // Krom highlight için noktasal ışık yerine yönlü ışıklar kullanılır.
+                    // Böylece dünyanın üzerinde gezen parlak ışık noktaları oluşmaz.
                     if (!orbitLightA) {
-                        orbitLightA = new THREE.PointLight(0xffffff, 2.2, 8, 2);
-                        orbitLightB = new THREE.PointLight(0xb9d8ff, 1.35, 7, 2);
+                        orbitLightA = new THREE.DirectionalLight(0xffffff, 1.75);
+                        orbitLightB = new THREE.DirectionalLight(0xdde8f2, 1.05);
                         scene.add(orbitLightA);
                         scene.add(orbitLightB);
                     }
@@ -1310,19 +1315,19 @@ function animateGlobe(currentTime) {
                 const chromeT = currentTime * 0.001;
                 if (orbitLightA) {
                     orbitLightA.position.set(
-                        Math.cos(chromeT * 1.15) * 3.4,
-                        1.35 + Math.sin(chromeT * 0.72) * 0.8,
-                        Math.sin(chromeT * 1.15) * 3.4
+                        Math.cos(chromeT * 0.72) * 5.0,
+                        3.2 + Math.sin(chromeT * 0.48) * 1.4,
+                        4.5 + Math.sin(chromeT * 0.72) * 2.0
                     );
-                    orbitLightA.intensity = 1.8 + (Math.sin(chromeT * 2.1) * 0.5 + 0.5) * 1.1;
+                    orbitLightA.intensity = 1.45 + (Math.sin(chromeT * 1.35) * 0.5 + 0.5) * 0.65;
                 }
                 if (orbitLightB) {
                     orbitLightB.position.set(
-                        Math.cos(-chromeT * 0.82 + 2.2) * 3.0,
-                        -0.8 + Math.cos(chromeT * 0.61) * 0.7,
-                        Math.sin(-chromeT * 0.82 + 2.2) * 3.0
+                        -4.0 + Math.cos(chromeT * 0.54) * 1.8,
+                        -2.2 + Math.cos(chromeT * 0.43) * 1.2,
+                        3.5 + Math.sin(chromeT * 0.54) * 1.5
                     );
-                    orbitLightB.intensity = 0.9 + (Math.cos(chromeT * 1.55) * 0.5 + 0.5) * 0.9;
+                    orbitLightB.intensity = 0.75 + (Math.cos(chromeT * 1.05) * 0.5 + 0.5) * 0.55;
                 }
             }
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
