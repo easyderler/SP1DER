@@ -1135,8 +1135,8 @@
         const geometry = new THREE.SphereGeometry(baseRadius, segments, segments);
         const material = new THREE.MeshStandardMaterial({
             map: earthTexture,
-            roughness: 0.35,
-            metalness: 0.55
+            roughness: 0.92,
+            metalness: 0.04
         });
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
@@ -1181,9 +1181,6 @@
         let ringDepthMeshes = [];
         let orbitTextGroup = null;
         let orbitChromeMaterials = [];
-        let orbitLightA = null;
-        let orbitLightB = null;
-        let orbitRimLight = null;
 
         function createOrbitRingText() {
             // Gerçek 3D + gerçekten kavisli yazı:
@@ -1196,8 +1193,8 @@
 
             if (orbitTextGroup) scene.remove(orbitTextGroup);
             orbitTextGroup = new THREE.Group();
-            orbitTextGroup.rotation.x = -0.30;
-            orbitTextGroup.rotation.z = 0.08;
+            orbitTextGroup.rotation.x = -0.10;
+            orbitTextGroup.rotation.z = 0.03;
             scene.add(orbitTextGroup);
 
             const fontLoader = new THREE.FontLoader();
@@ -1207,28 +1204,28 @@
                     // Krom yüzey: açık gümüş taban + koyu yan yüzey. Işık hareket ettikçe
                     // clearcoat/specular yansımaları yüzeyde canlı bir chrome geçişi oluşturur.
                     const chromeFace = new THREE.MeshPhysicalMaterial({
-                        color: 0xe8edf1,
-                        metalness: 1.0,
-                        roughness: 0.14,
+                        color: 0xf4f7f8,
+                        metalness: 0.72,
+                        roughness: 0.20,
                         clearcoat: 1.0,
                         clearcoatRoughness: 0.055,
                         reflectivity: 1.0,
-                        emissive: 0x171a1d,
-                        emissiveIntensity: 0.18,
+                        emissive: 0x7f8991,
+                        emissiveIntensity: 0.42,
                         side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
                     });
 
                     const chromeSide = new THREE.MeshPhysicalMaterial({
-                        color: 0x737d86,
-                        metalness: 1.0,
-                        roughness: 0.20,
+                        color: 0xaab2b8,
+                        metalness: 0.76,
+                        roughness: 0.24,
                         clearcoat: 0.92,
                         clearcoatRoughness: 0.09,
                         reflectivity: 1.0,
-                        emissive: 0x0b0d0f,
-                        emissiveIntensity: 0.12,
+                        emissive: 0x555d63,
+                        emissiveIntensity: 0.30,
                         side: THREE.DoubleSide,
                         depthTest: true,
                         depthWrite: true
@@ -1320,24 +1317,13 @@
                     };
 
                     // SP1DER belirgin şekilde kavisli; alt slogan aynı yayı takip eder ama küçük kalır.
-                    makeCurvedText('SP1DER', 0.57, 0.125, 0.030, 0.19, baseRadius + 0.37, 1.30, 0.020, 0.80);
-                    makeCurvedText('7/24 YUZDE YUZ MUZIK', 0.147, 0.064, 0.014, -0.255, baseRadius + 0.37, 1.48, 0.008, 0.86);
+                    makeCurvedText('SP1DER', 0.57, 0.125, 0.030, 0.12, baseRadius + 0.20, 1.30, 0.020, 0.80);
+                    makeCurvedText('7/24 YUZDE YUZ MUZIK', 0.147, 0.064, 0.014, -0.315, baseRadius + 0.20, 1.48, 0.008, 0.86);
 
-                    // Görünür ışık mesh/küreleri YOK. Bu DirectionalLight'lar sadece layer 1'deki
-                    // 3D yazıyı aydınlatır; dünya layer 0'da kaldığı için üzerinde parlak gezen
-                    // üç ışık lekesi/küresi oluşmaz.
-                    if (!orbitLightA) {
-                        orbitLightA = new THREE.DirectionalLight(0xffffff, 2.05);
-                        orbitLightB = new THREE.DirectionalLight(0xb9c7d3, 1.30);
-                        orbitRimLight = new THREE.DirectionalLight(0xffffff, 0.85);
-                        orbitLightA.layers.set(1);
-                        orbitLightB.layers.set(1);
-                        orbitRimLight.layers.set(1);
-                        scene.add(orbitLightA);
-                        scene.add(orbitLightB);
-                        scene.add(orbitRimLight);
-                        camera.layers.enable(1);
-                    }
+                    // Ekstra hareketli sahne ışığı kullanılmıyor. Böylece dünya üzerinde dolaşan
+                    // parlak yuvarlak/specular lekeler oluşmaz. Kromun canlılığı materyalin kendi
+                    // metalik ton geçişiyle animasyon sırasında verilir.
+                    camera.layers.enable(1);
                 },
                 undefined,
                 (err) => console.warn('3D SP1DER fontu yüklenemedi:', err)
@@ -1378,29 +1364,18 @@ function animateGlobe(currentTime) {
                 // MeshPhysicalMaterial gerçek yüzey normallerine tepki verdiği için
                 // ön, bevel, yan ve arka yüzeylerin parlaması açıya göre doğal değişir.
                 const chromeT = currentTime * 0.001;
-                if (orbitLightA) {
-                    orbitLightA.position.set(
-                        Math.cos(chromeT * 0.72) * 5.0,
-                        3.4 + Math.sin(chromeT * 0.48) * 1.5,
-                        4.8 + Math.sin(chromeT * 0.72) * 2.1
-                    );
-                    orbitLightA.intensity = 1.65 + (Math.sin(chromeT * 1.35) * 0.5 + 0.5) * 0.80;
-                }
-                if (orbitLightB) {
-                    orbitLightB.position.set(
-                        -4.2 + Math.cos(chromeT * 0.54) * 1.9,
-                        -2.4 + Math.cos(chromeT * 0.43) * 1.3,
-                        3.8 + Math.sin(chromeT * 0.54) * 1.6
-                    );
-                    orbitLightB.intensity = 0.95 + (Math.cos(chromeT * 1.05) * 0.5 + 0.5) * 0.65;
-                }
-                if (orbitRimLight) {
-                    orbitRimLight.position.set(
-                        Math.sin(chromeT * 0.38) * 3.0,
-                        4.5,
-                        -5.0 + Math.cos(chromeT * 0.38) * 1.2
-                    );
-                    orbitRimLight.intensity = 0.65 + (Math.sin(chromeT * 0.82) * 0.5 + 0.5) * 0.45;
+                if (orbitChromeMaterials.length >= 2) {
+                    // Işık kaynağı olmadan canlı krom: ton ve emissive parlaklığı çok hafif
+                    // değişir; yazı gümüş/metalik kalır, siyaha düşmez.
+                    const shine = Math.sin(chromeT * 1.15) * 0.5 + 0.5;
+                    const face = orbitChromeMaterials[0];
+                    const side = orbitChromeMaterials[1];
+                    face.color.setRGB(0.86 + shine * 0.12, 0.89 + shine * 0.09, 0.91 + shine * 0.07);
+                    face.emissive.setRGB(0.34 + shine * 0.16, 0.37 + shine * 0.15, 0.40 + shine * 0.14);
+                    face.emissiveIntensity = 0.38 + shine * 0.16;
+                    side.color.setRGB(0.50 + shine * 0.16, 0.54 + shine * 0.15, 0.57 + shine * 0.14);
+                    side.emissive.setRGB(0.20 + shine * 0.10, 0.22 + shine * 0.10, 0.24 + shine * 0.10);
+                    side.emissiveIntensity = 0.26 + shine * 0.12;
                 }
             }
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
