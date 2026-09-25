@@ -1176,6 +1176,7 @@
         scene.add(dirLight);
 
         let ringMesh = null;
+        let ringDepthMeshes = [];
 
         function createOrbitRingText() {
             // Daha yüksek çözünürlük: özellikle mobilde büyük SP1DER yazısı keskin kalsın.
@@ -1247,8 +1248,39 @@
                 opacity: 0.98
             });
 
+            // Gerçek hacim hissi: aynı yazı dokusunu çok ince yarıçap farklarıyla
+            // üst üste yerleştiriyoruz. Böylece orbit dönerken harflerin metalik
+            // yan yüzeyi/kalınlığı görünür; düz sticker hissi kaybolur.
+            ringDepthMeshes.forEach(m => scene.remove(m));
+            ringDepthMeshes = [];
+
+            const depthLayers = 7;
+            for (let i = depthLayers; i >= 1; i--) {
+                const t = i / depthLayers;
+                const depthGeo = new THREE.CylinderGeometry(
+                    baseRadius + 0.36 - i * 0.012,
+                    baseRadius + 0.36 - i * 0.012,
+                    0.82, 72, 1, true
+                );
+                const depthMat = new THREE.MeshBasicMaterial({
+                    map: ringTex,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    depthWrite: false,
+                    depthTest: true,
+                    opacity: 0.18 + (1 - t) * 0.16,
+                    color: new THREE.Color(0.28 + (1 - t) * 0.24, 0.30 + (1 - t) * 0.24, 0.33 + (1 - t) * 0.24)
+                });
+                const depthMesh = new THREE.Mesh(depthGeo, depthMat);
+                depthMesh.rotation.z = 0.08;
+                depthMesh.renderOrder = 0;
+                ringDepthMeshes.push(depthMesh);
+                scene.add(depthMesh);
+            }
+
             ringMesh = new THREE.Mesh(ringGeo, ringMat);
             ringMesh.rotation.z = 0.08;
+            ringMesh.renderOrder = 1;
             // Depth test korunuyor: yazı ön tarafta görünür, arka tarafta dünyanın arkasına geçer.
             scene.add(ringMesh);
         }
@@ -1280,7 +1312,13 @@ function animateGlobe(currentTime) {
             const ringSpeed = isPlayingState ? 0.75 : 0.22;
 
             globeMesh.rotation.y += globeSpeed * deltaTime;
-            if (ringMesh) ringMesh.rotation.y -= ringSpeed * deltaTime;
+            if (ringMesh) {
+                ringMesh.rotation.y -= ringSpeed * deltaTime;
+                // Tüm hacim katmanları ana yüzeyle birebir senkron döner.
+                for (let i = 0; i < ringDepthMeshes.length; i++) {
+                    ringDepthMeshes[i].rotation.y = ringMesh.rotation.y;
+                }
+            }
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
             if (isPlayingState) {
