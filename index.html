@@ -84,17 +84,45 @@
             100% { transform: translateY(100%); }
         }
 
-        /* Gerçekçi Örümcek Ağları Tuvali */
-        #web-canvas {
+        /* GERÇEK PNG ÖRÜMCEK AĞLARI - KÖŞELERE SABİTLENMİŞ VE BİNMEZ */
+        .spider-web-png {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            width: clamp(180px, 28vw, 380px);
+            height: clamp(180px, 28vw, 380px);
             z-index: 3;
             pointer-events: none;
-            opacity: 0.75;
-            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
+            opacity: 0.35;
+            background-size: contain;
+            background-repeat: no-repeat;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+            mix-blend-mode: screen;
+        }
+
+        .web-top-left {
+            top: 0; left: 0;
+            background-image: url('https://png.pngtree.com/png-vector/20230304/ourmid/pngtree-corner-spider-web-transparent-background-png-image_6630807.png');
+            background-position: top left;
+        }
+
+        .web-top-right {
+            top: 0; right: 0;
+            background-image: url('https://png.pngtree.com/png-vector/20230304/ourmid/pngtree-corner-spider-web-transparent-background-png-image_6630807.png');
+            background-position: top right;
+            transform: scaleX(-1);
+        }
+
+        .web-bottom-left {
+            bottom: 0; left: 0;
+            background-image: url('https://png.pngtree.com/png-vector/20230304/ourmid/pngtree-corner-spider-web-transparent-background-png-image_6630807.png');
+            background-position: bottom left;
+            transform: scaleY(-1);
+        }
+
+        .web-bottom-right {
+            bottom: 0; right: 0;
+            background-image: url('https://png.pngtree.com/png-vector/20230304/ourmid/pngtree-corner-spider-web-transparent-background-png-image_6630807.png');
+            background-position: bottom right;
+            transform: scale(-1, -1);
         }
 
         /* Arkaplan "5" Yazı Kapsayıcısı */
@@ -515,8 +543,11 @@
 
     <div class="scanline-overlay"></div>
 
-    <!-- Dinamik Gerçekçi Örümcek Ağı Tuvali -->
-    <canvas id="web-canvas"></canvas>
+    <!-- Gerçek PNG Örümcek Ağları (4 Köşe - Üst Üste Binmez) -->
+    <div class="spider-web-png web-top-left"></div>
+    <div class="spider-web-png web-top-right"></div>
+    <div class="spider-web-png web-bottom-left"></div>
+    <div class="spider-web-png web-bottom-right"></div>
 
     <!-- Arkaplan Kapsayıcısı -->
     <div id="gothic-bg-container"></div>
@@ -954,7 +985,7 @@
             updateAudioVisualState();
         });
 
-        // 3D Three.JS Kurulumu (Dünya + 3D Örümcek)
+        // 3D Three.JS Kurulumu (Dünya Küresi)
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
@@ -998,60 +1029,6 @@
         });
         const globeMesh = new THREE.Mesh(geometry, material);
         scene.add(globeMesh);
-
-        // --- 3D ÖRÜMCEK MODELİ VE İPİ ---
-        const spiderGroup = new THREE.Group();
-        
-        // Örümcek Gövdesi
-        const bodyGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const spiderMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.2, metalness: 0.8 });
-        const bodyMesh = new THREE.Mesh(bodyGeo, spiderMat);
-        spiderGroup.add(bodyMesh);
-
-        // Örümcek Başı
-        const headGeo = new THREE.SphereGeometry(0.07, 16, 16);
-        const headMesh = new THREE.Mesh(headGeo, spiderMat);
-        headMesh.position.set(0, -0.1, 0.05);
-        spiderGroup.add(headMesh);
-
-        // Kırmızı Örümcek Gözleri
-        const eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const eyeGeo = new THREE.SphereGeometry(0.015, 8, 8);
-        const eye1 = new THREE.Mesh(eyeGeo, eyeMat);
-        const eye2 = new THREE.Mesh(eyeGeo, eyeMat);
-        eye1.position.set(-0.025, -0.13, 0.1);
-        eye2.position.set(0.025, -0.13, 0.1);
-        spiderGroup.add(eye1);
-        spiderGroup.add(eye2);
-
-        // Örümcek Bacakları
-        const spiderLegs = [];
-        for (let i = 0; i < 8; i++) {
-            const side = i % 2 === 0 ? 1 : -1;
-            const legIdx = Math.floor(i / 2);
-            
-            const legCurve = new THREE.CatmullRomCurve3([
-                new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(side * 0.15, (legIdx - 1.5) * 0.05 + 0.08, 0.1),
-                new THREE.Vector3(side * 0.28, (legIdx - 1.5) * 0.08 - 0.05, 0)
-            ]);
-            
-            const legGeo = new THREE.TubeGeometry(legCurve, 8, 0.012, 6, false);
-            const legMesh = new THREE.Mesh(legGeo, spiderMat);
-            spiderGroup.add(legMesh);
-            spiderLegs.push(legMesh);
-        }
-
-        // Örümceğin İpi
-        const threadGeo = new THREE.CylinderGeometry(0.002, 0.002, 3, 4);
-        const threadMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
-        const threadMesh = new THREE.Mesh(threadGeo, threadMat);
-        threadMesh.position.set(0, 1.5, 0);
-        spiderGroup.add(threadMesh);
-
-        spiderGroup.position.set(0, 1.6, 0.4);
-        spiderGroup.scale.set(1.2, 1.2, 1.2);
-        scene.add(spiderGroup);
 
         const ringBarsCount = 80; 
         const ringBarsGroup = new THREE.Group();
@@ -1145,18 +1122,12 @@
             if (ringMesh) ringMesh.rotation.y -= ringSpeed * deltaTime;
             ringBarsGroup.rotation.z += (isPlayingState ? 0.4 : 0.05) * deltaTime;
 
-            // Örümcek Sallanma ve Ritim Animasyonu
-            spiderGroup.position.y = 1.55 + Math.sin(currentTime * 0.002) * 0.08;
-            spiderGroup.rotation.z = Math.sin(currentTime * 0.0015) * 0.12;
-
             if (isPlayingState) {
                 bassAngle += 7.0 * deltaTime;
                 
                 const bassPower = Math.pow(Math.sin(bassAngle), 5);
                 const bassScale = 1 + bassPower * 0.04; 
                 globeMesh.scale.set(bassScale, bassScale, bassScale);
-
-                spiderGroup.position.y += bassPower * 0.05;
 
                 dirLight.intensity = 2.5 + bassPower * 3.0;
 
@@ -1222,99 +1193,6 @@
             renderer.render(scene, camera);
         }
 
-        // --- RASTGELE GERÇEKÇİ ÖRÜMCEK AĞLARI ÇİZİMİ ---
-        const webCanvas = document.getElementById('web-canvas');
-        const webCtx = webCanvas.getContext('2d');
-        let generatedWebs = [];
-
-        function generateRealisticWebs() {
-            webCanvas.width = window.innerWidth;
-            webCanvas.height = window.innerHeight;
-            generatedWebs = [];
-
-            // Ekranın köşelerine ve rastgele bölgelerine 5 ila 8 adet örümcek ağı üret
-            const count = Math.floor(Math.random() * 3) + 5;
-
-            // Köşeler garanti olsun
-            const anchors = [
-                { x: 0, y: 0 },
-                { x: webCanvas.width, y: 0 },
-                { x: 0, y: webCanvas.height },
-                { x: webCanvas.width, y: webCanvas.height }
-            ];
-
-            for (let i = 0; i < count; i++) {
-                let origin = anchors[i] || { 
-                    x: Math.random() * webCanvas.width, 
-                    y: Math.random() * webCanvas.height 
-                };
-
-                generatedWebs.push({
-                    x: origin.x,
-                    y: origin.y,
-                    radius: Math.random() * 180 + 150,
-                    rays: Math.floor(Math.random() * 5) + 10,
-                    rings: Math.floor(Math.random() * 4) + 7,
-                    startAngle: Math.random() * Math.PI * 2,
-                    opacity: Math.random() * 0.35 + 0.25
-                });
-            }
-        }
-
-        function drawRealisticWebs() {
-            webCtx.clearRect(0, 0, webCanvas.width, webCanvas.height);
-
-            generatedWebs.forEach(web => {
-                webCtx.save();
-                webCtx.translate(web.x, web.y);
-                
-                webCtx.strokeStyle = "rgba(255, 255, 255, " + web.opacity + ")";
-                webCtx.lineWidth = 0.7;
-
-                const angleStep = (Math.PI * 2) / web.rays;
-
-                // Ana Destek İpleri
-                for (let i = 0; i < web.rays; i++) {
-                    const angle = web.startAngle + i * angleStep;
-                    const endX = Math.cos(angle) * web.radius;
-                    const endY = Math.sin(angle) * web.radius;
-
-                    webCtx.beginPath();
-                    webCtx.moveTo(0, 0);
-                    webCtx.lineTo(endX, endY);
-                    webCtx.stroke();
-                }
-
-                // Sarkık İç İpeksi Halka Spiralleri (Gerçek Örümcek Ağı Eğrileri)
-                for (let r = 1; r <= web.rings; r++) {
-                    const rDist = (web.radius / web.rings) * r;
-                    
-                    webCtx.beginPath();
-                    for (let i = 0; i < web.rays; i++) {
-                        const a1 = web.startAngle + i * angleStep;
-                        const a2 = web.startAngle + (i + 1) * angleStep;
-
-                        const p1x = Math.cos(a1) * rDist;
-                        const p1y = Math.sin(a1) * rDist;
-                        const p2x = Math.cos(a2) * rDist;
-                        const p2y = Math.sin(a2) * rDist;
-
-                        // Merkez sarkma hesabı (Gerçekçi ağ yerçekimi etkisi)
-                        const midAngle = (a1 + a2) / 2;
-                        const sag = rDist * 0.82; 
-                        const cX = Math.cos(midAngle) * sag;
-                        const cY = Math.sin(midAngle) * sag;
-
-                        if (i === 0) webCtx.moveTo(p1x, p1y);
-                        webCtx.quadraticCurveTo(cX, cY, p2x, p2y);
-                    }
-                    webCtx.stroke();
-                }
-
-                webCtx.restore();
-            });
-        }
-
         // Parçacık Tuvali (Noktalar & "5" Karakterleri)
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
@@ -1328,8 +1206,6 @@
             canvas.height = window.innerHeight;
             resizeThreeJS();
             generateRandomGothicBg();
-            generateRealisticWebs();
-            drawRealisticWebs();
             
             if (particlesArray.length > 0) {
                 particlesArray.forEach(p => {
@@ -1347,7 +1223,7 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.isFive = Math.random() > 0.65; // "5" sembolü ve nokta harmanı
+                this.isFive = Math.random() > 0.65;
                 this.size = this.isFive ? Math.random() * 14 + 10 : Math.random() * 2.5 + 0.8;
                 this.speedX = (Math.random() - 0.5) * 0.8;
                 this.speedY = (Math.random() - 0.5) * 0.8;
