@@ -744,7 +744,7 @@
             // Böylece her ağ mümkün olduğunca farklı bir alana yerleşir.
             const preferredZone = zones[index % zones.length];
 
-            for (let attempt = 0; attempt < 180; attempt++) {
+            for (let attempt = 0; attempt < 360; attempt++) {
                 const zone = attempt < 90
                     ? preferredZone
                     : zones[Math.floor(Math.random() * zones.length)];
@@ -801,6 +801,21 @@
                 }
             }
 
+            // Son güvenlik katmanı: küçük bir grid üzerinde daha fazla aday dene.
+            // Böylece yoğun ekranlarda bile ağlar üst üste bindirilmez.
+            for (let y = 12; y <= 88; y += 8) {
+                for (let x = 12; x <= 88; x += 8) {
+                    item.left = x;
+                    item.top = y;
+                    item.el.style.left = item.left + 'vw';
+                    item.el.style.top = item.top + 'vh';
+                    const current = webRect(item);
+                    if (!placed.some(other => rectsOverlap(current, webRect(other), mobile ? 1.5 : 3))) {
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 
@@ -809,7 +824,7 @@
             img.className = 'photo-web-3d';
             img.src = src;
             img.alt = '';
-            img.decoding = 'sync';
+            img.decoding = 'async';
             img.loading = 'eager';
             img.fetchPriority = 'high';
             img.draggable = false;
@@ -1411,6 +1426,7 @@
 
         let lastTime = performance.now();
         const rootStyle = document.documentElement.style;
+        const idleGlobeScale = new THREE.Vector3(1, 1, 1);
 
         // TEK BASS KAYNAĞI:
         // Dünya, 5'ler, noktalar ve örümcek ağları aynı bassPower değerini
@@ -1477,7 +1493,7 @@ const bassScale = 1 + bassPower * 0.04;
             } else {
                 // Yayın başlamadıysa, durmuşsa veya ses kapalıysa BASS = 0.
                 // Böylece hiçbir arka plan öğesi patlamaz.
-globeMesh.scale.lerp(new THREE.Vector3(1, 1, 1), 10 * deltaTime);
+globeMesh.scale.lerp(idleGlobeScale, 10 * deltaTime);
                 dirLight.intensity = 2.2;
 
                 rootStyle.setProperty('--bass-scale', '1');
