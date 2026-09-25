@@ -109,7 +109,33 @@
             background: transparent;
         }
 
+        
+        /* Örümcek ağı PNG'lerinin dört kenarında yumuşak kaybolma.
+           Böylece kare PNG sınırı görünmez; ağ her tarafta transparanlaşarak biter. */
         .photo-web-3d {
+            -webkit-mask-image: radial-gradient(
+                ellipse 82% 82% at 50% 50%,
+                #000 48%,
+                rgba(0,0,0,0.96) 57%,
+                rgba(0,0,0,0.72) 67%,
+                rgba(0,0,0,0.35) 78%,
+                transparent 94%
+            );
+            mask-image: radial-gradient(
+                ellipse 82% 82% at 50% 50%,
+                #000 48%,
+                rgba(0,0,0,0.96) 57%,
+                rgba(0,0,0,0.72) 67%,
+                rgba(0,0,0,0.35) 78%,
+                transparent 94%
+            );
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+        }
+
+.photo-web-3d {
             position:absolute;
             display:block;
             pointer-events:none;
