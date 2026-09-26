@@ -12,10 +12,9 @@
     <link rel="preload" as="image" href="https://i.hizliresim.com/bhocuany.png" fetchpriority="high">
     <link rel="preload" as="image" href="https://i.hizliresim.com/bkslqch8.png" fetchpriority="high">
 
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@900&family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -97,10 +96,6 @@
             z-index: 6;
             pointer-events: none;
             overflow: visible;
-        }
-
-        /* Ağların 3D dönüşü kapsayıcının perspektifini kullanır. */
-        #photo-webs-container {
             perspective: 1500px;
             perspective-origin: 50% 50%;
             transform-style: preserve-3d;
@@ -122,8 +117,6 @@
             image-rendering: auto;
             opacity: 1;
 
-            /* Maskenin yarıçapı kenara kadar uzanır; PNG'nin dört kenarında
-               alpha sıfırdır. Köşeler daha erken kaybolur. */
             -webkit-mask-image: radial-gradient(ellipse 50% 50% at center,
                 #000 8%, rgba(0,0,0,.8) 28%, rgba(0,0,0,.38) 50%,
                 rgba(0,0,0,.09) 76%, transparent 100%);
@@ -305,7 +298,7 @@
         .volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 10px;
+            width: 100px;
             height: 10px;
             border-radius: 50%;
             background: var(--accent-color);
@@ -319,7 +312,6 @@
             .volume-slider { width: 38px; }
         }
 
-        /* Mobilde uzun şarkı adlarını kesmek yerine okunabilir biçimde küçült/satırla */
         @media (max-width: 600px) {
             .now-playing-card {
                 padding: 11px 12px;
@@ -387,8 +379,6 @@
             margin: 2px 0;
             will-change: transform;
         }
-
-        /* Video kartında oynatma sırasında ekstra parlama yok. */
 
         #youtube-player {
             position: absolute;
@@ -543,8 +533,6 @@
             100% { transform: scaleY(1); }
         }
 
-
-        /* 2026 refresh: daha rafine cam yüzeyler + düşük maliyetli mikro etkileşimler */
         .badge, .volume-control-box, .now-playing-card, .video-container {
             isolation: isolate;
         }
@@ -599,11 +587,47 @@
             .scanline-overlay, .live-dot, .start-btn::after, .wave-bar { animation: none !important; }
             .photo-web-3d { will-change: auto; }
         }
-
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FontLoader.js"></script>
+
+    <!-- TRAP / GOTHIC / PUNK 3D GEOMETRY GLYPH GENERATOR -->
+    <script>
+        (function() {
+            // High-octane Gothic / Trap Font Data (Keskin sivri hatlar, agresif köşeler)
+            const GOTHIC_FONT_DATA = {
+                "glyphs": {
+                    "S": { "ha": 680, "o": "m 580 800 l -460 0 l -80 -180 l 120 -120 l 360 0 l 0 -120 l -480 -140 l 0 -240 l 480 0 l 80 180 l -120 120 l -340 0 l 0 100 l 440 140 z" },
+                    "P": { "ha": 660, "o": "m 100 0 l 160 0 l 0 300 l 300 0 l 100 -120 l 0 -180 l -100 -120 l -400 0 z m 160 440 l 200 0 l 40 40 l 0 180 l -40 40 l -200 0 z" },
+                    "1": { "ha": 520, "o": "m 240 0 l 160 0 l 0 800 l -200 -120 l 0 -160 l 100 60 l 0 -580 z" },
+                    "D": { "ha": 700, "o": "m 100 0 l 360 0 l 200 220 l 0 360 l -200 220 l -360 0 z m 160 140 l 180 0 l 100 120 l 0 280 l -100 120 l -180 0 z" },
+                    "E": { "ha": 600, "o": "m 100 0 l 460 0 l 0 140 l -300 0 l 0 180 l 260 0 l 0 140 l -260 0 l 0 200 l 300 0 l 0 140 l -460 0 z" },
+                    "R": { "ha": 680, "o": "m 100 0 l 160 0 l 0 320 l 180 0 l 180 -320 l 180 0 l -200 360 l 140 60 l 40 160 l -60 120 l -380 0 z m 160 460 l 220 0 l 40 40 l 0 100 l -40 40 l -220 0 z" },
+                    "7": { "ha": 580, "o": "m 100 800 l 440 0 l -280 -800 l 160 0 l 280 800 l -600 0 z" },
+                    "/": { "ha": 400, "o": "m 50 -100 l 120 0 l 200 900 l -120 0 z" },
+                    "2": { "ha": 600, "o": "m 100 800 l 460 0 l 0 -220 l -280 -280 l 280 0 l 0 -140 l -460 0 l 0 200 l 280 280 l -280 0 z" },
+                    "4": { "ha": 620, "o": "m 380 0 l 160 0 l 0 800 l -160 0 l -280 -400 l 0 -140 l 280 0 z m 0 400 l -160 0 l 160 220 z" },
+                    "Y": { "ha": 640, "o": "m 240 0 l 160 0 l 0 380 l 220 420 l -180 0 l -120 -240 l -120 240 l -180 0 l 220 -420 z" },
+                    "Ü": { "ha": 660, "o": "m 100 240 l 0 560 l 160 0 l 0 -420 l 140 0 l 0 420 l 160 0 l 0 -560 l -230 -240 z m 80 660 l 100 0 l 0 100 l -100 0 z m 180 0 l 100 0 l 0 100 l -100 0 z" },
+                    "Z": { "ha": 600, "o": "m 100 800 l 460 0 l 0 -140 l -280 -380 l 280 0 l 0 -140 l -460 0 l 0 140 l 280 380 l -280 0 z" },
+                    "D": { "ha": 680, "o": "m 100 0 l 360 0 l 200 220 l 0 360 l -200 220 l -360 0 z m 160 140 l 180 0 l 100 120 l 0 280 l -100 120 l -180 0 z" },
+                    "M": { "ha": 800, "o": "m 100 0 l 140 0 l 0 500 l 160 -500 l 80 0 l 160 500 l 0 -500 l 140 0 l 0 800 l -180 0 l -160 -520 l -160 520 l -180 0 z" },
+                    "I": { "ha": 340, "o": "m 90 0 l 160 0 l 0 800 l -160 0 z" },
+                    "K": { "ha": 660, "o": "m 100 0 l 160 0 l 0 320 l 220 -320 l 180 0 l -260 380 l 260 420 l -180 0 l -220 -340 l 0 340 l -160 0 z" },
+                    " ": { "ha": 300, "o": "" }
+                },
+                "familyName": "GothicTrap",
+                "ascender": 800,
+                "descender": -200,
+                "underlineThickness": 50
+            };
+
+            THREE.FontLoader.prototype.parseGothic = function() {
+                return new THREE.Font(GOTHIC_FONT_DATA);
+            };
+        })();
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/geometries/TextGeometry.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -670,13 +694,7 @@
     </div>
 
     <script>
-        // ================================================================
         // GERÇEK PNG ÖRÜMCEK AĞLARI — CORS-SAFE 3D DOM
-        // ================================================================
-        // PNG'ler doğrudan <img> olarak kullanılır. Böylece HızlıResim'in
-        // WebGL/CORS kısıtlamasına takılmadan şeffaf PNG'ler görüntülenir.
-        // Three.js TextureLoader burada KULLANILMIYOR.
-
         const photoWebsContainer = document.getElementById('photo-webs-container');
 
         const realWebImages = [
@@ -694,7 +712,6 @@
             return a + Math.random() * (b - a);
         }
 
-        // Ağların sabit merkezleri: sol üst, sağ üst, sol alt, sağ alt, orta.
         const webPositions = [
             [18, 18], [82, 18], [18, 82], [82, 82], [50, 50]
         ];
@@ -724,15 +741,11 @@
                 left: webPositions[index][0],
                 top: webPositions[index][1],
                 depth: randomBetween(-80, 90),
-
-                // Ağları önceki halden belirgin biçimde daha büyük yap.
                 width: mobile ? randomBetween(60, 72) : randomBetween(52, 66),
-
                 rotX: randomBetween(-4, 4),
                 rotY: randomBetween(-7, 7),
                 rotZ: randomBetween(-28, 28),
                 scale: randomBetween(0.92, 1.08),
-
                 phase: Math.random() * Math.PI * 2,
                 speed: randomBetween(0.9, 1.35),
                 moveX: randomBetween(2.6, 4.2),
@@ -741,7 +754,6 @@
                 rotate: randomBetween(0.25, 0.55)
             };
 
-            // left/top ağın merkezidir.
             img.style.left = item.left + 'vw';
             img.style.top = item.top + 'vh';
             img.style.width = item.width + 'vw';
@@ -751,20 +763,13 @@
             img.style.zIndex = String(3 + index);
             img.style.visibility = 'visible';
 
-            img.addEventListener('error', () => {
-                console.warn('Spider web PNG yüklenemedi:', src);
-                if (img.parentNode) img.parentNode.removeChild(img);
-            }, {once:true});
-
             return item;
         }
 
         function generatePhotoWebs() {
             clearPhotoWebs();
-
             for (let i = 0; i < realWebImages.length; i++) {
                 const item = createWebElement(realWebImages[i], i);
-
                 photoWebsContainer.appendChild(item.el);
                 photoWebElements.push(item);
             }
@@ -778,11 +783,6 @@
 
             photoWebElements.forEach(item => {
                 const t = webAnimationTime * item.speed + item.phase;
-
-                // Çok hafif sağ-sol / yukarı-aşağı salınım.
-                // Sinüsler farklı frekansta olduğu için hareket dairesel/organik görünür.
-                /* Gerçek CSS 3D hareket: X/Y kayma + Z derinlik + üç eksende dönüş.
-                   Farklı frekanslar ağların birbirinden bağımsız, doğal hareket etmesini sağlar. */
                 const dx = (Math.cos(t) * 0.72 + Math.sin(t * 1.71) * 0.28) * item.moveX;
                 const dy = (Math.sin(t * 1.08) * 0.72 + Math.cos(t * 1.63) * 0.28) * item.moveY;
                 const dz = (Math.sin(t * 0.72) * 0.78 + Math.cos(t * 1.37) * 0.22) * item.moveZ;
@@ -923,7 +923,6 @@
         const initialState = getCurrentStreamState();
         updateTrackLabels(initialState.playlist, initialState.songIndex);
 
-
         const nowPlayingCard = document.querySelector('.now-playing-card');
         const trackTimeEl = document.getElementById('track-time');
         const formatTime = (seconds) => {
@@ -931,7 +930,6 @@
             return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`;
         };
 
-        // Yayın çizelgesinden türetilir; ekstra ağ isteği veya ağır animasyon gerektirmez.
         function updateTrackProgress() {
             const state = getCurrentStreamState();
             const song = state.playlist[state.songIndex];
@@ -1148,14 +1146,13 @@
             updateAudioVisualState();
         });
 
-        // 3D Three.JS Kurulumu (Dünya Küresi)
+        // 3D Three.JS Kurulumu (Dünya Küresi ve Gothic Chrome Yazı)
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
         
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-        // Adaptif render çözünürlüğü: masaüstünde net, mobilde gereksiz GPU yükü yok.
         const preferredPixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth <= 600 ? 1.0 : 1.15);
         let adaptivePixelRatio = preferredPixelRatio;
         renderer.setPixelRatio(adaptivePixelRatio);
@@ -1203,11 +1200,7 @@
         dirLight.position.set(5, 4, 5);
         scene.add(dirLight);
 
-        // TEK SABİT yansıma ışığı: dünya + krom yazı için ortak key light.
-        // PointLight'ın kendisi görünür bir mesh değildir; yalnızca yüzeylerde TEK parlak nokta üretir.
         const orbitHighlightLight = new THREE.PointLight(0xf4f8ff, 4.35, 12.0, 1.65);
-        // SABİT KEY LIGHT: dünya üzerinde tek bir highlight noktası.
-        // Işık hareket etmez; yazı onun önünden geçtikçe doğal olarak farklı yüzeyleri parlar.
         orbitHighlightLight.position.set(3.15, 1.15, 3.65);
         scene.add(orbitHighlightLight);
 
@@ -1215,9 +1208,6 @@
         let orbitChromeMaterials = [];
 
         function createOrbitRingText() {
-            // Gerçek 3D + gerçekten kavisli yazı:
-            // Her harf ayrı TextGeometry olarak üretilir ve silindirik bir yay üzerinde
-            // konumlandırılır. Böylece metin düz bir tabela gibi değil, dünyanın formunu sarar.
             if (!THREE.FontLoader || !THREE.TextGeometry) {
                 console.warn('3D text modules yüklenemedi.');
                 return;
@@ -1230,147 +1220,130 @@
             scene.add(orbitTextGroup);
 
             const fontLoader = new THREE.FontLoader();
-            fontLoader.load(
-                'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/fonts/droid/droid_sans_bold.typeface.json',
-                (font) => {
-                    // Krom yüzey: açık gümüş taban + koyu yan yüzey. Işık hareket ettikçe
-                    // clearcoat/specular yansımaları yüzeyde canlı bir chrome geçişi oluşturur.
-                    const chromeFace = new THREE.MeshPhysicalMaterial({
-                        color: 0xf4f7f8,
-                        metalness: 0.72,
-                        roughness: 0.20,
-                        clearcoat: 1.0,
-                        clearcoatRoughness: 0.055,
-                        reflectivity: 1.0,
-                        emissive: 0x252b30,
-                        emissiveIntensity: 0.10,
-                        side: THREE.DoubleSide,
-                        depthTest: true,
-                        depthWrite: true
+            const font = fontLoader.parseGothic();
+
+            // YÜKSEK KALİTE PUNK / GOTHIC CHROME MATERYAL
+            const chromeFace = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                metalness: 0.92,
+                roughness: 0.12,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.02,
+                reflectivity: 1.0,
+                emissive: 0x333333,
+                emissiveIntensity: 0.20,
+                side: THREE.DoubleSide,
+                depthTest: true,
+                depthWrite: true
+            });
+
+            const chromeSide = new THREE.MeshPhysicalMaterial({
+                color: 0x888888,
+                metalness: 0.95,
+                roughness: 0.18,
+                clearcoat: 0.85,
+                clearcoatRoughness: 0.05,
+                reflectivity: 1.0,
+                emissive: 0x111111,
+                emissiveIntensity: 0.10,
+                side: THREE.DoubleSide,
+                depthTest: true,
+                depthWrite: true
+            });
+            orbitChromeMaterials = [chromeFace, chromeSide];
+
+            const makeCurvedText = (text, size, depth, bevel, y, radius, totalArc, tracking, xScale=0.85) => {
+                const holder = new THREE.Group();
+                holder.position.y = y;
+                orbitTextGroup.add(holder);
+
+                const chars = [...text];
+                const widths = [];
+                let totalWidth = 0;
+
+                for (const ch of chars) {
+                    if (ch === ' ') {
+                        const w = size * 0.42;
+                        widths.push(w);
+                        totalWidth += w + tracking;
+                        continue;
+                    }
+                    const temp = new THREE.TextGeometry(ch, {
+                        font, size, height: depth,
+                        curveSegments: 8,
+                        bevelEnabled: true,
+                        bevelThickness: bevel,
+                        bevelSize: bevel * 0.85,
+                        bevelOffset: 0,
+                        bevelSegments: 4
                     });
+                    temp.computeBoundingBox();
+                    const b = temp.boundingBox;
+                    const w = (b.max.x - b.min.x) * xScale;
+                    widths.push(w);
+                    totalWidth += w + tracking;
+                    temp.dispose();
+                }
+                totalWidth -= tracking;
 
-                    const chromeSide = new THREE.MeshPhysicalMaterial({
-                        color: 0xaab2b8,
-                        metalness: 0.76,
-                        roughness: 0.24,
-                        clearcoat: 0.92,
-                        clearcoatRoughness: 0.09,
-                        reflectivity: 1.0,
-                        emissive: 0x171b1e,
-                        emissiveIntensity: 0.07,
-                        side: THREE.DoubleSide,
-                        depthTest: true,
-                        depthWrite: true
+                let cursor = -totalWidth / 2;
+                for (let i = 0; i < chars.length; i++) {
+                    const ch = chars[i];
+                    const w = widths[i];
+                    const center = cursor + w / 2;
+                    cursor += w + tracking;
+                    if (ch === ' ') continue;
+
+                    const normalized = totalWidth > 0 ? center / totalWidth : 0;
+                    const theta = normalized * totalArc;
+
+                    const geo = new THREE.TextGeometry(ch, {
+                        font, size, height: depth,
+                        curveSegments: 8,
+                        bevelEnabled: true,
+                        bevelThickness: bevel,
+                        bevelSize: bevel * 0.85,
+                        bevelOffset: 0,
+                        bevelSegments: 4
                     });
-                    orbitChromeMaterials = [chromeFace, chromeSide];
+                    geo.computeBoundingBox();
+                    const box = geo.boundingBox;
+                    const gw = box.max.x - box.min.x;
+                    const gh = box.max.y - box.min.y;
+                    geo.translate(-gw/2 - box.min.x, -gh/2 - box.min.y, -depth/2);
+                    geo.scale(xScale, 1, 1);
 
-                    // Harfleri tek tek bir yay üzerine dizer. radius küçüldükçe kavis artar.
-                    const makeCurvedText = (text, size, depth, bevel, y, radius, totalArc, tracking, xScale=0.84) => {
-                        const holder = new THREE.Group();
-                        holder.position.y = y;
-                        orbitTextGroup.add(holder);
+                    const pos = geo.attributes.position;
+                    for (let p = 0; p < pos.count; p++) {
+                        pos.setX(p, pos.getX(p) + pos.getY(p) * 0.12);
+                    }
+                    pos.needsUpdate = true;
+                    geo.computeVertexNormals();
 
-                        const chars = [...text];
-                        const widths = [];
-                        let totalWidth = 0;
+                    const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
+                    mesh.position.x = Math.sin(theta) * radius;
+                    mesh.position.z = Math.cos(theta) * radius;
+                    mesh.rotation.y = theta;
+                    mesh.renderOrder = 1;
+                    mesh.layers.set(1);
+                    holder.add(mesh);
+                }
+                return holder;
+            };
 
-                        for (const ch of chars) {
-                            if (ch === ' ') {
-                                const w = size * 0.42;
-                                widths.push(w);
-                                totalWidth += w + tracking;
-                                continue;
-                            }
-                            const temp = new THREE.TextGeometry(ch, {
-                                font, size, height: depth,
-                                curveSegments: 6,
-                                bevelEnabled: true,
-                                bevelThickness: bevel,
-                                bevelSize: bevel * 0.78,
-                                bevelOffset: 0,
-                                bevelSegments: 3
-                            });
-                            temp.computeBoundingBox();
-                            const b = temp.boundingBox;
-                            const w = (b.max.x - b.min.x) * xScale;
-                            widths.push(w);
-                            totalWidth += w + tracking;
-                            temp.dispose();
-                        }
-                        totalWidth -= tracking;
+            // AGRESİF SP1DER MARKA FONTU VE SADE SUB-TEXT
+            makeCurvedText('SP1DER', 0.62, 0.160, 0.045, 0.12, baseRadius + 0.22, 1.35, 0.020, 0.76);
+            makeCurvedText('7/24 YÜZDE YÜZ MÜZİK', 0.140, 0.050, 0.012, -0.320, baseRadius + 0.20, 1.48, 0.007, 0.80);
 
-                        let cursor = -totalWidth / 2;
-                        for (let i = 0; i < chars.length; i++) {
-                            const ch = chars[i];
-                            const w = widths[i];
-                            const center = cursor + w / 2;
-                            cursor += w + tracking;
-                            if (ch === ' ') continue;
-
-                            // Metnin toplam genişliğini belirtilen yay açısına map et.
-                            const normalized = totalWidth > 0 ? center / totalWidth : 0;
-                            const theta = normalized * totalArc;
-
-                            const geo = new THREE.TextGeometry(ch, {
-                                font, size, height: depth,
-                                curveSegments: 6,
-                                bevelEnabled: true,
-                                bevelThickness: bevel,
-                                bevelSize: bevel * 0.78,
-                                bevelOffset: 0,
-                                bevelSegments: 3
-                            });
-                            geo.computeBoundingBox();
-                            const box = geo.boundingBox;
-                            const gw = box.max.x - box.min.x;
-                            const gh = box.max.y - box.min.y;
-                            geo.translate(-gw/2 - box.min.x, -gh/2 - box.min.y, -depth/2);
-                            geo.scale(xScale, 1, 1);
-
-                            // Hafif sağa yatık/condensed form daha trap-logo hissi verir.
-                            const pos = geo.attributes.position;
-                            for (let p = 0; p < pos.count; p++) {
-                                pos.setX(p, pos.getX(p) + pos.getY(p) * 0.14);
-                            }
-                            pos.needsUpdate = true;
-                            geo.computeVertexNormals();
-
-                            const mesh = new THREE.Mesh(geo, [chromeFace, chromeSide]);
-                            // Dünya yüzeyini saran gerçek kavis.
-                            mesh.position.x = Math.sin(theta) * radius;
-                            mesh.position.z = Math.cos(theta) * radius;
-                            // Harfin önü her noktada yörüngenin dışına bakar.
-                            mesh.rotation.y = theta;
-                            mesh.renderOrder = 1;
-                            mesh.layers.set(1); // krom ışıkları yalnızca yazıyı etkiler
-                            holder.add(mesh);
-                        }
-                        return holder;
-                    };
-
-                    // SP1DER belirgin şekilde kavisli; alt slogan aynı yayı takip eder ama küçük kalır.
-                    makeCurvedText('SP1DER', 0.59, 0.135, 0.032, 0.12, baseRadius + 0.20, 1.30, 0.018, 0.72);
-                    makeCurvedText('7/24 YÜZDE YÜZ MÜZİK', 0.150, 0.068, 0.015, -0.315, baseRadius + 0.20, 1.48, 0.007, 0.78);
-
-                    // Ekstra hareketli sahne ışığı kullanılmıyor. Böylece dünya üzerinde dolaşan
-                    // parlak yuvarlak/specular lekeler oluşmaz. Kromun canlılığı materyalin kendi
-                    // metalik ton geçişiyle animasyon sırasında verilir.
-                    camera.layers.enable(1);
-                },
-                undefined,
-                (err) => console.warn('3D SP1DER fontu yüklenemedi:', err)
-            );
+            camera.layers.enable(1);
         }
 
-        document.fonts.ready.then(() => { createOrbitRingText(); });
+        createOrbitRingText();
 
         let lastTime = performance.now();
-        // FPS dengeleyici: zayıf cihazlarda render çözünürlüğünü otomatik düşürür.
         let perfSampleStart = performance.now();
         let perfFrames = 0;
 
-        // Patlama/bass tepki sistemi kaldırıldı.
-        // Şarkı çalarken yalnızca dünyanın çevresindeki çizgiler canlı biçimde hareket eder.
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
             if (document.hidden) { lastTime = currentTime; return; }
@@ -1401,16 +1374,15 @@
 
             if (orbitTextGroup) {
                 orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
-                // Orijinal kontrastlı krom görünümü birebir koru.
                 if (orbitChromeMaterials.length >= 2) {
                     const face = orbitChromeMaterials[0];
                     const side = orbitChromeMaterials[1];
-                    face.color.setRGB(0.82, 0.85, 0.88);
-                    face.emissive.setRGB(0.085, 0.092, 0.10);
-                    face.emissiveIntensity = 0.16;
-                    side.color.setRGB(0.47, 0.51, 0.55);
-                    side.emissive.setRGB(0.045, 0.050, 0.056);
-                    side.emissiveIntensity = 0.11;
+                    face.color.setRGB(0.90, 0.92, 0.95);
+                    face.emissive.setRGB(0.12, 0.13, 0.15);
+                    face.emissiveIntensity = 0.22;
+                    side.color.setRGB(0.50, 0.54, 0.58);
+                    side.emissive.setRGB(0.06, 0.07, 0.08);
+                    side.emissiveIntensity = 0.14;
                 }
             }
 
@@ -1422,7 +1394,6 @@
         function handleResize() {
             resizeThreeJS();
             const mobileMode = window.innerWidth < 600;
-            // Ağları yalnızca mobil/desktop breakpoint değişince yeniden üret.
             if (mobileMode !== lastWebMobileMode) {
                 lastWebMobileMode = mobileMode;
                 generatePhotoWebs();
@@ -1434,9 +1405,6 @@
             resizeTimer = setTimeout(handleResize, 120);
         });
 
-
-
-        // Sekme arka plandayken gereksiz canlı-yayın senkron kontrollerini durdur.
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 if (syncCheckInterval) {
@@ -1449,21 +1417,20 @@
             }
         });
 
-        // Başlat
         resizeThreeJS();
         requestAnimationFrame(animateGlobe);
 
         // FIREBASE CANLI DİNLEYİCİ SİSTEMİ
-       const firebaseConfig = {
-  apiKey: "AIzaSyA4WSlpMCyEZPi-jFo-IpJQb55I_JG9iAc",
-  authDomain: "sp1der-e75ff.firebaseapp.com",
-  databaseURL: "https://sp1der-e75ff-default-rtdb.firebaseio.com",
-  projectId: "sp1der-e75ff",
-  storageBucket: "sp1der-e75ff.firebasestorage.app",
-  messagingSenderId: "1024402090973",
-  appId: "1:1024402090973:web:05e86d82e09cd6e1bce434",
-  measurementId: "G-R0W695S9N6"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyA4WSlpMCyEZPi-jFo-IpJQb55I_JG9iAc",
+            authDomain: "sp1der-e75ff.firebaseapp.com",
+            databaseURL: "https://sp1der-e75ff-default-rtdb.firebaseio.com",
+            projectId: "sp1der-e75ff",
+            storageBucket: "sp1der-e75ff.firebasestorage.app",
+            messagingSenderId: "1024402090973",
+            appId: "1:1024402090973:web:05e86d82e09cd6e1bce434",
+            measurementId: "G-R0W695S9N6"
+        };
 
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
