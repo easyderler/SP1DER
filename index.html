@@ -15,7 +15,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=New+Rocker&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -617,132 +617,14 @@
         .start-btn::before { content:""; position:absolute; inset:4px; border-radius:inherit; border:1px solid rgba(0,0,0,.13); pointer-events:none; }
         .start-btn:hover { transform:translateY(-2px) scale(1.035); box-shadow:0 16px 42px rgba(0,0,0,.68),0 0 34px rgba(255,255,255,.24),inset 0 1px 0 #fff; }
         .start-btn:active { transform:translateY(0) scale(.985); }
-        .reg-mark { display:inline-block; font-size:.34em; vertical-align:top; margin-left:.08em; transform:translateY(.05em); letter-spacing:0; }
         .ambient-glow { background:radial-gradient(circle at 50% 48%, rgba(255,255,255,.11), rgba(100,140,255,.035) 35%, transparent 68%); filter:blur(70px); opacity:.65; transform:translate(-50%,-50%) scale(calc(1 + var(--energy))); }
         #fx-canvas { position:fixed; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; opacity:.8; }
         .control-dock { position:fixed; right:18px; bottom:18px; z-index:70; display:flex; gap:8px; }
         .dock-btn { width:38px; height:38px; border:1px solid rgba(255,255,255,.18); border-radius:12px; background:rgba(8,8,8,.72); color:#fff; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); cursor:pointer; display:grid; place-items:center; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); transition:.2s ease; }
         .dock-btn:hover { transform:translateY(-3px) scale(1.05); border-color:rgba(255,255,255,.5); box-shadow:0 14px 35px rgba(0,0,0,.6),0 0 22px rgba(255,255,255,.08); }
-        .boot { position:fixed; inset:0; z-index:999; background:#000; display:grid; place-items:center; transition:opacity .7s ease,visibility .7s ease; }
-        .boot.out { opacity:0; visibility:hidden; }
-        .boot-mark { font-family:'Syne',sans-serif; font-size:clamp(34px,8vw,74px); font-weight:900; letter-spacing:.18em; padding-left:.18em; color:#fff; text-shadow:0 0 35px rgba(255,255,255,.3); animation:bootPulse .8s ease-in-out infinite alternate; }
-        @keyframes bootPulse { from{opacity:.28;filter:blur(2px);transform:scale(.985)} to{opacity:1;filter:blur(0);transform:scale(1)} }
         body.playing .video-container { box-shadow:0 24px 80px rgba(0,0,0,.68),0 0 45px rgba(255,255,255,.055),inset 0 1px 0 rgba(255,255,255,.08); }
         body.playing .now-playing-card { box-shadow:0 18px 55px rgba(0,0,0,.7),0 0 26px rgba(255,255,255,.04); }
         @media(max-width:700px){ .control-dock{right:10px;bottom:10px}.dock-btn{width:34px;height:34px}.main-wrapper{padding-left:10px;padding-right:10px}.video-container{border-radius:18px}.now-playing-card{border-radius:16px} }
-
-    
-        :root{--sx:50vw;--sy:50vh;--signal:0;--chrome:rgba(255,255,255,.86)}
-        body{background:#010101;}
-        #sp1der-atmosphere{position:fixed;inset:0;z-index:7;pointer-events:none;overflow:hidden;mix-blend-mode:screen;opacity:.9}
-        #sp1der-atmosphere canvas{position:absolute;inset:0;width:100%;height:100%}
-        .sp1der-haze{position:absolute;inset:-20%;background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.055),transparent 28%),conic-gradient(from 90deg at 50% 50%,transparent,rgba(255,255,255,.018),transparent 18%,rgba(255,255,255,.025),transparent 45%);filter:blur(42px);animation:hazeTurn 24s linear infinite;opacity:.8}
-        @keyframes hazeTurn{to{transform:rotate(360deg) scale(1.08)}}
-        .signal-sweep{position:fixed;left:-30vw;top:0;width:24vw;height:100vh;z-index:44;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.035),transparent);filter:blur(12px);transform:skewX(-18deg);animation:signalSweep 9s cubic-bezier(.7,0,.2,1) infinite;opacity:.5}
-        @keyframes signalSweep{0%,55%{translate:-20vw 0;opacity:0}63%{opacity:.55}78%{translate:160vw 0;opacity:0}100%{translate:160vw 0;opacity:0}}
-        .video-container{overflow:visible!important;isolation:isolate}
-        .video-container>*{border-radius:inherit}
-        .video-container .spider-frame{position:absolute;inset:-12px;z-index:-1;pointer-events:none;border-radius:30px;opacity:.58;filter:drop-shadow(0 0 18px rgba(255,255,255,.12));transition:opacity .5s ease,transform .5s ease}
-        body.playing .video-container .spider-frame{opacity:.92;transform:scale(1.012)}
-        .spider-frame:before,.spider-frame:after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,transparent 0 8%,rgba(255,255,255,.72) 8.2% 8.5%,transparent 8.7% 91%,rgba(255,255,255,.72) 91.2% 91.5%,transparent 91.7%),linear-gradient(0deg,transparent 0 9%,rgba(255,255,255,.48) 9.2% 9.45%,transparent 9.7% 90%,rgba(255,255,255,.48) 90.2% 90.45%,transparent 90.7%);mask:linear-gradient(#000,#000);opacity:.45}
-        .spider-frame:after{inset:-6px;opacity:.18;filter:blur(7px)}
-        .video-container::after{box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),inset 0 -55px 85px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.9)!important}
-        .now-playing-card{overflow:visible!important}
-        .now-playing-card:before{z-index:-1!important}
-        .now-playing-card .signal-rail{position:absolute;left:16px;right:16px;top:-7px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);box-shadow:0 0 12px rgba(255,255,255,.24);opacity:.35;transform:scaleX(.35);transition:.5s ease}
-        body.playing .now-playing-card .signal-rail{opacity:.9;transform:scaleX(1)}
-        #start-overlay{overflow:hidden}
-        #start-overlay:before{content:"";position:absolute;width:min(70vw,520px);aspect-ratio:1;border-radius:50%;border:1px solid rgba(255,255,255,.08);box-shadow:0 0 0 35px rgba(255,255,255,.012),0 0 0 70px rgba(255,255,255,.009),0 0 80px rgba(255,255,255,.05);animation:portal 7s linear infinite}
-        #start-overlay:after{content:"";position:absolute;width:min(62vw,460px);aspect-ratio:1;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.18) 0 1deg,transparent 1deg 13deg);mask:radial-gradient(circle,transparent 0 56%,#000 57% 59%,transparent 60%);animation:portalReverse 18s linear infinite;opacity:.4}
-        @keyframes portal{50%{transform:rotate(180deg) scale(1.05)}100%{transform:rotate(360deg)}}
-        @keyframes portalReverse{to{transform:rotate(-360deg)}}
-        .start-btn{z-index:3}
-        .status-bar{filter:drop-shadow(0 12px 22px rgba(0,0,0,.7))}
-        .badge,.volume-control-box{position:relative;overflow:hidden}
-        .badge:after,.volume-control-box:after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.11),transparent 65%);translate:-130% 0;animation:microChrome 8s ease-in-out infinite;pointer-events:none}
-        @keyframes microChrome{0%,72%{translate:-130% 0}88%,100%{translate:130% 0}}
-        .boot{background:radial-gradient(circle at 50% 48%,#111 0,#020202 28%,#000 72%);overflow:hidden}
-        .boot-sequence{position:relative;display:grid;place-items:center;width:min(82vw,760px);height:min(72vh,620px);isolation:isolate}
-        .boot-orbit{position:absolute;width:min(58vw,440px);aspect-ratio:1;border-radius:50%;border:1px solid rgba(255,255,255,.13);box-shadow:0 0 0 24px rgba(255,255,255,.012),0 0 0 48px rgba(255,255,255,.008);animation:bootOrbit 5s linear infinite}
-        .boot-orbit:before{content:"";position:absolute;inset:-8%;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.65) 0 .7deg,transparent .7deg 15deg);mask:radial-gradient(circle,transparent 0 61%,#000 62% 63%,transparent 64%);opacity:.38}
-        @keyframes bootOrbit{to{transform:rotate(360deg)}}
-        .boot-core{position:relative;text-align:center;z-index:3}
-        .boot-mark{font-family:'New Rocker','Syne',sans-serif!important;font-size:clamp(44px,10vw,96px)!important;letter-spacing:.07em!important;padding-left:.07em!important;text-shadow:0 0 8px rgba(255,255,255,.7),0 0 42px rgba(255,255,255,.16)!important;animation:bootMark 1.3s cubic-bezier(.2,.8,.2,1) both!important}
-        @keyframes bootMark{0%{opacity:0;filter:blur(18px);transform:scale(.72) rotateX(35deg)}55%{opacity:1;filter:blur(0);transform:scale(1.04)}100%{transform:scale(1)}}
-        .boot-sub{font-size:8px;font-weight:900;letter-spacing:.55em;margin-top:18px;color:rgba(255,255,255,.58);padding-left:.55em}
-        .boot-loader{width:min(310px,58vw);height:1px;background:rgba(255,255,255,.12);margin:20px auto 0;overflow:hidden;position:relative}
-        .boot-loader:after{content:"";position:absolute;inset:0;background:#fff;box-shadow:0 0 15px #fff;transform-origin:left;animation:loadRail 1.55s cubic-bezier(.7,0,.2,1) both}
-        @keyframes loadRail{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-        .boot-status{font:700 7px 'Space Grotesk',sans-serif;letter-spacing:.32em;color:rgba(255,255,255,.34);margin-top:12px}
-        .main-wrapper{transition:transform .18s ease-out,filter .4s ease,opacity .5s ease}
-        body:not(.entered) .main-wrapper{filter:blur(8px);opacity:.5;transform:scale(.975)}
-        body.entered .main-wrapper{animation:stageEnter .9s cubic-bezier(.16,.8,.18,1) both}
-        @keyframes stageEnter{0%{filter:blur(8px);opacity:.25;transform:scale(.96) translateY(18px)}100%{filter:none;opacity:1;transform:none}}
-        @media(max-width:700px){.video-container .spider-frame{inset:-7px;border-radius:22px}.boot-sub{letter-spacing:.32em;padding-left:.32em}.signal-sweep{display:none}}
-        @media(prefers-reduced-motion:reduce){.sp1der-haze,.signal-sweep,.boot-orbit,.boot-orbit:before,#start-overlay:before,#start-overlay:after,.badge:after,.volume-control-box:after{animation:none!important}}
-
-
-
-        /* === SP1DER 3.0 — CINEMATIC SHOW LAYER === */
-        .show-aurora{position:fixed;inset:-30vmax;z-index:3;pointer-events:none;overflow:hidden;opacity:.46;filter:blur(52px);mix-blend-mode:screen;transform:translateZ(0)}
-        .show-aurora::before,.show-aurora::after{content:"";position:absolute;left:50%;top:50%;width:86vmax;height:30vmax;border-radius:50%;border:1px solid rgba(255,255,255,.11);background:radial-gradient(ellipse at center,transparent 48%,rgba(255,255,255,.045) 56%,transparent 69%);transform-origin:center;animation:auroraOrbit 28s linear infinite}
-        .show-aurora::before{transform:translate(-50%,-50%) rotate(18deg)}
-        .show-aurora::after{width:72vmax;height:22vmax;opacity:.55;animation-duration:39s;animation-direction:reverse;transform:translate(-50%,-50%) rotate(-31deg)}
-        @keyframes auroraOrbit{from{rotate:0deg}to{rotate:360deg}}
-
-        .globe-rift{position:absolute;left:50%;top:50%;width:min(66vw,520px);aspect-ratio:1;transform:translate(-50%,-50%);z-index:1;pointer-events:none;border-radius:50%;opacity:0}
-        .globe-rift i{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.0);box-shadow:0 0 0 rgba(255,255,255,0);transform:scale(.48);opacity:0}
-        body.live-entry .globe-rift{opacity:1}
-        body.live-entry .globe-rift i:nth-child(1){animation:riftBurst 1.35s cubic-bezier(.12,.72,.15,1) .05s both}
-        body.live-entry .globe-rift i:nth-child(2){animation:riftBurst 1.55s cubic-bezier(.12,.72,.15,1) .17s both}
-        body.live-entry .globe-rift i:nth-child(3){animation:riftBurst 1.8s cubic-bezier(.12,.72,.15,1) .29s both}
-        @keyframes riftBurst{0%{opacity:0;transform:scale(.35);border-color:rgba(255,255,255,.9);box-shadow:0 0 40px rgba(255,255,255,.34)}22%{opacity:.9}100%{opacity:0;transform:scale(1.7);border-color:rgba(255,255,255,0);box-shadow:0 0 0 rgba(255,255,255,0)}}
-
-        #cinematic-gate{position:fixed;inset:0;z-index:880;pointer-events:none;overflow:hidden;visibility:hidden}
-        #cinematic-gate .gate-panel{position:absolute;background:linear-gradient(135deg,#000 0%,#090909 48%,#000 100%);box-shadow:0 0 80px rgba(255,255,255,.05);will-change:transform}
-        #cinematic-gate .gate-top,#cinematic-gate .gate-bottom{left:-5%;width:110%;height:52%}
-        #cinematic-gate .gate-top{top:-1%;transform:translateY(-105%)}
-        #cinematic-gate .gate-bottom{bottom:-1%;transform:translateY(105%)}
-        #cinematic-gate .gate-left,#cinematic-gate .gate-right{top:0;width:51%;height:100%;opacity:.92}
-        #cinematic-gate .gate-left{left:0;transform:translateX(-110%);clip-path:polygon(0 0,100% 0,82% 100%,0 100%)}
-        #cinematic-gate .gate-right{right:0;transform:translateX(110%);clip-path:polygon(18% 0,100% 0,100% 100%,0 100%)}
-        #cinematic-gate .gate-core{position:absolute;left:50%;top:50%;width:12vmax;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%) scale(.1);opacity:0;border:1px solid rgba(255,255,255,.85);box-shadow:0 0 55px rgba(255,255,255,.35),inset 0 0 35px rgba(255,255,255,.18)}
-        #cinematic-gate .gate-flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:screen}
-        body.live-entry #cinematic-gate{visibility:visible}
-        body.live-entry #cinematic-gate .gate-top{animation:gateTop 1.15s cubic-bezier(.7,0,.2,1) both}
-        body.live-entry #cinematic-gate .gate-bottom{animation:gateBottom 1.15s cubic-bezier(.7,0,.2,1) both}
-        body.live-entry #cinematic-gate .gate-left{animation:gateLeft 1.15s cubic-bezier(.7,0,.2,1) both}
-        body.live-entry #cinematic-gate .gate-right{animation:gateRight 1.15s cubic-bezier(.7,0,.2,1) both}
-        body.live-entry #cinematic-gate .gate-core{animation:gateCore 1.05s cubic-bezier(.12,.8,.18,1) .18s both}
-        body.live-entry #cinematic-gate .gate-flash{animation:gateFlash .72s ease .46s both}
-        @keyframes gateTop{0%{transform:translateY(-105%)}35%,52%{transform:translateY(-49%)}100%{transform:translateY(-105%)}}
-        @keyframes gateBottom{0%{transform:translateY(105%)}35%,52%{transform:translateY(49%)}100%{transform:translateY(105%)}}
-        @keyframes gateLeft{0%{transform:translateX(-110%)}35%,52%{transform:translateX(-56%)}100%{transform:translateX(-110%)}}
-        @keyframes gateRight{0%{transform:translateX(110%)}35%,52%{transform:translateX(56%)}100%{transform:translateX(110%)}}
-        @keyframes gateCore{0%{opacity:0;transform:translate(-50%,-50%) scale(.08) rotate(0)}35%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(7) rotate(180deg)}}
-        @keyframes gateFlash{0%,25%,100%{opacity:0}45%{opacity:.22}58%{opacity:.04}}
-
-        .video-container .show-corners{position:absolute;inset:-2px;z-index:24;pointer-events:none;border-radius:inherit;overflow:hidden}
-        .video-container .show-corners::before,.video-container .show-corners::after{content:"";position:absolute;width:58px;height:58px;opacity:.65;transition:width .45s ease,height .45s ease,opacity .45s ease;filter:drop-shadow(0 0 8px rgba(255,255,255,.22))}
-        .video-container .show-corners::before{left:0;top:0;border-left:1px solid rgba(255,255,255,.75);border-top:1px solid rgba(255,255,255,.75);border-radius:inherit 0 0 0}
-        .video-container .show-corners::after{right:0;bottom:0;border-right:1px solid rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.75);border-radius:0 0 inherit 0}
-        body.playing .video-container .show-corners::before,body.playing .video-container .show-corners::after{width:86px;height:86px;opacity:.95}
-        .video-container .show-scan{position:absolute;left:0;right:0;height:1px;top:-2%;z-index:23;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);box-shadow:0 0 18px rgba(255,255,255,.35);opacity:0}
-        body.playing .video-container .show-scan{animation:videoScan 7.5s cubic-bezier(.55,0,.2,1) infinite}
-        @keyframes videoScan{0%,72%{top:-2%;opacity:0}77%{opacity:.7}94%{top:102%;opacity:.12}100%{top:102%;opacity:0}}
-
-        .now-playing-card.track-switch{animation:trackCardSwitch .7s cubic-bezier(.16,.82,.18,1)}
-        .now-playing-card.track-switch .track-title{animation:trackTitleSwitch .62s cubic-bezier(.16,.82,.18,1)}
-        @keyframes trackCardSwitch{0%{transform:translateX(0)}24%{transform:translateX(-8px);filter:brightness(1.5)}55%{transform:translateX(5px)}100%{transform:none;filter:none}}
-        @keyframes trackTitleSwitch{0%{opacity:1;filter:blur(0);letter-spacing:.5px}28%{opacity:.08;filter:blur(8px);letter-spacing:7px}62%{opacity:1;filter:blur(0);letter-spacing:1.8px}100%{letter-spacing:.5px}}
-
-        body.live-entry .main-wrapper{animation:liveStagePunch 1.25s cubic-bezier(.12,.82,.18,1) both}
-        @keyframes liveStagePunch{0%{filter:blur(0);transform:scale(1)}31%{filter:blur(3px) brightness(.55);transform:scale(.975)}52%{filter:blur(0) brightness(1.32);transform:scale(1.018)}100%{filter:none;transform:none}}
-        body.live-entry .photo-web-3d{animation:webEntryWarp 1.35s cubic-bezier(.16,.82,.18,1) both}
-        @keyframes webEntryWarp{0%{filter:blur(0) brightness(1)}36%{filter:blur(4px) brightness(1.6);opacity:.35}100%{filter:blur(0) brightness(1);}}
-
-        @media(max-width:700px){.show-aurora{opacity:.3}.globe-rift{width:76vw}.video-container .show-corners::before,.video-container .show-corners::after{width:38px;height:38px}}
-        @media(prefers-reduced-motion:reduce){.show-aurora::before,.show-aurora::after,.video-container .show-scan{animation:none!important}#cinematic-gate{display:none!important}.globe-rift{display:none!important}}
 
     </style>
 
@@ -754,11 +636,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <div class="show-aurora" aria-hidden="true"></div>
-    <div id="cinematic-gate" aria-hidden="true"><div class="gate-panel gate-top"></div><div class="gate-panel gate-bottom"></div><div class="gate-panel gate-left"></div><div class="gate-panel gate-right"></div><div class="gate-core"></div><div class="gate-flash"></div></div>
-
-    <div class="boot" id="boot"><div class="boot-sequence"><div class="boot-orbit"></div><div class="boot-core"><div class="boot-mark">SP1DER<span class="reg-mark">®</span></div><div class="boot-sub">24/7 WORLDWIDE MUSIC</div><div class="boot-loader"></div><div class="boot-status">ESTABLISHING GLOBAL SIGNAL</div></div></div></div>
-    <div id="sp1der-atmosphere"><canvas id="web-field"></canvas><div class="sp1der-haze"></div></div><div class="signal-sweep"></div>
     <canvas id="fx-canvas"></canvas>
     <div class="control-dock"><button class="dock-btn" id="share-btn" type="button" aria-label="Share">↗</button><button class="dock-btn" id="full-btn" type="button" aria-label="Fullscreen">⛶</button></div>
 
@@ -772,7 +649,7 @@
 
     <div class="main-wrapper" id="main-wrapper">
         <div class="logo-container">
-            <div class="globe-rift" aria-hidden="true"><i></i><i></i><i></i></div><div id="globe-3d-container"></div>
+            <div id="globe-3d-container"></div>
         </div>
 
         <div class="status-bar">
@@ -789,7 +666,7 @@
             </div>
         </div>
 
-        <div class="video-container" id="video-box"><div class="spider-frame"></div><div class="show-corners"></div><div class="show-scan"></div>
+        <div class="video-container" id="video-box">
             <div class="yt-shield-top-main"></div>
             <div class="yt-shield-bottom-left"></div>
             <div class="yt-shield-bottom-edge"></div>
@@ -800,7 +677,7 @@
             <div id="youtube-player"></div>
         </div>
 
-        <div class="now-playing-card"><div class="signal-rail"></div>
+        <div class="now-playing-card">
             <div class="track-info">
                 <span class="track-label">
                     <span style="display:inline-block; width:6px; height:6px; background:var(--accent-color); border-radius:50%; box-shadow:0 0 10px var(--accent-color);"></span>
@@ -1685,7 +1562,6 @@
             }
         });
 
-        
         const fx=document.getElementById('fx-canvas'),fxc=fx.getContext('2d',{alpha:true});
         let fxW=0,fxH=0,dpr=1,particles=[];
         function sizeFx(){dpr=Math.min(devicePixelRatio||1,1.5);fxW=innerWidth;fxH=innerHeight;fx.width=fxW*dpr;fx.height=fxH*dpr;fxc.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(72,Math.max(34,Math.floor(fxW*fxH/24000)));particles=Array.from({length:count},()=>({x:Math.random()*fxW,y:Math.random()*fxH,vx:(Math.random()-.5)*.09,vy:(Math.random()-.5)*.09,r:Math.random()*1.2+.25,p:Math.random()*6.28}))}
@@ -1698,43 +1574,6 @@
         const wrapper=document.getElementById('main-wrapper');
         if(matchMedia('(pointer:fine)').matches){addEventListener('pointermove',e=>{const nx=e.clientX/innerWidth-.5,ny=e.clientY/innerHeight-.5;wrapper.style.transform=`rotateY(${nx*1.15}deg) rotateX(${-ny*.75}deg)`},{passive:true});addEventListener('pointerleave',()=>wrapper.style.transform='rotateY(0deg) rotateX(0deg)')}
         setInterval(()=>{document.body.classList.toggle('playing',!!isPlayingState);document.documentElement.style.setProperty('--energy',isPlayingState?'.28':'.12')},250);
-
-        const webField=document.getElementById('web-field');
-        const wctx=webField.getContext('2d',{alpha:true});
-        let ww=0,wh=0,wdpr=1,nodes=[],pointer={x:-9999,y:-9999,active:false};
-        function webResize(){wdpr=Math.min(devicePixelRatio||1,1.4);ww=innerWidth;wh=innerHeight;webField.width=ww*wdpr;webField.height=wh*wdpr;wctx.setTransform(wdpr,0,0,wdpr,0,0);const count=Math.max(34,Math.min(76,Math.floor(ww*wh/21000)));nodes=Array.from({length:count},(_,i)=>({x:Math.random()*ww,y:Math.random()*wh,ox:0,oy:0,vx:(Math.random()-.5)*.13,vy:(Math.random()-.5)*.13,p:Math.random()*6.28,r:.35+Math.random()*.8}));}
-        webResize();addEventListener('resize',webResize,{passive:true});
-        addEventListener('pointermove',e=>{pointer.x=e.clientX;pointer.y=e.clientY;pointer.active=true},{passive:true});
-        addEventListener('pointerleave',()=>pointer.active=false,{passive:true});
-        function renderWebField(ms){wctx.clearRect(0,0,ww,wh);const live=document.body.classList.contains('playing');const link=live?150:118;const speed=live?1.55:1;for(const n of nodes){n.x+=n.vx*speed;n.y+=n.vy*speed;if(n.x<0||n.x>ww)n.vx*=-1;if(n.y<0||n.y>wh)n.vy*=-1;if(pointer.active){const dx=n.x-pointer.x,dy=n.y-pointer.y,d=Math.hypot(dx,dy);if(d<145&&d>1){const f=(1-d/145)*.42;n.x+=dx/d*f;n.y+=dy/d*f}}n.ox=Math.sin(ms*.00045+n.p)*3;n.oy=Math.cos(ms*.00038+n.p)*3}
-        wctx.lineWidth=.45;for(let i=0;i<nodes.length;i++){const a=nodes[i],ax=a.x+a.ox,ay=a.y+a.oy;for(let j=i+1;j<nodes.length;j++){const b=nodes[j],bx=b.x+b.ox,by=b.y+b.oy,d=Math.hypot(ax-bx,ay-by);if(d<link){let alpha=(1-d/link)*(live?.105:.055);wctx.strokeStyle=`rgba(255,255,255,${alpha})`;wctx.beginPath();wctx.moveTo(ax,ay);const mx=(ax+bx)/2+(ay-by)*.025,my=(ay+by)/2+(bx-ax)*.025;wctx.quadraticCurveTo(mx,my,bx,by);wctx.stroke()}}wctx.fillStyle=`rgba(255,255,255,${live?.48:.28})`;wctx.beginPath();wctx.arc(ax,ay,a.r,0,Math.PI*2);wctx.fill()}requestAnimationFrame(renderWebField)}
-        requestAnimationFrame(renderWebField);
-        const boot=document.getElementById('boot');
-        function exitBoot(){if(boot.classList.contains('out'))return;boot.classList.add('out');document.body.classList.add('entered')}
-        window.addEventListener('load',()=>setTimeout(exitBoot,1650),{once:true});setTimeout(exitBoot,2800);
-        const originalHandleUserClick=handleUserClick;
-        handleUserClick=function(e){
-            const firstEntry=!userHasClicked;
-            originalHandleUserClick(e);
-            document.body.classList.add('entered');
-            if(firstEntry){
-                document.body.classList.remove('live-entry');
-                void document.body.offsetWidth;
-                document.body.classList.add('live-entry');
-                setTimeout(()=>document.body.classList.remove('live-entry'),1900);
-            }
-            const vb=document.getElementById('video-box');
-            vb.animate([{transform:'scale(.985)',filter:'brightness(1.5)'},{transform:'scale(1.012)',filter:'brightness(1.08)'},{transform:'scale(1)',filter:'brightness(1)'}],{duration:900,easing:'cubic-bezier(.16,.8,.2,1)'});
-        };
-
-        const trackTitleObserver=new MutationObserver(()=>{
-            if(!userHasClicked)return;
-            nowPlayingCard.classList.remove('track-switch');
-            void nowPlayingCard.offsetWidth;
-            nowPlayingCard.classList.add('track-switch');
-            setTimeout(()=>nowPlayingCard.classList.remove('track-switch'),760);
-        });
-        trackTitleObserver.observe(currentTrackEl,{childList:true,characterData:true,subtree:true});
 
     </script>
 </body>
