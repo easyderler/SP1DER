@@ -12,10 +12,9 @@
     <link rel="preload" as="image" href="https://i.hizliresim.com/bhocuany.png" fetchpriority="high">
     <link rel="preload" as="image" href="https://i.hizliresim.com/bkslqch8.png" fetchpriority="high">
 
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Syne:wght@800;900&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -56,7 +55,6 @@
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 20%, #000000 130%);
             z-index: 45;
             pointer-events: none;
         }
@@ -87,7 +85,6 @@
             100% { transform: translateY(100%); }
         }
 
-
         #photo-webs-container {
             position: fixed;
             top: 0;
@@ -97,10 +94,6 @@
             z-index: 6;
             pointer-events: none;
             overflow: visible;
-        }
-
-
-        #photo-webs-container {
             perspective: 1500px;
             perspective-origin: 50% 50%;
             transform-style: preserve-3d;
@@ -118,10 +111,6 @@
             transform-style: preserve-3d;
             backface-visibility: visible;
             will-change: transform;
-            perspective: 1500px;
-            image-rendering: auto;
-            opacity: 1;
-
 
             -webkit-mask-image: radial-gradient(ellipse 50% 50% at center,
                 #000 8%, rgba(0,0,0,.8) 28%, rgba(0,0,0,.38) 50%,
@@ -159,7 +148,6 @@
             position: relative;
             z-index: 10;
             width: 100%;
-            max-width: 680px;
             height: 100%;
             height: 100dvh;
             display: flex;
@@ -170,7 +158,7 @@
             gap: 12px;
             margin: 0 auto;
             box-sizing: border-box;
-            will-change: transform, filter;
+            will-change: transform;
         }
 
         .logo-container {
@@ -208,7 +196,6 @@
         #globe-3d-container canvas {
             display: block;
             outline: none;
-            filter: drop-shadow(0 0 40px var(--glow-color));
         }
 
         .status-bar {
@@ -318,7 +305,6 @@
             .volume-slider { width: 38px; }
         }
 
-
         @media (max-width: 600px) {
             .now-playing-card {
                 padding: 11px 12px;
@@ -384,10 +370,7 @@
             transition: border-color 0.3s, box-shadow 0.3s;
             background: #000;
             margin: 2px 0;
-            will-change: transform;
         }
-
-
 
         #youtube-player {
             position: absolute;
@@ -542,8 +525,6 @@
             100% { transform: scaleY(1); }
         }
 
-
-
         .badge, .volume-control-box, .now-playing-card, .video-container {
             isolation: isolate;
         }
@@ -599,10 +580,9 @@
             .photo-web-3d { will-change: auto; }
         }
 
-
-        :root { --mx:50vw; --my:50vh; --energy:.18; }
+        :root { --energy:.12; }
         body { background: radial-gradient(circle at 50% 42%, #101010 0%, #040404 36%, #000 78%); }
-        body::before { background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.055), transparent 18%), radial-gradient(circle at 50% 45%, transparent 12%, #000 105%); transition: background .08s linear; }
+        body::before { background: radial-gradient(circle at 50vw 50vh, rgba(255,255,255,.055), transparent 18%), radial-gradient(circle at 50% 45%, transparent 12%, #000 105%); }
         .main-wrapper { max-width: 760px; padding-left:18px; padding-right:18px; perspective:1200px; }
         .logo-container { filter: saturate(.9) contrast(1.08); transition: transform .22s ease-out; }
         #globe-3d-container canvas { filter: drop-shadow(0 0 26px rgba(255,255,255,.22)) drop-shadow(0 0 70px rgba(120,160,255,.10)); }
@@ -639,9 +619,7 @@
     <canvas id="fx-canvas"></canvas>
     <div class="control-dock"><button class="dock-btn" id="share-btn" type="button" aria-label="Share">↗</button><button class="dock-btn" id="full-btn" type="button" aria-label="Fullscreen">⛶</button></div>
 
-
     <div class="scanline-overlay"></div>
-
 
     <div id="photo-webs-container"></div>
 
@@ -718,7 +696,6 @@
             return a + Math.random() * (b - a);
         }
 
-
         const webPositions = [
             [18, 18], [82, 18], [18, 82], [82, 82], [50, 50]
         ];
@@ -749,7 +726,6 @@
                 top: webPositions[index][1],
                 depth: randomBetween(-80, 90),
 
-
                 width: mobile ? randomBetween(60, 72) : randomBetween(52, 66),
 
                 rotX: randomBetween(-4, 4),
@@ -764,7 +740,6 @@
                 moveZ: randomBetween(1.6, 3.0),
                 rotate: randomBetween(0.25, 0.55)
             };
-
 
             img.style.left = item.left + 'vw';
             img.style.top = item.top + 'vh';
@@ -802,9 +777,6 @@
 
             photoWebElements.forEach(item => {
                 const t = webAnimationTime * item.speed + item.phase;
-
-
-
 
                 const dx = (Math.cos(t) * 0.72 + Math.sin(t * 1.71) * 0.28) * item.moveX;
                 const dy = (Math.sin(t * 1.08) * 0.72 + Math.cos(t * 1.63) * 0.28) * item.moveY;
@@ -946,14 +918,12 @@
         const initialState = getCurrentStreamState();
         updateTrackLabels(initialState.playlist, initialState.songIndex);
 
-
         const nowPlayingCard = document.querySelector('.now-playing-card');
         const trackTimeEl = document.getElementById('track-time');
         const formatTime = (seconds) => {
             const safe = Math.max(0, Math.floor(seconds || 0));
             return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`;
         };
-
 
         function updateTrackProgress() {
             const state = getCurrentStreamState();
@@ -1012,6 +982,9 @@
                 isPlayingState = true;
                 waveBars.style.opacity = '1';
             }
+
+            document.body.classList.toggle('playing', isPlayingState);
+            document.documentElement.style.setProperty('--energy', isPlayingState ? '.28' : '.12');
         }
 
         function onPlayerStateChange(event) {
@@ -1121,6 +1094,7 @@
         const muteBtn = document.getElementById('mute-btn');
         let isMuted = false;
         let lastVolume = 100;
+        updateAudioVisualState();
 
         volumeRange.addEventListener('input', (e) => {
             const val = Number(e.target.value);
@@ -1170,7 +1144,6 @@
             }
             updateAudioVisualState();
         });
-
 
         const globeContainer = document.getElementById('globe-3d-container');
 
@@ -1226,19 +1199,14 @@
         dirLight.position.set(5, 4, 5);
         scene.add(dirLight);
 
-
-
         const orbitHighlightLight = new THREE.PointLight(0xf4f8ff, 4.35, 12.0, 1.65);
-
 
         orbitHighlightLight.position.set(3.15, 1.15, 3.65);
         scene.add(orbitHighlightLight);
 
         let orbitTextGroup = null;
-        let orbitChromeMaterials = [];
 
         function createOrbitRingText() {
-
 
             if (!THREE.FontLoader || !THREE.TextGeometry || !window.opentype) {
                 console.warn('3D text modules failed to load.');
@@ -1289,9 +1257,12 @@
                     depthTest: true,
                     depthWrite: true
                 });
-                orbitChromeMaterials = [chromeFace, chromeSide];
-
-
+                chromeFace.color.setRGB(0.82, 0.85, 0.88);
+                chromeFace.emissive.setRGB(0.085, 0.092, 0.10);
+                chromeFace.emissiveIntensity = 0.16;
+                chromeSide.color.setRGB(0.47, 0.51, 0.55);
+                chromeSide.emissive.setRGB(0.045, 0.050, 0.056);
+                chromeSide.emissiveIntensity = 0.11;
 
                 const glyphShapes = (font, ch, size) => {
                     const units = font.unitsPerEm || 1000;
@@ -1312,9 +1283,6 @@
                             (cmd.x1 || 0) * scale, -(cmd.y1 || 0) * scale, x, y
                         );
                     }
-
-
-
 
                     return shapePath.toShapes(false);
                 };
@@ -1409,7 +1377,6 @@
                         geo.scale(xScale, 1, 1);
                         if (ch === '®') geo.scale(0.42, 0.42, 0.42);
 
-
                         const pos = geo.attributes.position;
                         for (let p = 0; p < pos.count; p++) {
                             pos.setX(p, pos.getX(p) + pos.getY(p) * 0.14);
@@ -1428,7 +1395,6 @@
                     return holder;
                 };
 
-
                 makeCurvedText('SP1DER®', brandFont, 'brand', 0.61, 0.175, 0.026, 0.12, baseRadius + 0.20, 1.30, 0.012, 0.76);
                 makeCurvedText('24/7 WORLDWIDE MUSIC', sloganFont, 'slogan', 0.150, 0.068, 0.015, -0.315, baseRadius + 0.20, 1.48, 0.007, 0.78);
 
@@ -1442,8 +1408,6 @@
 
         let perfSampleStart = performance.now();
         let perfFrames = 0;
-
-
 
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
@@ -1475,17 +1439,6 @@
 
             if (orbitTextGroup) {
                 orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
-
-                if (orbitChromeMaterials.length >= 2) {
-                    const face = orbitChromeMaterials[0];
-                    const side = orbitChromeMaterials[1];
-                    face.color.setRGB(0.82, 0.85, 0.88);
-                    face.emissive.setRGB(0.085, 0.092, 0.10);
-                    face.emissiveIntensity = 0.16;
-                    side.color.setRGB(0.47, 0.51, 0.55);
-                    side.emissive.setRGB(0.045, 0.050, 0.056);
-                    side.emissiveIntensity = 0.11;
-                }
             }
 
             animatePhotoWebs(deltaTime);
@@ -1508,9 +1461,6 @@
             resizeTimer = setTimeout(handleResize, 120);
         });
 
-
-
-
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 if (syncCheckInterval) {
@@ -1523,10 +1473,8 @@
             }
         });
 
-
         resizeThreeJS();
         requestAnimationFrame(animateGlobe);
-
 
        const firebaseConfig = {
   apiKey: "AIzaSyA4WSlpMCyEZPi-jFo-IpJQb55I_JG9iAc",
@@ -1556,24 +1504,125 @@
         });
 
         listenersRef.on('value', (snap) => {
-            const count = snap.numChildren();
-            if (listenerCountEl) {
-                listenerCountEl.innerText = count > 0 ? count : 1;
+            const nextCount = String(Math.max(1, snap.numChildren()));
+            if (listenerCountEl && listenerCountEl.textContent !== nextCount) {
+                listenerCountEl.textContent = nextCount;
             }
         });
 
-        const fx=document.getElementById('fx-canvas'),fxc=fx.getContext('2d',{alpha:true});
-        let fxW=0,fxH=0,dpr=1,particles=[];
-        function sizeFx(){dpr=Math.min(devicePixelRatio||1,1.5);fxW=innerWidth;fxH=innerHeight;fx.width=fxW*dpr;fx.height=fxH*dpr;fxc.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(72,Math.max(34,Math.floor(fxW*fxH/24000)));particles=Array.from({length:count},()=>({x:Math.random()*fxW,y:Math.random()*fxH,vx:(Math.random()-.5)*.09,vy:(Math.random()-.5)*.09,r:Math.random()*1.2+.25,p:Math.random()*6.28}))}
-        sizeFx();addEventListener('resize',sizeFx,{passive:true});
-        function drawFx(t){fxc.clearRect(0,0,fxW,fxH);const active=document.body.classList.contains('playing');const range=active?128:92;for(const p of particles){p.x+=p.vx*(active?2.2:1);p.y+=p.vy*(active?2.2:1);if(p.x<-20)p.x=fxW+20;if(p.x>fxW+20)p.x=-20;if(p.y<-20)p.y=fxH+20;if(p.y>fxH+20)p.y=-20;const pulse=.32+Math.sin(t*.001+p.p)*.18;fxc.fillStyle=`rgba(255,255,255,${pulse})`;fxc.beginPath();fxc.arc(p.x,p.y,p.r,0,Math.PI*2);fxc.fill()}for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const a=particles[i],b=particles[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<range){fxc.strokeStyle=`rgba(255,255,255,${(1-d/range)*(active?.065:.035)})`;fxc.lineWidth=.45;fxc.beginPath();fxc.moveTo(a.x,a.y);fxc.lineTo(b.x,b.y);fxc.stroke()}}}requestAnimationFrame(drawFx)}
+        const fx = document.getElementById('fx-canvas');
+        const fxc = fx.getContext('2d', { alpha: true });
+        let fxW = 0;
+        let fxH = 0;
+        let dpr = 1;
+        let particles = [];
+
+        function sizeFx() {
+            dpr = Math.min(devicePixelRatio || 1, 1.5);
+            fxW = innerWidth;
+            fxH = innerHeight;
+            fx.width = fxW * dpr;
+            fx.height = fxH * dpr;
+            fxc.setTransform(dpr, 0, 0, dpr, 0, 0);
+            fxc.lineWidth = 0.45;
+
+            const count = Math.min(72, Math.max(34, Math.floor(fxW * fxH / 24000)));
+            particles = Array.from({ length: count }, () => ({
+                x: Math.random() * fxW,
+                y: Math.random() * fxH,
+                vx: (Math.random() - 0.5) * 0.09,
+                vy: (Math.random() - 0.5) * 0.09,
+                r: Math.random() * 1.2 + 0.25,
+                p: Math.random() * 6.28
+            }));
+        }
+
+        sizeFx();
+        addEventListener('resize', sizeFx, { passive: true });
+
+        function drawFx(t) {
+            if (document.hidden) {
+                requestAnimationFrame(drawFx);
+                return;
+            }
+
+            fxc.clearRect(0, 0, fxW, fxH);
+            const active = isPlayingState;
+            const range = active ? 128 : 92;
+            const rangeSquared = range * range;
+            const velocityScale = active ? 2.2 : 1;
+            const lineAlpha = active ? 0.065 : 0.035;
+
+            for (const p of particles) {
+                p.x += p.vx * velocityScale;
+                p.y += p.vy * velocityScale;
+                if (p.x < -20) p.x = fxW + 20;
+                if (p.x > fxW + 20) p.x = -20;
+                if (p.y < -20) p.y = fxH + 20;
+                if (p.y > fxH + 20) p.y = -20;
+
+                const pulse = 0.32 + Math.sin(t * 0.001 + p.p) * 0.18;
+                fxc.fillStyle = `rgba(255,255,255,${pulse})`;
+                fxc.beginPath();
+                fxc.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                fxc.fill();
+            }
+
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const a = particles[i];
+                    const b = particles[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const distanceSquared = dx * dx + dy * dy;
+                    if (distanceSquared >= rangeSquared) continue;
+
+                    const distance = Math.sqrt(distanceSquared);
+                    fxc.strokeStyle = `rgba(255,255,255,${(1 - distance / range) * lineAlpha})`;
+                    fxc.beginPath();
+                    fxc.moveTo(a.x, a.y);
+                    fxc.lineTo(b.x, b.y);
+                    fxc.stroke();
+                }
+            }
+
+            requestAnimationFrame(drawFx);
+        }
+
         requestAnimationFrame(drawFx);
-        const fullBtn=document.getElementById('full-btn');
-        fullBtn.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}});
-        document.getElementById('share-btn').addEventListener('click',async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);const b=document.getElementById('share-btn');const old=b.textContent;b.textContent='✓';setTimeout(()=>b.textContent=old,1000)}}catch(e){}});
-        const wrapper=document.getElementById('main-wrapper');
-        if(matchMedia('(pointer:fine)').matches){addEventListener('pointermove',e=>{const nx=e.clientX/innerWidth-.5,ny=e.clientY/innerHeight-.5;wrapper.style.transform=`rotateY(${nx*1.15}deg) rotateX(${-ny*.75}deg)`},{passive:true});addEventListener('pointerleave',()=>wrapper.style.transform='rotateY(0deg) rotateX(0deg)')}
-        setInterval(()=>{document.body.classList.toggle('playing',!!isPlayingState);document.documentElement.style.setProperty('--energy',isPlayingState?'.28':'.12')},250);
+        const fullBtn = document.getElementById('full-btn');
+        fullBtn.addEventListener('click', async () => {
+            try {
+                if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+                else await document.exitFullscreen();
+            } catch (e) {}
+        });
+
+        const shareBtn = document.getElementById('share-btn');
+        shareBtn.addEventListener('click', async () => {
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: document.title, url: location.href });
+                } else {
+                    await navigator.clipboard.writeText(location.href);
+                    const old = shareBtn.textContent;
+                    shareBtn.textContent = '✓';
+                    setTimeout(() => { shareBtn.textContent = old; }, 1000);
+                }
+            } catch (e) {}
+        });
+
+        const wrapper = document.getElementById('main-wrapper');
+        if (matchMedia('(pointer:fine)').matches) {
+            addEventListener('pointermove', (e) => {
+                const nx = e.clientX / innerWidth - 0.5;
+                const ny = e.clientY / innerHeight - 0.5;
+                wrapper.style.transform = `rotateY(${nx * 1.15}deg) rotateX(${-ny * 0.75}deg)`;
+            }, { passive: true });
+            addEventListener('pointerleave', () => {
+                wrapper.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            });
+        }
 
     </script>
 </body>
