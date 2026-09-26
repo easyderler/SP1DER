@@ -25,9 +25,6 @@
 
         :root {
             --accent-color: #ffffff;
-            --glow-color: rgba(255, 255, 255, 0.55);
-            --bg-glow: rgba(180, 220, 255, 0.1);
-            --border-glow: rgba(255, 255, 255, 0.35);
             --energy: .12;
         }
 
@@ -106,13 +103,7 @@
             position: absolute;
             display: block;
             pointer-events: none;
-            user-select: none;
             -webkit-user-drag: none;
-            object-fit: contain;
-            object-position: center;
-            transform-origin: center center;
-            transform-style: preserve-3d;
-            backface-visibility: visible;
             will-change: transform;
 
             -webkit-mask-image: radial-gradient(ellipse 50% 50% at center,
@@ -137,13 +128,9 @@
             left: 50%;
             width: 95vw;
             height: 95vh;
-            background: radial-gradient(circle, var(--glow-color) 0%, var(--bg-glow) 50%, rgba(0, 0, 0, 0) 80%);
             z-index: 4;
             pointer-events: none;
-            filter: blur(52px);
             contain: strict;
-            transform: translate(-50%, -50%);
-            opacity: 0.4;
         }
 
         .main-wrapper {
@@ -159,7 +146,6 @@
             padding: calc(16px + env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) 18px;
             gap: 12px;
             margin: 0 auto;
-            box-sizing: border-box;
             max-width: 760px;
             perspective: 1200px;
             will-change: transform;
@@ -178,7 +164,6 @@
             margin: 0 auto;
             flex-shrink: 0;
             filter: saturate(.9) contrast(1.08);
-            transition: transform .22s ease-out;
         }
 
         @media (min-width: 769px) {
@@ -218,10 +203,9 @@
         }
 
         .badge {
-            background: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glow);
+            border: 1px solid rgba(255,255,255,.16);
             padding: 7px 12px;
             border-radius: 40px;
             font-size: 9.5px;
@@ -231,7 +215,6 @@
             align-items: center;
             gap: 6px;
             text-transform: uppercase;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.08);
             white-space: nowrap;
             transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
         }
@@ -254,13 +237,11 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            background: rgba(10, 10, 10, 0.85);
-            border: 1px solid var(--border-glow);
+            border: 1px solid rgba(255,255,255,.16);
             padding: 6px 12px;
             border-radius: 40px;
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
             transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
             pointer-events: auto;
         }
@@ -314,7 +295,6 @@
 
         @media (max-width: 600px) {
             .now-playing-card {
-                padding: 11px 12px;
                 gap: 10px;
                 align-items: center;
             }
@@ -359,7 +339,7 @@
         }
 
         @media (max-width: 360px) {
-            .now-playing-card { padding: 9px 10px; gap: 7px; }
+            .now-playing-card { gap: 7px; }
             .track-title { font-size: clamp(8px, 3vw, 11px); }
             #next-track-name { font-size: clamp(6.5px, 2.35vw, 8px); }
         }
@@ -370,12 +350,9 @@
             flex: 1 1 auto;
             min-height: 140px;
             max-height: 38vh;
-            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.95);
-            border: 1px solid var(--border-glow);
+            border: 1px solid rgba(255,255,255,.16);
             transition: border-color 0.3s, box-shadow 0.3s;
-            background: #000;
             margin: 2px 0;
         }
 
@@ -401,21 +378,15 @@
             cursor: pointer;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            transition: opacity 0.3s ease, visibility 0.3s;
+            transition: opacity 0.3s ease;
         }
 
         .start-btn {
-            background: var(--accent-color);
             color: #000;
             font-family: 'Syne', sans-serif;
             font-weight: 900;
             font-size: 11px;
-            padding: 16px 42px;
-            border: none;
-            border-radius: 50px;
             cursor: pointer;
-            letter-spacing: 3.5px;
-            box-shadow: 0 0 45px var(--accent-color);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             text-transform: uppercase;
             position: relative;
@@ -437,23 +408,15 @@
             100% { transform: translateX(100%) rotate(30deg); }
         }
 
-        .start-btn:hover {
-            transform: scale(1.08);
-            box-shadow: 0 0 65px var(--accent-color);
-        }
 
         .now-playing-card {
             width: 100%;
-            background: rgba(12, 12, 12, 0.88);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glow);
-            border-radius: 16px;
-            padding: 14px 18px;
+            border: 1px solid rgba(255,255,255,.16);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.95);
             flex-shrink: 0;
             position: relative;
             overflow: hidden;
@@ -587,12 +550,12 @@
             .photo-web-3d { will-change: auto; }
         }
 
-        .video-container, .now-playing-card, .badge, .volume-control-box { border-color: rgba(255,255,255,.16); background: linear-gradient(135deg, rgba(20,20,20,.82), rgba(4,4,4,.72)); box-shadow: 0 22px 70px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06); }
+        .video-container, .now-playing-card, .badge, .volume-control-box { background: linear-gradient(135deg, rgba(20,20,20,.82), rgba(4,4,4,.72)); box-shadow: 0 22px 70px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06); }
         .video-container { border-radius:24px; transform:translateZ(0); }
         .now-playing-card { border-radius:22px; padding:16px 18px; }
         .status-bar { position:relative; z-index:20; }
         .badge,.volume-control-box { min-height:32px; }
-        .start-btn { padding:16px 44px; min-width:170px; border-radius:999px; letter-spacing:3.2px; clip-path:none; background:linear-gradient(135deg,#fff 0%,#dcdcdc 48%,#fff 100%); border:1px solid rgba(255,255,255,.9); box-shadow:0 10px 34px rgba(0,0,0,.58),0 0 24px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 8px rgba(0,0,0,.14); }
+        .start-btn { padding:16px 44px; min-width:170px; border-radius:999px; letter-spacing:3.2px; background:linear-gradient(135deg,#fff 0%,#dcdcdc 48%,#fff 100%); border:1px solid rgba(255,255,255,.9); box-shadow:0 10px 34px rgba(0,0,0,.58),0 0 24px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 8px rgba(0,0,0,.14); }
         .start-btn::before { content:""; position:absolute; inset:4px; border-radius:inherit; border:1px solid rgba(0,0,0,.13); pointer-events:none; }
         .start-btn:hover { transform:translateY(-2px) scale(1.035); box-shadow:0 16px 42px rgba(0,0,0,.68),0 0 34px rgba(255,255,255,.24),inset 0 1px 0 #fff; }
         .start-btn:active { transform:translateY(0) scale(.985); }
@@ -631,11 +594,11 @@
         </div>
 
         <div class="status-bar">
-            <div class="badge" id="badge-live">
+            <div class="badge">
                 <span class="live-dot"></span>
                 <span>LIVE</span>
             </div>
-            <div class="badge" id="badge-listener">
+            <div class="badge">
                 <span>🎧 LISTENERS: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
             </div>
             <div class="volume-control-box disabled" id="volume-box">
@@ -644,13 +607,13 @@
             </div>
         </div>
 
-        <div class="video-container" id="video-box">
+        <div class="video-container">
             <div class="yt-shield-top-main"></div>
             <div class="yt-shield-bottom-left"></div>
             <div class="yt-shield-bottom-edge"></div>
 
             <div id="start-overlay">
-                <button class="start-btn" id="start-btn-el" type="button">JOIN LIVE</button>
+                <button class="start-btn" type="button">JOIN LIVE</button>
             </div>
             <div id="youtube-player"></div>
         </div>
@@ -745,11 +708,8 @@
             img.style.left = item.left + 'vw';
             img.style.top = item.top + 'vh';
             img.style.width = item.width + 'vw';
-            img.style.maxWidth = 'none';
-            img.style.height = 'auto';
             img.style.opacity = randomBetween(0.72, 0.96).toFixed(3);
             img.style.zIndex = String(3 + index);
-            img.style.visibility = 'visible';
 
             img.addEventListener('error', () => {
                 console.warn('Spider web PNG failed to load:', src);
@@ -1110,12 +1070,9 @@
         }
 
         const startOverlay = document.getElementById('start-overlay');
-        const startBtnEl = document.getElementById('start-btn-el');
 
         startOverlay.addEventListener('click', handleUserClick);
         startOverlay.addEventListener('touchstart', handleUserClick, {passive: false});
-        startBtnEl.addEventListener('click', handleUserClick);
-        startBtnEl.addEventListener('touchstart', handleUserClick, {passive: false});
 
         const muteBtn = document.getElementById('mute-btn');
         let isMuted = false;
