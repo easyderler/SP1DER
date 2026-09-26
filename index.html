@@ -681,6 +681,69 @@
         @media(max-width:700px){.video-container .spider-frame{inset:-7px;border-radius:22px}.boot-sub{letter-spacing:.32em;padding-left:.32em}.signal-sweep{display:none}}
         @media(prefers-reduced-motion:reduce){.sp1der-haze,.signal-sweep,.boot-orbit,.boot-orbit:before,#start-overlay:before,#start-overlay:after,.badge:after,.volume-control-box:after{animation:none!important}}
 
+
+
+        /* === SP1DER 3.0 — CINEMATIC SHOW LAYER === */
+        .show-aurora{position:fixed;inset:-30vmax;z-index:3;pointer-events:none;overflow:hidden;opacity:.46;filter:blur(52px);mix-blend-mode:screen;transform:translateZ(0)}
+        .show-aurora::before,.show-aurora::after{content:"";position:absolute;left:50%;top:50%;width:86vmax;height:30vmax;border-radius:50%;border:1px solid rgba(255,255,255,.11);background:radial-gradient(ellipse at center,transparent 48%,rgba(255,255,255,.045) 56%,transparent 69%);transform-origin:center;animation:auroraOrbit 28s linear infinite}
+        .show-aurora::before{transform:translate(-50%,-50%) rotate(18deg)}
+        .show-aurora::after{width:72vmax;height:22vmax;opacity:.55;animation-duration:39s;animation-direction:reverse;transform:translate(-50%,-50%) rotate(-31deg)}
+        @keyframes auroraOrbit{from{rotate:0deg}to{rotate:360deg}}
+
+        .globe-rift{position:absolute;left:50%;top:50%;width:min(66vw,520px);aspect-ratio:1;transform:translate(-50%,-50%);z-index:1;pointer-events:none;border-radius:50%;opacity:0}
+        .globe-rift i{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(255,255,255,.0);box-shadow:0 0 0 rgba(255,255,255,0);transform:scale(.48);opacity:0}
+        body.live-entry .globe-rift{opacity:1}
+        body.live-entry .globe-rift i:nth-child(1){animation:riftBurst 1.35s cubic-bezier(.12,.72,.15,1) .05s both}
+        body.live-entry .globe-rift i:nth-child(2){animation:riftBurst 1.55s cubic-bezier(.12,.72,.15,1) .17s both}
+        body.live-entry .globe-rift i:nth-child(3){animation:riftBurst 1.8s cubic-bezier(.12,.72,.15,1) .29s both}
+        @keyframes riftBurst{0%{opacity:0;transform:scale(.35);border-color:rgba(255,255,255,.9);box-shadow:0 0 40px rgba(255,255,255,.34)}22%{opacity:.9}100%{opacity:0;transform:scale(1.7);border-color:rgba(255,255,255,0);box-shadow:0 0 0 rgba(255,255,255,0)}}
+
+        #cinematic-gate{position:fixed;inset:0;z-index:880;pointer-events:none;overflow:hidden;visibility:hidden}
+        #cinematic-gate .gate-panel{position:absolute;background:linear-gradient(135deg,#000 0%,#090909 48%,#000 100%);box-shadow:0 0 80px rgba(255,255,255,.05);will-change:transform}
+        #cinematic-gate .gate-top,#cinematic-gate .gate-bottom{left:-5%;width:110%;height:52%}
+        #cinematic-gate .gate-top{top:-1%;transform:translateY(-105%)}
+        #cinematic-gate .gate-bottom{bottom:-1%;transform:translateY(105%)}
+        #cinematic-gate .gate-left,#cinematic-gate .gate-right{top:0;width:51%;height:100%;opacity:.92}
+        #cinematic-gate .gate-left{left:0;transform:translateX(-110%);clip-path:polygon(0 0,100% 0,82% 100%,0 100%)}
+        #cinematic-gate .gate-right{right:0;transform:translateX(110%);clip-path:polygon(18% 0,100% 0,100% 100%,0 100%)}
+        #cinematic-gate .gate-core{position:absolute;left:50%;top:50%;width:12vmax;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%) scale(.1);opacity:0;border:1px solid rgba(255,255,255,.85);box-shadow:0 0 55px rgba(255,255,255,.35),inset 0 0 35px rgba(255,255,255,.18)}
+        #cinematic-gate .gate-flash{position:absolute;inset:0;background:#fff;opacity:0;mix-blend-mode:screen}
+        body.live-entry #cinematic-gate{visibility:visible}
+        body.live-entry #cinematic-gate .gate-top{animation:gateTop 1.15s cubic-bezier(.7,0,.2,1) both}
+        body.live-entry #cinematic-gate .gate-bottom{animation:gateBottom 1.15s cubic-bezier(.7,0,.2,1) both}
+        body.live-entry #cinematic-gate .gate-left{animation:gateLeft 1.15s cubic-bezier(.7,0,.2,1) both}
+        body.live-entry #cinematic-gate .gate-right{animation:gateRight 1.15s cubic-bezier(.7,0,.2,1) both}
+        body.live-entry #cinematic-gate .gate-core{animation:gateCore 1.05s cubic-bezier(.12,.8,.18,1) .18s both}
+        body.live-entry #cinematic-gate .gate-flash{animation:gateFlash .72s ease .46s both}
+        @keyframes gateTop{0%{transform:translateY(-105%)}35%,52%{transform:translateY(-49%)}100%{transform:translateY(-105%)}}
+        @keyframes gateBottom{0%{transform:translateY(105%)}35%,52%{transform:translateY(49%)}100%{transform:translateY(105%)}}
+        @keyframes gateLeft{0%{transform:translateX(-110%)}35%,52%{transform:translateX(-56%)}100%{transform:translateX(-110%)}}
+        @keyframes gateRight{0%{transform:translateX(110%)}35%,52%{transform:translateX(56%)}100%{transform:translateX(110%)}}
+        @keyframes gateCore{0%{opacity:0;transform:translate(-50%,-50%) scale(.08) rotate(0)}35%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(7) rotate(180deg)}}
+        @keyframes gateFlash{0%,25%,100%{opacity:0}45%{opacity:.22}58%{opacity:.04}}
+
+        .video-container .show-corners{position:absolute;inset:-2px;z-index:24;pointer-events:none;border-radius:inherit;overflow:hidden}
+        .video-container .show-corners::before,.video-container .show-corners::after{content:"";position:absolute;width:58px;height:58px;opacity:.65;transition:width .45s ease,height .45s ease,opacity .45s ease;filter:drop-shadow(0 0 8px rgba(255,255,255,.22))}
+        .video-container .show-corners::before{left:0;top:0;border-left:1px solid rgba(255,255,255,.75);border-top:1px solid rgba(255,255,255,.75);border-radius:inherit 0 0 0}
+        .video-container .show-corners::after{right:0;bottom:0;border-right:1px solid rgba(255,255,255,.75);border-bottom:1px solid rgba(255,255,255,.75);border-radius:0 0 inherit 0}
+        body.playing .video-container .show-corners::before,body.playing .video-container .show-corners::after{width:86px;height:86px;opacity:.95}
+        .video-container .show-scan{position:absolute;left:0;right:0;height:1px;top:-2%;z-index:23;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);box-shadow:0 0 18px rgba(255,255,255,.35);opacity:0}
+        body.playing .video-container .show-scan{animation:videoScan 7.5s cubic-bezier(.55,0,.2,1) infinite}
+        @keyframes videoScan{0%,72%{top:-2%;opacity:0}77%{opacity:.7}94%{top:102%;opacity:.12}100%{top:102%;opacity:0}}
+
+        .now-playing-card.track-switch{animation:trackCardSwitch .7s cubic-bezier(.16,.82,.18,1)}
+        .now-playing-card.track-switch .track-title{animation:trackTitleSwitch .62s cubic-bezier(.16,.82,.18,1)}
+        @keyframes trackCardSwitch{0%{transform:translateX(0)}24%{transform:translateX(-8px);filter:brightness(1.5)}55%{transform:translateX(5px)}100%{transform:none;filter:none}}
+        @keyframes trackTitleSwitch{0%{opacity:1;filter:blur(0);letter-spacing:.5px}28%{opacity:.08;filter:blur(8px);letter-spacing:7px}62%{opacity:1;filter:blur(0);letter-spacing:1.8px}100%{letter-spacing:.5px}}
+
+        body.live-entry .main-wrapper{animation:liveStagePunch 1.25s cubic-bezier(.12,.82,.18,1) both}
+        @keyframes liveStagePunch{0%{filter:blur(0);transform:scale(1)}31%{filter:blur(3px) brightness(.55);transform:scale(.975)}52%{filter:blur(0) brightness(1.32);transform:scale(1.018)}100%{filter:none;transform:none}}
+        body.live-entry .photo-web-3d{animation:webEntryWarp 1.35s cubic-bezier(.16,.82,.18,1) both}
+        @keyframes webEntryWarp{0%{filter:blur(0) brightness(1)}36%{filter:blur(4px) brightness(1.6);opacity:.35}100%{filter:blur(0) brightness(1);}}
+
+        @media(max-width:700px){.show-aurora{opacity:.3}.globe-rift{width:76vw}.video-container .show-corners::before,.video-container .show-corners::after{width:38px;height:38px}}
+        @media(prefers-reduced-motion:reduce){.show-aurora::before,.show-aurora::after,.video-container .show-scan{animation:none!important}#cinematic-gate{display:none!important}.globe-rift{display:none!important}}
+
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -691,6 +754,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
+    <div class="show-aurora" aria-hidden="true"></div>
+    <div id="cinematic-gate" aria-hidden="true"><div class="gate-panel gate-top"></div><div class="gate-panel gate-bottom"></div><div class="gate-panel gate-left"></div><div class="gate-panel gate-right"></div><div class="gate-core"></div><div class="gate-flash"></div></div>
+
     <div class="boot" id="boot"><div class="boot-sequence"><div class="boot-orbit"></div><div class="boot-core"><div class="boot-mark">SP1DER<span class="reg-mark">®</span></div><div class="boot-sub">24/7 WORLDWIDE MUSIC</div><div class="boot-loader"></div><div class="boot-status">ESTABLISHING GLOBAL SIGNAL</div></div></div></div>
     <div id="sp1der-atmosphere"><canvas id="web-field"></canvas><div class="sp1der-haze"></div></div><div class="signal-sweep"></div>
     <canvas id="fx-canvas"></canvas>
@@ -706,7 +772,7 @@
 
     <div class="main-wrapper" id="main-wrapper">
         <div class="logo-container">
-            <div id="globe-3d-container"></div>
+            <div class="globe-rift" aria-hidden="true"><i></i><i></i><i></i></div><div id="globe-3d-container"></div>
         </div>
 
         <div class="status-bar">
@@ -723,7 +789,7 @@
             </div>
         </div>
 
-        <div class="video-container" id="video-box"><div class="spider-frame"></div>
+        <div class="video-container" id="video-box"><div class="spider-frame"></div><div class="show-corners"></div><div class="show-scan"></div>
             <div class="yt-shield-top-main"></div>
             <div class="yt-shield-bottom-left"></div>
             <div class="yt-shield-bottom-edge"></div>
@@ -1647,7 +1713,28 @@
         function exitBoot(){if(boot.classList.contains('out'))return;boot.classList.add('out');document.body.classList.add('entered')}
         window.addEventListener('load',()=>setTimeout(exitBoot,1650),{once:true});setTimeout(exitBoot,2800);
         const originalHandleUserClick=handleUserClick;
-        handleUserClick=function(e){originalHandleUserClick(e);document.body.classList.add('entered');const vb=document.getElementById('video-box');vb.animate([{transform:'scale(.985)',filter:'brightness(1.5)'},{transform:'scale(1.012)',filter:'brightness(1.08)'},{transform:'scale(1)',filter:'brightness(1)'}],{duration:720,easing:'cubic-bezier(.16,.8,.2,1)'});};
+        handleUserClick=function(e){
+            const firstEntry=!userHasClicked;
+            originalHandleUserClick(e);
+            document.body.classList.add('entered');
+            if(firstEntry){
+                document.body.classList.remove('live-entry');
+                void document.body.offsetWidth;
+                document.body.classList.add('live-entry');
+                setTimeout(()=>document.body.classList.remove('live-entry'),1900);
+            }
+            const vb=document.getElementById('video-box');
+            vb.animate([{transform:'scale(.985)',filter:'brightness(1.5)'},{transform:'scale(1.012)',filter:'brightness(1.08)'},{transform:'scale(1)',filter:'brightness(1)'}],{duration:900,easing:'cubic-bezier(.16,.8,.2,1)'});
+        };
+
+        const trackTitleObserver=new MutationObserver(()=>{
+            if(!userHasClicked)return;
+            nowPlayingCard.classList.remove('track-switch');
+            void nowPlayingCard.offsetWidth;
+            nowPlayingCard.classList.add('track-switch');
+            setTimeout(()=>nowPlayingCard.classList.remove('track-switch'),760);
+        });
+        trackTitleObserver.observe(currentTrackEl,{childList:true,characterData:true,subtree:true});
 
     </script>
 </body>
