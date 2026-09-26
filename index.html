@@ -599,6 +599,37 @@
             .photo-web-3d { will-change: auto; }
         }
 
+
+        :root { --mx:50vw; --my:50vh; --energy:.18; }
+        body { background: radial-gradient(circle at 50% 42%, #101010 0%, #040404 36%, #000 78%); }
+        body::before { background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.055), transparent 18%), radial-gradient(circle at 50% 45%, transparent 12%, #000 105%); transition: background .08s linear; }
+        .main-wrapper { max-width: 760px; padding-left:18px; padding-right:18px; perspective:1200px; }
+        .logo-container { filter: saturate(.9) contrast(1.08); transition: transform .22s ease-out; }
+        #globe-3d-container canvas { filter: drop-shadow(0 0 26px rgba(255,255,255,.22)) drop-shadow(0 0 70px rgba(120,160,255,.10)); }
+        .video-container, .now-playing-card, .badge, .volume-control-box { border-color: rgba(255,255,255,.16); background: linear-gradient(135deg, rgba(20,20,20,.82), rgba(4,4,4,.72)); box-shadow: 0 22px 70px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06); }
+        .video-container { border-radius:24px; transform:translateZ(0); }
+        .video-container::before { content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:linear-gradient(115deg, transparent 12%, rgba(255,255,255,.42) 33%, transparent 48%, rgba(255,255,255,.12) 72%, transparent 88%); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; z-index:20; pointer-events:none; opacity:.48; background-size:240% 100%; animation:edgeTravel 8s linear infinite; }
+        @keyframes edgeTravel { to { background-position:240% 0; } }
+        .now-playing-card { border-radius:22px; padding:16px 18px; }
+        .status-bar { position:relative; z-index:20; }
+        .badge,.volume-control-box { min-height:32px; }
+        .start-btn { padding:17px 46px; border-radius:14px; letter-spacing:4px; clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px); }
+        .ambient-glow { background:radial-gradient(circle at 50% 48%, rgba(255,255,255,.11), rgba(100,140,255,.035) 35%, transparent 68%); filter:blur(70px); opacity:.65; transform:translate(-50%,-50%) scale(calc(1 + var(--energy))); }
+        #fx-canvas { position:fixed; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; opacity:.8; }
+        #cursor-aura { position:fixed; width:260px; height:260px; border-radius:50%; pointer-events:none; z-index:7; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(255,255,255,.045),rgba(255,255,255,.012) 34%,transparent 70%); filter:blur(8px); mix-blend-mode:screen; }
+        .control-dock { position:fixed; right:18px; bottom:18px; z-index:70; display:flex; gap:8px; }
+        .dock-btn { width:38px; height:38px; border:1px solid rgba(255,255,255,.18); border-radius:12px; background:rgba(8,8,8,.72); color:#fff; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); cursor:pointer; display:grid; place-items:center; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); transition:.2s ease; }
+        .dock-btn:hover { transform:translateY(-3px) scale(1.05); border-color:rgba(255,255,255,.5); box-shadow:0 14px 35px rgba(0,0,0,.6),0 0 22px rgba(255,255,255,.08); }
+        .boot { position:fixed; inset:0; z-index:999; background:#000; display:grid; place-items:center; transition:opacity .7s ease,visibility .7s ease; }
+        .boot.out { opacity:0; visibility:hidden; }
+        .boot-mark { font-family:'Syne',sans-serif; font-size:clamp(34px,8vw,74px); font-weight:900; letter-spacing:.18em; padding-left:.18em; color:#fff; text-shadow:0 0 35px rgba(255,255,255,.3); animation:bootPulse .8s ease-in-out infinite alternate; }
+        @keyframes bootPulse { from{opacity:.28;filter:blur(2px);transform:scale(.985)} to{opacity:1;filter:blur(0);transform:scale(1)} }
+        .signal-line { position:fixed; left:0; top:0; width:100%; height:1px; z-index:51; pointer-events:none; background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent); box-shadow:0 0 14px rgba(255,255,255,.08); animation:signalSweep 7s linear infinite; opacity:.45; }
+        @keyframes signalSweep { from{transform:translateY(-2vh)} to{transform:translateY(102vh)} }
+        body.playing .video-container { box-shadow:0 24px 80px rgba(0,0,0,.68),0 0 45px rgba(255,255,255,.055),inset 0 1px 0 rgba(255,255,255,.08); }
+        body.playing .now-playing-card { box-shadow:0 18px 55px rgba(0,0,0,.7),0 0 26px rgba(255,255,255,.04); }
+        @media(max-width:700px){ #cursor-aura{display:none}.control-dock{right:10px;bottom:10px}.dock-btn{width:34px;height:34px}.main-wrapper{padding-left:10px;padding-right:10px}.video-container{border-radius:18px}.now-playing-card{border-radius:16px} }
+
     </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -609,6 +640,12 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
+    <div class="boot" id="boot"><div class="boot-mark">SP1DER</div></div>
+    <canvas id="fx-canvas"></canvas>
+    <div id="cursor-aura"></div>
+    <div class="signal-line"></div>
+    <div class="control-dock"><button class="dock-btn" id="share-btn" type="button" aria-label="Share">↗</button><button class="dock-btn" id="full-btn" type="button" aria-label="Fullscreen">⛶</button></div>
+
 
     <div class="scanline-overlay"></div>
 
@@ -1530,6 +1567,28 @@
                 listenerCountEl.innerText = count > 0 ? count : 1;
             }
         });
+
+        const bootEl=document.getElementById('boot');
+        window.addEventListener('load',()=>setTimeout(()=>bootEl.classList.add('out'),650),{once:true});
+        setTimeout(()=>bootEl.classList.add('out'),1800);
+        const aura=document.getElementById('cursor-aura');
+        let pointerX=innerWidth/2,pointerY=innerHeight/2,auraX=pointerX,auraY=pointerY;
+        addEventListener('pointermove',e=>{pointerX=e.clientX;pointerY=e.clientY;document.documentElement.style.setProperty('--mx',pointerX+'px');document.documentElement.style.setProperty('--my',pointerY+'px')},{passive:true});
+        function moveAura(){auraX+=(pointerX-auraX)*.1;auraY+=(pointerY-auraY)*.1;aura.style.left=auraX+'px';aura.style.top=auraY+'px';requestAnimationFrame(moveAura)}
+        moveAura();
+        const fx=document.getElementById('fx-canvas'),fxc=fx.getContext('2d',{alpha:true});
+        let fxW=0,fxH=0,dpr=1,particles=[];
+        function sizeFx(){dpr=Math.min(devicePixelRatio||1,1.5);fxW=innerWidth;fxH=innerHeight;fx.width=fxW*dpr;fx.height=fxH*dpr;fxc.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(72,Math.max(34,Math.floor(fxW*fxH/24000)));particles=Array.from({length:count},()=>({x:Math.random()*fxW,y:Math.random()*fxH,vx:(Math.random()-.5)*.09,vy:(Math.random()-.5)*.09,r:Math.random()*1.2+.25,p:Math.random()*6.28}))}
+        sizeFx();addEventListener('resize',sizeFx,{passive:true});
+        function drawFx(t){fxc.clearRect(0,0,fxW,fxH);const active=document.body.classList.contains('playing');const range=active?128:92;for(const p of particles){p.x+=p.vx*(active?2.2:1);p.y+=p.vy*(active?2.2:1);if(p.x<-20)p.x=fxW+20;if(p.x>fxW+20)p.x=-20;if(p.y<-20)p.y=fxH+20;if(p.y>fxH+20)p.y=-20;const pulse=.32+Math.sin(t*.001+p.p)*.18;fxc.fillStyle=`rgba(255,255,255,${pulse})`;fxc.beginPath();fxc.arc(p.x,p.y,p.r,0,Math.PI*2);fxc.fill()}for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const a=particles[i],b=particles[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<range){fxc.strokeStyle=`rgba(255,255,255,${(1-d/range)*(active?.065:.035)})`;fxc.lineWidth=.45;fxc.beginPath();fxc.moveTo(a.x,a.y);fxc.lineTo(b.x,b.y);fxc.stroke()}}}requestAnimationFrame(drawFx)}
+        requestAnimationFrame(drawFx);
+        const fullBtn=document.getElementById('full-btn');
+        fullBtn.addEventListener('click',async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}});
+        document.getElementById('share-btn').addEventListener('click',async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);const b=document.getElementById('share-btn');const old=b.textContent;b.textContent='✓';setTimeout(()=>b.textContent=old,1000)}}catch(e){}});
+        const wrapper=document.getElementById('main-wrapper');
+        if(matchMedia('(pointer:fine)').matches){addEventListener('pointermove',e=>{const nx=e.clientX/innerWidth-.5,ny=e.clientY/innerHeight-.5;wrapper.style.transform=`rotateY(${nx*1.15}deg) rotateX(${-ny*.75}deg)`},{passive:true});addEventListener('pointerleave',()=>wrapper.style.transform='rotateY(0deg) rotateX(0deg)')}
+        setInterval(()=>{document.body.classList.toggle('playing',!!isPlayingState);document.documentElement.style.setProperty('--energy',isPlayingState?'.28':'.12')},250);
+
     </script>
 </body>
 </html>
