@@ -613,10 +613,13 @@
         .now-playing-card { border-radius:22px; padding:16px 18px; }
         .status-bar { position:relative; z-index:20; }
         .badge,.volume-control-box { min-height:32px; }
-        .start-btn { padding:17px 46px; border-radius:14px; letter-spacing:4px; clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px); }
+        .start-btn { padding:16px 44px; min-width:170px; border-radius:999px; letter-spacing:3.2px; clip-path:none; background:linear-gradient(135deg,#fff 0%,#dcdcdc 48%,#fff 100%); border:1px solid rgba(255,255,255,.9); box-shadow:0 10px 34px rgba(0,0,0,.58),0 0 24px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -2px 8px rgba(0,0,0,.14); }
+        .start-btn::before { content:""; position:absolute; inset:4px; border-radius:inherit; border:1px solid rgba(0,0,0,.13); pointer-events:none; }
+        .start-btn:hover { transform:translateY(-2px) scale(1.035); box-shadow:0 16px 42px rgba(0,0,0,.68),0 0 34px rgba(255,255,255,.24),inset 0 1px 0 #fff; }
+        .start-btn:active { transform:translateY(0) scale(.985); }
+        .reg-mark { display:inline-block; font-size:.34em; vertical-align:top; margin-left:.08em; transform:translateY(.05em); letter-spacing:0; }
         .ambient-glow { background:radial-gradient(circle at 50% 48%, rgba(255,255,255,.11), rgba(100,140,255,.035) 35%, transparent 68%); filter:blur(70px); opacity:.65; transform:translate(-50%,-50%) scale(calc(1 + var(--energy))); }
         #fx-canvas { position:fixed; inset:0; width:100%; height:100%; z-index:5; pointer-events:none; opacity:.8; }
-        #cursor-aura { position:fixed; width:260px; height:260px; border-radius:50%; pointer-events:none; z-index:7; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(255,255,255,.045),rgba(255,255,255,.012) 34%,transparent 70%); filter:blur(8px); mix-blend-mode:screen; }
         .control-dock { position:fixed; right:18px; bottom:18px; z-index:70; display:flex; gap:8px; }
         .dock-btn { width:38px; height:38px; border:1px solid rgba(255,255,255,.18); border-radius:12px; background:rgba(8,8,8,.72); color:#fff; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); cursor:pointer; display:grid; place-items:center; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); transition:.2s ease; }
         .dock-btn:hover { transform:translateY(-3px) scale(1.05); border-color:rgba(255,255,255,.5); box-shadow:0 14px 35px rgba(0,0,0,.6),0 0 22px rgba(255,255,255,.08); }
@@ -624,11 +627,9 @@
         .boot.out { opacity:0; visibility:hidden; }
         .boot-mark { font-family:'Syne',sans-serif; font-size:clamp(34px,8vw,74px); font-weight:900; letter-spacing:.18em; padding-left:.18em; color:#fff; text-shadow:0 0 35px rgba(255,255,255,.3); animation:bootPulse .8s ease-in-out infinite alternate; }
         @keyframes bootPulse { from{opacity:.28;filter:blur(2px);transform:scale(.985)} to{opacity:1;filter:blur(0);transform:scale(1)} }
-        .signal-line { position:fixed; left:0; top:0; width:100%; height:1px; z-index:51; pointer-events:none; background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent); box-shadow:0 0 14px rgba(255,255,255,.08); animation:signalSweep 7s linear infinite; opacity:.45; }
-        @keyframes signalSweep { from{transform:translateY(-2vh)} to{transform:translateY(102vh)} }
         body.playing .video-container { box-shadow:0 24px 80px rgba(0,0,0,.68),0 0 45px rgba(255,255,255,.055),inset 0 1px 0 rgba(255,255,255,.08); }
         body.playing .now-playing-card { box-shadow:0 18px 55px rgba(0,0,0,.7),0 0 26px rgba(255,255,255,.04); }
-        @media(max-width:700px){ #cursor-aura{display:none}.control-dock{right:10px;bottom:10px}.dock-btn{width:34px;height:34px}.main-wrapper{padding-left:10px;padding-right:10px}.video-container{border-radius:18px}.now-playing-card{border-radius:16px} }
+        @media(max-width:700px){ .control-dock{right:10px;bottom:10px}.dock-btn{width:34px;height:34px}.main-wrapper{padding-left:10px;padding-right:10px}.video-container{border-radius:18px}.now-playing-card{border-radius:16px} }
 
     </style>
 
@@ -640,10 +641,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body>
-    <div class="boot" id="boot"><div class="boot-mark">SP1DER®</div></div>
+    <div class="boot" id="boot"><div class="boot-mark">SP1DER<span class="reg-mark">®</span></div></div>
     <canvas id="fx-canvas"></canvas>
-    <div id="cursor-aura"></div>
-    <div class="signal-line"></div>
     <div class="control-dock"><button class="dock-btn" id="share-btn" type="button" aria-label="Share">↗</button><button class="dock-btn" id="full-btn" type="button" aria-label="Fullscreen">⛶</button></div>
 
 
@@ -1414,6 +1413,7 @@
                         const gh = box.max.y - box.min.y;
                         geo.translate(-gw/2 - box.min.x, -gh/2 - box.min.y, -depth/2);
                         geo.scale(xScale, 1, 1);
+                        if (ch === '®') geo.scale(0.42, 0.42, 0.42);
 
 
                         const pos = geo.attributes.position;
@@ -1571,11 +1571,6 @@
         const bootEl=document.getElementById('boot');
         window.addEventListener('load',()=>setTimeout(()=>bootEl.classList.add('out'),650),{once:true});
         setTimeout(()=>bootEl.classList.add('out'),1800);
-        const aura=document.getElementById('cursor-aura');
-        let pointerX=innerWidth/2,pointerY=innerHeight/2,auraX=pointerX,auraY=pointerY;
-        addEventListener('pointermove',e=>{pointerX=e.clientX;pointerY=e.clientY;document.documentElement.style.setProperty('--mx',pointerX+'px');document.documentElement.style.setProperty('--my',pointerY+'px')},{passive:true});
-        function moveAura(){auraX+=(pointerX-auraX)*.1;auraY+=(pointerY-auraY)*.1;aura.style.left=auraX+'px';aura.style.top=auraY+'px';requestAnimationFrame(moveAura)}
-        moveAura();
         const fx=document.getElementById('fx-canvas'),fxc=fx.getContext('2d',{alpha:true});
         let fxW=0,fxH=0,dpr=1,particles=[];
         function sizeFx(){dpr=Math.min(devicePixelRatio||1,1.5);fxW=innerWidth;fxH=innerHeight;fx.width=fxW*dpr;fx.height=fxH*dpr;fxc.setTransform(dpr,0,0,dpr,0,0);const count=Math.min(72,Math.max(34,Math.floor(fxW*fxH/24000)));particles=Array.from({length:count},()=>({x:Math.random()*fxW,y:Math.random()*fxH,vx:(Math.random()-.5)*.09,vy:(Math.random()-.5)*.09,r:Math.random()*1.2+.25,p:Math.random()*6.28}))}
