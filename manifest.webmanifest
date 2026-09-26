@@ -1,0 +1,25 @@
+{
+  "name": "SP1DER | 24/7 WORLDWIDE MUSIC",
+  "short_name": "SP1DER",
+  "description": "Synchronized 24/7 worldwide music stream.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#020202",
+  "theme_color": "#020202",
+  "icons": [
+    {
+      "src": "https://i.hizliresim.com/nf559ut0.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.hizliresim.com/ynb90joc.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
