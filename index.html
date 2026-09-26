@@ -7,10 +7,10 @@
     <meta name="theme-color" content="#020202">
     <meta name="color-scheme" content="dark">
     <link rel="preload" as="image" href="https://i.hizliresim.com/av8t7brd.png" fetchpriority="high">
-    <link rel="preload" as="image" href="https://i.hizliresim.com/xllwx1bt.png" fetchpriority="high">
-    <link rel="preload" as="image" href="https://i.hizliresim.com/tcbusgul.png" fetchpriority="high">
-    <link rel="preload" as="image" href="https://i.hizliresim.com/bhocuany.png" fetchpriority="high">
-    <link rel="preload" as="image" href="https://i.hizliresim.com/bkslqch8.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/xllwx1bt.png">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/tcbusgul.png">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/bhocuany.png">
+    <link rel="preload" as="image" href="https://i.hizliresim.com/bkslqch8.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +28,7 @@
             --glow-color: rgba(255, 255, 255, 0.55);
             --bg-glow: rgba(180, 220, 255, 0.1);
             --border-glow: rgba(255, 255, 255, 0.35);
+            --energy: .12;
         }
 
         html, body {
@@ -37,6 +38,7 @@
             height: 100%;
             height: 100dvh;
             background-color: #020202;
+            background: radial-gradient(circle at 50% 42%, #101010 0%, #040404 36%, #000 78%);
             color: #fff;
             font-family: 'Space Grotesk', sans-serif;
             overflow: hidden !important;
@@ -57,6 +59,7 @@
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 45;
             pointer-events: none;
+            background: radial-gradient(circle at 50vw 50vh, rgba(255,255,255,.055), transparent 18%), radial-gradient(circle at 50% 45%, transparent 12%, #000 105%);
         }
 
         body::after {
@@ -137,8 +140,7 @@
             background: radial-gradient(circle, var(--glow-color) 0%, var(--bg-glow) 50%, rgba(0, 0, 0, 0) 80%);
             z-index: 4;
             pointer-events: none;
-            will-change: transform, opacity;
-            filter: blur(50px);
+            filter: blur(52px);
             contain: strict;
             transform: translate(-50%, -50%);
             opacity: 0.4;
@@ -154,10 +156,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: calc(16px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom)) 14px;
+            padding: calc(16px + env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) 18px;
             gap: 12px;
             margin: 0 auto;
             box-sizing: border-box;
+            max-width: 760px;
+            perspective: 1200px;
             will-change: transform;
         }
 
@@ -173,6 +177,8 @@
             overflow: visible;
             margin: 0 auto;
             flex-shrink: 0;
+            filter: saturate(.9) contrast(1.08);
+            transition: transform .22s ease-out;
         }
 
         @media (min-width: 769px) {
@@ -196,6 +202,7 @@
         #globe-3d-container canvas {
             display: block;
             outline: none;
+            filter: drop-shadow(0 0 26px rgba(255,255,255,.22)) drop-shadow(0 0 70px rgba(120,160,255,.10));
         }
 
         .status-bar {
@@ -580,16 +587,8 @@
             .photo-web-3d { will-change: auto; }
         }
 
-        :root { --energy:.12; }
-        body { background: radial-gradient(circle at 50% 42%, #101010 0%, #040404 36%, #000 78%); }
-        body::before { background: radial-gradient(circle at 50vw 50vh, rgba(255,255,255,.055), transparent 18%), radial-gradient(circle at 50% 45%, transparent 12%, #000 105%); }
-        .main-wrapper { max-width: 760px; padding-left:18px; padding-right:18px; perspective:1200px; }
-        .logo-container { filter: saturate(.9) contrast(1.08); transition: transform .22s ease-out; }
-        #globe-3d-container canvas { filter: drop-shadow(0 0 26px rgba(255,255,255,.22)) drop-shadow(0 0 70px rgba(120,160,255,.10)); }
         .video-container, .now-playing-card, .badge, .volume-control-box { border-color: rgba(255,255,255,.16); background: linear-gradient(135deg, rgba(20,20,20,.82), rgba(4,4,4,.72)); box-shadow: 0 22px 70px rgba(0,0,0,.62), inset 0 1px 0 rgba(255,255,255,.06); }
         .video-container { border-radius:24px; transform:translateZ(0); }
-        .video-container::before { content:""; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:linear-gradient(115deg, transparent 12%, rgba(255,255,255,.42) 33%, transparent 48%, rgba(255,255,255,.12) 72%, transparent 88%); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; z-index:20; pointer-events:none; opacity:.48; background-size:240% 100%; animation:edgeTravel 8s linear infinite; }
-        @keyframes edgeTravel { to { background-position:240% 0; } }
         .now-playing-card { border-radius:22px; padding:16px 18px; }
         .status-bar { position:relative; z-index:20; }
         .badge,.volume-control-box { min-height:32px; }
@@ -602,9 +601,11 @@
         body.playing .now-playing-card { box-shadow:0 18px 55px rgba(0,0,0,.7),0 0 26px rgba(255,255,255,.04); }
         html[data-quality="balanced"] .badge, html[data-quality="balanced"] .volume-control-box, html[data-quality="balanced"] .now-playing-card { backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
         html[data-quality="balanced"] .ambient-glow { filter:blur(46px); }
-        html[data-quality="low"] .badge, html[data-quality="low"] .volume-control-box, html[data-quality="low"] .now-playing-card { backdrop-filter:blur(7px); -webkit-backdrop-filter:blur(7px); }
-        html[data-quality="low"] #start-overlay { backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
-        html[data-quality="low"] .ambient-glow { filter:blur(38px); opacity:.58; }
+        html[data-quality="balanced"] .scanline-overlay { animation-duration:18s; }
+        html[data-quality="low"] .badge, html[data-quality="low"] .volume-control-box, html[data-quality="low"] .now-playing-card { backdrop-filter:none; -webkit-backdrop-filter:none; }
+        html[data-quality="low"] #start-overlay { backdrop-filter:none; -webkit-backdrop-filter:none; }
+        html[data-quality="low"] .ambient-glow { filter:none; opacity:.42; }
+        html[data-quality="low"] .scanline-overlay, html[data-quality="low"] .start-btn::after { animation:none; }
         html[data-quality="low"] .photo-web-3d { will-change:auto; }
         @media(max-width:700px){ .main-wrapper{padding-left:10px;padding-right:10px}.video-container{border-radius:18px}.now-playing-card{border-radius:16px} }
 
@@ -714,7 +715,7 @@
             img.alt = '';
             img.decoding = 'async';
             img.loading = 'eager';
-            img.fetchPriority = 'high';
+            img.fetchPriority = index === 0 ? 'high' : 'auto';
             img.draggable = false;
             img.setAttribute('aria-hidden', 'true');
 
@@ -776,8 +777,8 @@
             webAnimationTime += deltaTime;
             webAnimationAccumulator += deltaTime;
             const quality = document.documentElement.dataset.quality || 'high';
-            const webInterval = quality === 'low' ? 1 / 30 : quality === 'balanced' ? 1 / 45 : 0;
-            if (webInterval && webAnimationAccumulator < webInterval) return;
+            const webInterval = quality === 'low' ? 1 / 30 : quality === 'balanced' ? 1 / 45 : 1 / 60;
+            if (webAnimationAccumulator < webInterval) return;
             webAnimationAccumulator = 0;
 
             photoWebElements.forEach(item => {
@@ -884,6 +885,16 @@
         }
 
         const totalPlaylistDuration = baseSongList.reduce((acc, song) => acc + song.duration, 0);
+        let cachedCycleIndex = -1;
+        let cachedPlaylist = null;
+
+        function getPlaylistForCycle(cycleIndex) {
+            if (cachedCycleIndex !== cycleIndex || !cachedPlaylist) {
+                cachedCycleIndex = cycleIndex;
+                cachedPlaylist = seededShuffle(baseSongList, cycleIndex + 42);
+            }
+            return cachedPlaylist;
+        }
 
         function getCurrentStreamState() {
             const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -892,7 +903,7 @@
             const cycleIndex = Math.floor(totalElapsed / totalPlaylistDuration);
             const elapsedTime = totalElapsed % totalPlaylistDuration;
 
-            const currentPlaylist = seededShuffle(baseSongList, cycleIndex + 42);
+            const currentPlaylist = getPlaylistForCycle(cycleIndex);
 
             let accumulatedTime = 0;
             for (let i = 0; i < currentPlaylist.length; i++) {
@@ -930,15 +941,25 @@
             return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`;
         };
 
-        function updateTrackProgress() {
+        function updateNowPlayingUI() {
+            if (document.hidden) return;
             const state = getCurrentStreamState();
             const song = state.playlist[state.songIndex];
             const progress = song.duration > 0 ? Math.min(100, (state.seekTo / song.duration) * 100) : 0;
+
+            updateTrackLabels(state.playlist, state.songIndex);
             nowPlayingCard.style.setProperty('--track-progress', `${progress.toFixed(2)}%`);
             trackTimeEl.textContent = `${formatTime(state.seekTo)} / ${formatTime(song.duration)}`;
         }
-        updateTrackProgress();
-        setInterval(updateTrackProgress, 1000);
+        let nowPlayingInterval = null;
+
+        function startNowPlayingTicker() {
+            if (nowPlayingInterval) clearInterval(nowPlayingInterval);
+            updateNowPlayingUI();
+            nowPlayingInterval = setInterval(updateNowPlayingUI, 1000);
+        }
+
+        startNowPlayingTicker();
 
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -1423,22 +1444,33 @@
         document.fonts.ready.then(() => { createOrbitRingText(); });
 
         let lastTime = performance.now();
+        let lastRenderTime = lastTime;
+        const targetFPS = renderQuality === 'low' ? 30 : renderQuality === 'balanced' ? 45 : 60;
+        const targetFrameInterval = 1000 / targetFPS;
 
         let perfSampleStart = performance.now();
         let perfFrames = 0;
 
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
-            if (document.hidden) { lastTime = currentTime; return; }
+            if (document.hidden) {
+                lastTime = currentTime;
+                lastRenderTime = currentTime;
+                return;
+            }
+
+            const frameElapsed = currentTime - lastRenderTime;
+            if (frameElapsed < targetFrameInterval - 0.5) return;
+            lastRenderTime = currentTime - (frameElapsed % targetFrameInterval);
 
             perfFrames++;
             if (currentTime - perfSampleStart >= 2000) {
                 const fps = perfFrames * 1000 / (currentTime - perfSampleStart);
-                if (fps < 47 && adaptivePixelRatio > minimumPixelRatio) {
+                if (fps < targetFPS * 0.80 && adaptivePixelRatio > minimumPixelRatio) {
                     adaptivePixelRatio = Math.max(minimumPixelRatio, adaptivePixelRatio - 0.08);
                     renderer.setPixelRatio(adaptivePixelRatio);
                     resizeThreeJS();
-                } else if (fps > 57 && adaptivePixelRatio < preferredPixelRatio) {
+                } else if (fps > targetFPS * 0.94 && adaptivePixelRatio < preferredPixelRatio) {
                     adaptivePixelRatio = Math.min(preferredPixelRatio, adaptivePixelRatio + 0.03);
                     renderer.setPixelRatio(adaptivePixelRatio);
                     resizeThreeJS();
@@ -1481,13 +1513,21 @@
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
+                if (nowPlayingInterval) {
+                    clearInterval(nowPlayingInterval);
+                    nowPlayingInterval = null;
+                }
                 if (syncCheckInterval) {
                     clearInterval(syncCheckInterval);
                     syncCheckInterval = null;
                 }
-            } else if (userHasClicked) {
-                syncToLiveStream();
-                syncCheckInterval = setInterval(syncToLiveStream, 2000);
+            } else {
+                startNowPlayingTicker();
+                if (userHasClicked) {
+                    syncToLiveStream();
+                    if (syncCheckInterval) clearInterval(syncCheckInterval);
+                    syncCheckInterval = setInterval(syncToLiveStream, 2000);
+                }
             }
         });
 
@@ -1513,9 +1553,11 @@
         const listenersRef = db.ref('online_listeners');
         const listenerCountEl = document.getElementById('listener-count');
 
+        let myPresenceRef = null;
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val() === true) {
-                const myPresenceRef = listenersRef.push();
+                if (myPresenceRef) myPresenceRef.remove().catch(() => {});
+                myPresenceRef = listenersRef.push();
                 myPresenceRef.onDisconnect().remove();
                 myPresenceRef.set(true);
             }
@@ -1530,12 +1572,28 @@
 
         const wrapper = document.getElementById('main-wrapper');
         if (matchMedia('(pointer:fine)').matches) {
+            let pointerFrame = 0;
+            let pointerX = innerWidth / 2;
+            let pointerY = innerHeight / 2;
+
             addEventListener('pointermove', (e) => {
-                const nx = e.clientX / innerWidth - 0.5;
-                const ny = e.clientY / innerHeight - 0.5;
-                wrapper.style.transform = `rotateY(${nx * 1.15}deg) rotateX(${-ny * 0.75}deg)`;
+                pointerX = e.clientX;
+                pointerY = e.clientY;
+                if (pointerFrame) return;
+
+                pointerFrame = requestAnimationFrame(() => {
+                    pointerFrame = 0;
+                    const nx = pointerX / innerWidth - 0.5;
+                    const ny = pointerY / innerHeight - 0.5;
+                    wrapper.style.transform = `rotateY(${nx * 1.15}deg) rotateX(${-ny * 0.75}deg)`;
+                });
             }, { passive: true });
+
             addEventListener('pointerleave', () => {
+                if (pointerFrame) {
+                    cancelAnimationFrame(pointerFrame);
+                    pointerFrame = 0;
+                }
                 wrapper.style.transform = 'rotateY(0deg) rotateX(0deg)';
             });
         }
