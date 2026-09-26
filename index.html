@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SP1DER | 7/24 YÜZDE YÜZ MÜZİK</title>
+    <title>SP1DER | 7/24 WORLDWIDE MUSIC</title>
     <meta name="theme-color" content="#020202">
     <meta name="color-scheme" content="dark">
     <link rel="preload" as="image" href="https://i.hizliresim.com/av8t7brd.png" fetchpriority="high">
@@ -87,7 +87,7 @@
             100% { transform: translateY(100%); }
         }
 
-        
+        /* Spider Webs Container */
         #photo-webs-container {
             position: fixed;
             top: 0;
@@ -99,7 +99,7 @@
             overflow: visible;
         }
 
-        
+        /* Web 3D rotation uses the container perspective. */
         #photo-webs-container {
             perspective: 1500px;
             perspective-origin: 50% 50%;
@@ -122,7 +122,8 @@
             image-rendering: auto;
             opacity: 1;
 
-            
+            /* Maskenin yarıçapı kenara kadar uzanır; PNG'nin dört kenarında
+               alpha sıfırdır. Köşeler daha erken kaybolur. */
             -webkit-mask-image: radial-gradient(ellipse 50% 50% at center,
                 #000 8%, rgba(0,0,0,.8) 28%, rgba(0,0,0,.38) 50%,
                 rgba(0,0,0,.09) 76%, transparent 100%);
@@ -318,7 +319,7 @@
             .volume-slider { width: 38px; }
         }
 
-        
+        /* On mobile, shrink/wrap long track names instead of clipping them */
         @media (max-width: 600px) {
             .now-playing-card {
                 padding: 11px 12px;
@@ -387,7 +388,7 @@
             will-change: transform;
         }
 
-        
+        /* No extra glow on the video card during playback. */
 
         #youtube-player {
             position: absolute;
@@ -543,7 +544,7 @@
         }
 
 
-        
+        /* 2026 refresh: more refined glass surfaces + low-cost micro-interactions */
         .badge, .volume-control-box, .now-playing-card, .video-container {
             isolation: isolate;
         }
@@ -612,7 +613,7 @@
 
     <div class="scanline-overlay"></div>
 
-    
+    <!-- Spider Webs Container -->
     <div id="photo-webs-container"></div>
 
     <div class="ambient-glow"></div>
@@ -625,14 +626,14 @@
         <div class="status-bar">
             <div class="badge" id="badge-live">
                 <span class="live-dot"></span>
-                <span>CANLI</span>
+                <span>LIVE</span>
             </div>
             <div class="badge" id="badge-listener">
-                <span>🎧 DİNLEYİCİ: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
+                <span>🎧 LISTENERS: <strong id="listener-count" style="color: #ffffff; text-shadow:0 0 10px #fff;">1</strong></span>
             </div>
             <div class="volume-control-box disabled" id="volume-box">
-                <button class="volume-btn" id="mute-btn" type="button" aria-label="Sesi kapat" disabled>🔊</button>
-                <input type="range" class="volume-slider" id="volume-range" min="0" max="100" value="100" aria-label="Ses seviyesi" disabled>
+                <button class="volume-btn" id="mute-btn" type="button" aria-label="Mute" disabled>🔊</button>
+                <input type="range" class="volume-slider" id="volume-range" min="0" max="100" value="100" aria-label="Volume level" disabled>
             </div>
         </div>
 
@@ -642,7 +643,7 @@
             <div class="yt-shield-bottom-edge"></div>
 
             <div id="start-overlay">
-                <button class="start-btn" id="start-btn-el" type="button">CANLI YAYINA KATIL</button>
+                <button class="start-btn" id="start-btn-el" type="button">JOIN LIVE</button>
             </div>
             <div id="youtube-player"></div>
         </div>
@@ -651,7 +652,7 @@
             <div class="track-info">
                 <span class="track-label">
                     <span style="display:inline-block; width:6px; height:6px; background:var(--accent-color); border-radius:50%; box-shadow:0 0 10px var(--accent-color);"></span>
-                    YAYINDA
+                    NOW PLAYING
                     <div class="wave-bars" id="wave-bars">
                         <div class="wave-bar"></div>
                         <div class="wave-bar"></div>
@@ -659,17 +660,23 @@
                         <div class="wave-bar"></div>
                     </div>
                 </span>
-                <span class="track-title" id="current-track-name">Canlı Yayın Bekleniyor...</span>
+                <span class="track-title" id="current-track-name">Waiting for Live Stream...</span>
                 <span class="track-time" id="track-time" aria-live="off">--:-- / --:--</span>
             </div>
             <div class="next-track">
-                <div class="track-label" style="justify-content: flex-end;">SIRADAKİ</div>
+                <div class="track-label" style="justify-content: flex-end;">UP NEXT</div>
                 <span id="next-track-name" style="font-weight:700;">---</span>
             </div>
         </div>
     </div>
 
     <script>
+        // ================================================================
+        // REAL PNG SPIDER WEBS — CORS-SAFE 3D DOM
+        // ================================================================
+        // PNG'ler doğrudan <img> olarak kullanılır. Böylece HızlıResim'in
+        // WebGL/CORS kısıtlamasına takılmadan şeffaf PNG'ler görüntülenir.
+        // Three.js TextureLoader burada KULLANILMIYOR.
 
         const photoWebsContainer = document.getElementById('photo-webs-container');
 
@@ -688,6 +695,7 @@
             return a + Math.random() * (b - a);
         }
 
+        // Ağların sabit merkezleri: sol üst, sağ üst, sol alt, sağ alt, orta.
         const webPositions = [
             [18, 18], [82, 18], [18, 82], [82, 82], [50, 50]
         ];
@@ -718,6 +726,7 @@
                 top: webPositions[index][1],
                 depth: randomBetween(-80, 90),
 
+                // Ağları önceki halden belirgin biçimde daha büyük yap.
                 width: mobile ? randomBetween(60, 72) : randomBetween(52, 66),
 
                 rotX: randomBetween(-4, 4),
@@ -733,6 +742,7 @@
                 rotate: randomBetween(0.25, 0.55)
             };
 
+            // left/top ağın merkezidir.
             img.style.left = item.left + 'vw';
             img.style.top = item.top + 'vh';
             img.style.width = item.width + 'vw';
@@ -743,7 +753,7 @@
             img.style.visibility = 'visible';
 
             img.addEventListener('error', () => {
-                console.warn('Spider web PNG yüklenemedi:', src);
+                console.warn('Spider web PNG failed to load:', src);
                 if (img.parentNode) img.parentNode.removeChild(img);
             }, {once:true});
 
@@ -770,7 +780,10 @@
             photoWebElements.forEach(item => {
                 const t = webAnimationTime * item.speed + item.phase;
 
-                
+                // Çok hafif sağ-sol / yukarı-aşağı salınım.
+                // Sinüsler farklı frekansta olduğu için hareket dairesel/organik görünür.
+                /* Gerçek CSS 3D hareket: X/Y kayma + Z derinlik + üç eksende dönüş.
+                   Farklı frekanslar ağların birbirinden bağımsız, doğal hareket etmesini sağlar. */
                 const dx = (Math.cos(t) * 0.72 + Math.sin(t * 1.71) * 0.28) * item.moveX;
                 const dy = (Math.sin(t * 1.08) * 0.72 + Math.cos(t * 1.63) * 0.28) * item.moveY;
                 const dz = (Math.sin(t * 0.72) * 0.78 + Math.cos(t * 1.37) * 0.22) * item.moveZ;
@@ -919,6 +932,7 @@
             return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, '0')}`;
         };
 
+        // Yayın çizelgesinden türetilir; ekstra ağ isteği veya ağır animasyon gerektirmez.
         function updateTrackProgress() {
             const state = getCurrentStreamState();
             const song = state.playlist[state.songIndex];
@@ -1094,7 +1108,7 @@
                 if (val === 0) {
                     player.mute();
                     muteBtn.innerText = '🔇';
-                    muteBtn.setAttribute('aria-label', 'Sesi aç');
+                    muteBtn.setAttribute('aria-label', 'Unmute');
                     isMuted = true;
                 } else {
                     if (isMuted || (typeof player.isMuted === 'function' && player.isMuted())) {
@@ -1102,7 +1116,7 @@
                         isMuted = false;
                     }
                     muteBtn.innerText = '🔊';
-                    muteBtn.setAttribute('aria-label', 'Sesi kapat');
+                    muteBtn.setAttribute('aria-label', 'Mute');
                     lastVolume = val;
                 }
             }
@@ -1114,7 +1128,7 @@
             if (isMuted) {
                 player.unMute();
                 muteBtn.innerText = '🔊';
-                muteBtn.setAttribute('aria-label', 'Sesi kapat');
+                muteBtn.setAttribute('aria-label', 'Mute');
                 let currentVol = Number(volumeRange.value);
                 if (currentVol === 0) {
                     currentVol = lastVolume > 0 ? lastVolume : 100;
@@ -1125,7 +1139,7 @@
             } else {
                 player.mute();
                 muteBtn.innerText = '🔇';
-                muteBtn.setAttribute('aria-label', 'Sesi aç');
+                muteBtn.setAttribute('aria-label', 'Unmute');
                 if (Number(volumeRange.value) > 0) {
                     lastVolume = Number(volumeRange.value);
                 }
@@ -1135,12 +1149,14 @@
             updateAudioVisualState();
         });
 
+        // 3D Three.js Setup (Globe)
         const globeContainer = document.getElementById('globe-3d-container');
         
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
         
         const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+        // Adaptive render resolution: sharp on desktop, avoids unnecessary GPU load on mobile.
         const preferredPixelRatio = Math.min(window.devicePixelRatio || 1, window.innerWidth <= 600 ? 1.0 : 1.15);
         let adaptivePixelRatio = preferredPixelRatio;
         renderer.setPixelRatio(adaptivePixelRatio);
@@ -1188,7 +1204,11 @@
         dirLight.position.set(5, 4, 5);
         scene.add(dirLight);
 
+        // TEK SABİT yansıma ışığı: dünya + krom yazı için ortak key light.
+        // PointLight'ın kendisi görünür bir mesh değildir; yalnızca yüzeylerde TEK parlak nokta üretir.
         const orbitHighlightLight = new THREE.PointLight(0xf4f8ff, 4.35, 12.0, 1.65);
+        // SABİT KEY LIGHT: dünya üzerinde tek bir highlight noktası.
+        // Işık hareket etmez; yazı onun önünden geçtikçe doğal olarak farklı yüzeyleri parlar.
         orbitHighlightLight.position.set(3.15, 1.15, 3.65);
         scene.add(orbitHighlightLight);
 
@@ -1196,8 +1216,10 @@
         let orbitChromeMaterials = [];
 
         function createOrbitRingText() {
+            // SP1DER artık hazır Three.js demo fontlarından değil, gerçek bir display/brand fontundan üretilir.
+            // New Rocker: keskin, gothic/punk karakterli ama SP1DER kelimesini hâlâ okunabilir tutar.
             if (!THREE.FontLoader || !THREE.TextGeometry || !window.opentype) {
-                console.warn('3D text modules yüklenemedi.');
+                console.warn('3D text modules failed to load.');
                 return;
             }
 
@@ -1217,6 +1239,7 @@
                     resolve, undefined, reject
                 ))
             ]).then(([brandFont, sloganFont]) => {
+                // AYNI krom materyaller: renk, ışık, yansıma ve metal hissi değiştirilmedi.
                 const chromeFace = new THREE.MeshPhysicalMaterial({
                     color: 0xf4f7f8,
                     metalness: 0.72,
@@ -1246,6 +1269,8 @@
                 });
                 orbitChromeMaterials = [chromeFace, chromeSide];
 
+                // OpenType glyph yolunu Three.js Shape'lerine çevirir.
+                // Böylece SP1DER için sıradan demo-font sınırından çıkıp gerçek logo fontu kullanabiliyoruz.
                 const glyphShapes = (font, ch, size) => {
                     const units = font.unitsPerEm || 1000;
                     const scale = size / units;
@@ -1265,6 +1290,10 @@
                             (cmd.x1 || 0) * scale, -(cmd.y1 || 0) * scale, x, y
                         );
                     }
+                    // New Rocker'ın R/P/D gibi harflerinde iç konturların (counter)
+                    // dolguya dönüşmemesi için winding yönünü fonttan geldiği haliyle koru.
+                    // `toShapes(true)` burada dış/iç kontur sınıflamasını ters yorumlayıp
+                    // R'nin gövdesini boş, iç deliğini dolu gösterebiliyordu.
                     return shapePath.toShapes(false);
                 };
 
@@ -1302,6 +1331,7 @@
 
                         let w;
                         if (fontType === 'brand') {
+                            // OpenType advance width, görsel logo harf aralığını daha düzgün tutar.
                             w = brandFont.getAdvanceWidth(ch, brandFont.unitsPerEm) / brandFont.unitsPerEm * size * xScale;
                         } else {
                             const temp = new THREE.TextGeometry(ch, {
@@ -1356,6 +1386,7 @@
                         geo.translate(-gw/2 - box.min.x, -gh/2 - box.min.y, -depth/2);
                         geo.scale(xScale, 1, 1);
 
+                        // Mevcut hafif yatıklık korunuyor; marka fontunun keskin uçları daha saldırgan görünüyor.
                         const pos = geo.attributes.position;
                         for (let p = 0; p < pos.count; p++) {
                             pos.setX(p, pos.getX(p) + pos.getY(p) * 0.14);
@@ -1374,8 +1405,9 @@
                     return holder;
                 };
 
+                // SP1DER = gerçek display/logo fontu. Alt slogan = sade, okunaklı ve Türkçe karakter destekli.
                 makeCurvedText('SP1DER', brandFont, 'brand', 0.61, 0.175, 0.026, 0.12, baseRadius + 0.20, 1.30, 0.012, 0.76);
-                makeCurvedText('7/24 YÜZDE YÜZ MÜZİK', sloganFont, 'slogan', 0.150, 0.068, 0.015, -0.315, baseRadius + 0.20, 1.48, 0.007, 0.78);
+                makeCurvedText('24/7 WORLDWIDE MUSIC', sloganFont, 'slogan', 0.150, 0.068, 0.015, -0.315, baseRadius + 0.20, 1.48, 0.007, 0.78);
 
                 camera.layers.enable(1);
             }).catch((err) => console.warn('3D marka fontu yüklenemedi:', err));
@@ -1384,9 +1416,12 @@
         document.fonts.ready.then(() => { createOrbitRingText(); });
 
         let lastTime = performance.now();
+        // FPS dengeleyici: zayıf cihazlarda render çözünürlüğünü otomatik düşürür.
         let perfSampleStart = performance.now();
         let perfFrames = 0;
 
+        // Patlama/bass tepki sistemi kaldırıldı.
+        // Şarkı çalarken yalnızca dünyanın çevresindeki çizgiler canlı biçimde hareket eder.
         function animateGlobe(currentTime) {
             requestAnimationFrame(animateGlobe);
             if (document.hidden) { lastTime = currentTime; return; }
@@ -1417,6 +1452,7 @@
 
             if (orbitTextGroup) {
                 orbitTextGroup.rotation.y -= ringSpeed * deltaTime;
+                // Orijinal kontrastlı krom görünümü birebir koru.
                 if (orbitChromeMaterials.length >= 2) {
                     const face = orbitChromeMaterials[0];
                     const side = orbitChromeMaterials[1];
@@ -1437,6 +1473,7 @@
         function handleResize() {
             resizeThreeJS();
             const mobileMode = window.innerWidth < 600;
+            // Ağları yalnızca mobil/desktop breakpoint değişince yeniden üret.
             if (mobileMode !== lastWebMobileMode) {
                 lastWebMobileMode = mobileMode;
                 generatePhotoWebs();
@@ -1450,6 +1487,7 @@
 
 
 
+        // Sekme arka plandayken gereksiz canlı-yayın senkron kontrollerini durdur.
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 if (syncCheckInterval) {
@@ -1462,9 +1500,11 @@
             }
         });
 
+        // Başlat
         resizeThreeJS();
         requestAnimationFrame(animateGlobe);
 
+        // FIREBASE CANLI DİNLEYİCİ SİSTEMİ
        const firebaseConfig = {
   apiKey: "AIzaSyA4WSlpMCyEZPi-jFo-IpJQb55I_JG9iAc",
   authDomain: "sp1der-e75ff.firebaseapp.com",
